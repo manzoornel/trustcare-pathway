@@ -21,12 +21,12 @@ export default {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "#00A8A8",
+          DEFAULT: "#00C6C6", // Turquoise color from the logo
           foreground: "#FFFFFF",
         },
         secondary: {
-          DEFAULT: "#F5F5F5",
-          foreground: "#333333",
+          DEFAULT: "#2D3B41", // Dark background color from second image
+          foreground: "#FFFFFF",
         },
         accent: {
           DEFAULT: "#004F9F",
@@ -36,6 +36,10 @@ export default {
           DEFAULT: "#F0F0F0",
           foreground: "#666666",
         },
+      },
+      fontFamily: {
+        display: ['Poppins', 'sans-serif'], // The font appears similar to Poppins
+        body: ['Inter', 'sans-serif'],
       },
       keyframes: {
         "fade-up": {

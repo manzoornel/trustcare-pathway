@@ -26,8 +26,12 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
-            <Link to="/" className="text-2xl font-bold text-primary">
-              Doctor Uncle Family Clinic
+            <Link to="/" className="flex items-center">
+              <img 
+                src="/lovable-uploads/0876b966-5589-452f-b412-caa4a9700d33.png" 
+                alt="Doctor Uncle Family Clinic" 
+                className="h-12 w-auto"
+              />
             </Link>
           </div>
           
@@ -41,7 +45,7 @@ const Navbar = () => {
                   isActive(item.href)
                     ? "text-primary font-semibold"
                     : "text-gray-600 hover:text-primary"
-                } transition-colors duration-200`}
+                } transition-colors duration-200 font-display`}
               >
                 {item.name}
               </Link>
@@ -72,7 +76,7 @@ const Navbar = () => {
                   isActive(item.href)
                     ? "text-primary"
                     : "text-gray-600 hover:text-primary"
-                }`}
+                } font-display`}
                 onClick={() => setIsOpen(false)}
               >
                 {item.name}
