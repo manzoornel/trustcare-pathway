@@ -1,8 +1,41 @@
 
 import { Calendar } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 
 const HeroSection = () => {
+  const [isBlinking, setIsBlinking] = useState(false);
+  const [isSmiling, setIsSmiling] = useState(false);
+  const [rotation, setRotation] = useState(0);
+
+  useEffect(() => {
+    // Blinking animation - every 3 seconds
+    const blinkInterval = setInterval(() => {
+      setIsBlinking(true);
+      setTimeout(() => setIsBlinking(false), 300);
+    }, 3000);
+
+    // Smiling animation - every 5 seconds
+    const smileInterval = setInterval(() => {
+      setIsSmiling(true);
+      setTimeout(() => setIsSmiling(false), 1500);
+    }, 5000);
+
+    // Rotation animation - gentle rocking every 4 seconds
+    const rotateInterval = setInterval(() => {
+      setRotation(prev => {
+        // Rock between -5 and 5 degrees
+        return prev === 0 ? 5 : prev === 5 ? -5 : 0;
+      });
+    }, 4000);
+
+    return () => {
+      clearInterval(blinkInterval);
+      clearInterval(smileInterval);
+      clearInterval(rotateInterval);
+    };
+  }, []);
+
   return (
     <div className="min-h-screen flex items-center bg-gradient-to-b from-secondary to-white pt-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -34,12 +67,26 @@ const HeroSection = () => {
           <div className="relative animate-fade-up" style={{
             animationDelay: '200ms'
           }}>
-            <div className="aspect-w-16 aspect-h-9 rounded-2xl overflow-hidden shadow-2xl">
-              <img 
-                alt="Doctor consulting with patient" 
-                className="object-cover w-full h-full rounded-2xl" 
-                src="/lovable-uploads/d18bbc61-0f35-4480-9b29-cf9dd88e75d3.png" 
-              />
+            <div 
+              className="aspect-w-16 aspect-h-9 rounded-2xl overflow-hidden shadow-2xl transition-transform duration-1000 ease-in-out" 
+              style={{ 
+                transform: `rotate(${rotation}deg)`,
+                transformOrigin: 'center center'
+              }}
+            >
+              <div className="relative w-full h-full">
+                <img 
+                  alt="Doctor consulting with patient" 
+                  className={`object-cover w-full h-full rounded-2xl transition-all duration-300 ${isSmiling ? 'scale-105' : ''} ${isBlinking ? 'brightness-110' : ''}`}
+                  src="/lovable-uploads/d18bbc61-0f35-4480-9b29-cf9dd88e75d3.png" 
+                />
+                {isBlinking && (
+                  <div className="absolute inset-0 bg-white opacity-10 animate-pulse" />
+                )}
+                {isSmiling && (
+                  <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 w-20 h-5 bg-primary opacity-20 rounded-full animate-pulse" />
+                )}
+              </div>
             </div>
           </div>
         </div>
