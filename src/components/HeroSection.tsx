@@ -67,18 +67,17 @@ const HeroSection = () => {
           <div className="relative animate-fade-up" style={{
             animationDelay: '200ms'
           }}>
-            <div 
-              className="aspect-w-16 aspect-h-9 rounded-2xl overflow-hidden shadow-2xl transition-transform duration-1000 ease-in-out" 
-              style={{ 
-                transform: `rotate(${rotation}deg)`,
-                transformOrigin: 'center center'
-              }}
-            >
+            <div className="aspect-w-16 aspect-h-9 rounded-2xl overflow-hidden shadow-2xl">
               <div className="relative w-full h-full">
                 <img 
                   alt="Doctor consulting with patient" 
                   className={`object-cover w-full h-full rounded-2xl transition-all duration-300 ${isSmiling ? 'scale-105' : ''} ${isBlinking ? 'brightness-110' : ''}`}
                   src="/lovable-uploads/d18bbc61-0f35-4480-9b29-cf9dd88e75d3.png" 
+                  style={{ 
+                    transform: `rotate(${rotation}deg)`,
+                    transformOrigin: 'center center',
+                    transition: 'transform 1s ease-in-out'
+                  }}
                 />
                 {isBlinking && (
                   <div className="absolute inset-0 bg-white opacity-10 animate-pulse" />
