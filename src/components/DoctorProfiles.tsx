@@ -1,5 +1,4 @@
-
-import { User, Mail, Phone, CheckCircle, Clock, MapPin, Ear, Nose, Throat } from 'lucide-react';
+import { User, Mail, Phone, CheckCircle, Clock, MapPin, Ear, Stethoscope, Activity } from 'lucide-react';
 
 const DoctorProfiles = () => {
   const doctors = [
@@ -250,10 +249,10 @@ const DoctorProfiles = () => {
                         <Ear className="w-5 h-5" />
                       </button>
                       <button className="p-2 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors">
-                        <Nose className="w-5 h-5" />
+                        <Stethoscope className="w-5 h-5" />
                       </button>
                       <button className="p-2 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors">
-                        <Throat className="w-5 h-5" />
+                        <Activity className="w-5 h-5" />
                       </button>
                     </div>
                   </div>
