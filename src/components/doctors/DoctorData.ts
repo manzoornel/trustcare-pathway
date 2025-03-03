@@ -1,0 +1,113 @@
+
+import { DoctorProfile, EntDoctorProfile } from './types';
+
+export const doctors: DoctorProfile[] = [
+  {
+    name: "Dr. Manzoor Nellancheri",
+    title: "MBBS, CCEBDM (Diabetes), BCCPM (Pain & Palliative)",
+    specialty: "Family Doctor | Diabetes & Palliative Care Specialist",
+    experience: "10+ years",
+    education: "MBBS, CCEBDM, BCCPM",
+    description: "Dr. Manzoor is a highly experienced family physician and diabetes specialist dedicated to providing comprehensive, patient-centered healthcare. As the founder and chief physician at Doctor Uncle Family Clinic, he specializes in general medicine, diabetes management, chronic disease care, and palliative medicine.",
+    image: "/lovable-uploads/2550a412-1e2b-48fc-8a38-2d3f782909b5.png",
+    specializations: [
+      "General Medicine – Diagnosis and treatment of acute and chronic illnesses",
+      "Diabetes Care (CCEBDM) – Advanced diabetes management and preventive care",
+      "Pain & Palliative Medicine (BCCPM) – Specialized care for pain relief",
+      "Preventive Healthcare – Personalized health checkups and wellness",
+      "Elderly & Home Care Services – Compassionate support for seniors"
+    ],
+    highlights: [
+      "Trusted Family Doctor with over 10 years of experience",
+      "Diabetes & Chronic Disease Expert",
+      "Pain & Palliative Specialist",
+      "Patient-Centered Approach",
+      "Available at Doctor Uncle Family Clinic"
+    ]
+  },
+  {
+    name: "Dr. Wazeem Kadengal",
+    title: "MBBS, MD, FNNF",
+    specialty: "Pediatrician & Neonatologist | Expert Child & Newborn Care",
+    experience: "Extensive experience",
+    education: "MBBS, MD, FNNF",
+    description: "Dr. Wazeem Kadengal is a highly skilled pediatrician and neonatologist specializing in newborn care, child development, and pediatric emergencies. With extensive experience in treating infants, toddlers, and children, he is dedicated to ensuring healthy growth, proper nutrition, and disease prevention for every child.",
+    image: "/lovable-uploads/10544f28-fe9f-4f04-9736-0fb61e5a3f17.png",
+    specializations: [
+      "Neonatal & Infant Care – Expert management of newborn health and early development",
+      "Comprehensive Vaccination Plans – Protecting children against serious diseases",
+      "Child Growth & Nutrition Counseling – Helping parents ensure balanced nutrition",
+      "Treatment for Allergies & Respiratory Issues – Effective care for asthma, colds, and infections",
+      "Emergency Pediatric Care – Immediate attention for childhood injuries and illnesses"
+    ],
+    highlights: [
+      "Expert Pediatrician & Neonatologist – Specialized in child and newborn healthcare",
+      "Newborn & Premature Baby Care – Advanced neonatal care for preterm infants",
+      "Growth & Development Monitoring – Ensuring children reach milestones at the right age",
+      "Vaccination & Immunization – Protecting children with timely vaccinations",
+      "Compassionate & Patient-Friendly Approach – Making every child feel safe"
+    ],
+    clinicInfo: {
+      location: "Doctor Uncle Family Clinic – Vakkad Branch",
+      timing: "2:30 PM – 4:30 PM (Daily)",
+      contact: "9961 588 880"
+    }
+  }
+];
+
+export const entDoctors: EntDoctorProfile[] = [
+  {
+    name: "Dr. Shahar Banu",
+    title: "MBBS, MS (ENT)",
+    specialty: "ENT Specialist & Surgeon",
+    description: "Dr. Shahar Banu is a highly skilled ENT specialist and surgeon with expertise in diagnosing and treating disorders related to the ear, nose, throat, head, and neck. With extensive experience, she provides advanced care for sinus infections, hearing issues, voice disorders, tonsillitis, and more.",
+    image: "/lovable-uploads/54ce09cc-73b7-4e3a-abdc-fedcc93cc51c.png",
+    specializations: [
+      "Hearing Loss & Ear Infections – Treatment for middle ear infections and tinnitus",
+      "Nasal Disorders & Sinusitis – Advanced care for allergies, nasal polyps, and blocked sinuses",
+      "Tonsillitis & Throat Infections – Effective treatments for sore throats and chronic tonsillitis",
+      "Vertigo & Balance Disorders – Specialized care for dizziness and inner ear issues",
+      "Head & Neck Surgery – Skilled surgical intervention for ENT-related conditions"
+    ],
+    clinicInfo: {
+      location: "Doctor Uncle Family Clinic – Vakkad Branch",
+      contact: "9961 588 880 | 04942 087 888"
+    }
+  },
+  {
+    name: "Dr. Vijay S",
+    title: "MBBS, DLO, MS (ENT)",
+    specialty: "Senior ENT Surgeon",
+    description: "Dr. Vijay S is a renowned ENT surgeon specializing in ear, nose, and throat disorders, offering expert diagnosis and treatment for both adults and children. His approach combines advanced medical techniques with compassionate patient care to provide the best treatment outcomes.",
+    image: "/lovable-uploads/1aff5afe-1070-44a1-8b38-24f7962a7840.png",
+    specializations: [
+      "Ear Surgery & Cochlear Implants – Advanced surgical solutions for hearing loss",
+      "Sinus & Allergy Treatment – Comprehensive allergy testing and management",
+      "Voice & Swallowing Disorders – Specialized care for vocal cord and swallowing problems",
+      "Snoring & Sleep Apnea Treatment – Effective therapies to improve sleep health",
+      "ENT Endoscopic Procedures – Minimally invasive treatments for nasal and throat conditions"
+    ],
+    clinicInfo: {
+      location: "Doctor Uncle Family Clinic – Vakkad Branch",
+      contact: "9961 588 880 | 04942 087 888"
+    }
+  },
+  {
+    name: "Dr. Mansheer Nellancheri",
+    title: "MBBS, Dip ENT",
+    specialty: "ENT Specialist & Surgeon",
+    description: "Dr. Mansheer Nellancheri is a trusted ENT specialist with a focus on diagnosing and treating ear, nose, and throat conditions using the latest medical advancements. He provides comprehensive ENT care, ensuring accurate diagnoses and effective treatments for a wide range of conditions.",
+    image: "/lovable-uploads/5b0045c2-3301-401d-9d16-faf9110a47bf.png",
+    specializations: [
+      "Pediatric ENT Care – Specialized treatments for ear infections, allergies, and speech disorders in children",
+      "Nasal Blockage & Deviated Septum – Expert surgical and non-surgical treatments",
+      "Chronic Ear & Throat Infections – Long-term management and prevention strategies",
+      "Tinnitus & Hearing Issues – Advanced solutions for ringing in the ears and hearing loss",
+      "ENT Surgeries & Procedures – Skilled surgical intervention for complex ENT conditions"
+    ],
+    clinicInfo: {
+      location: "Doctor Uncle Family Clinic – Vakkad Branch",
+      contact: "9961 588 880 | 04942 087 888"
+    }
+  }
+];
