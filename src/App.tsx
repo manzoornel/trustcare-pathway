@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Home from './pages/Home';
@@ -46,13 +47,13 @@ function App() {
             }
           />
         
-        {/* Admin Routes */}
-        <Route path="/admin" element={<Admin />} />
-        <Route path="/admin/dashboard" element={<AdminDashboard />} />
-        <Route path="/admin/blog" element={<BlogManager />} />
-        <Route path="/admin/careers" element={<CareersManager />} />
-        <Route path="/admin/applications" element={<ApplicationsManager />} />
-      </Routes>
+          {/* Admin Routes */}
+          <Route path="/admin" element={<Admin />} />
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/blog" element={<BlogManager />} />
+          <Route path="/admin/careers" element={<CareersManager />} />
+          <Route path="/admin/applications" element={<ApplicationsManager />} />
+        </Routes>
       </AuthProvider>
     </Router>
   );
