@@ -17,6 +17,7 @@ import PatientPortal from './pages/PatientPortal';
 import NotFound from './pages/NotFound';
 import AIChat from './pages/AIChat';
 import Appointments from './pages/Appointments';
+import Careers from './pages/Careers';
 
 function App() {
   return (
@@ -34,6 +35,7 @@ function App() {
         <Route path="/patient-portal" element={<PatientPortal />} />
         <Route path="/ai-chat" element={<AIChat />} />
         <Route path="/appointments" element={<Appointments />} />
+        <Route path="/careers" element={<Careers />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Toaster />
