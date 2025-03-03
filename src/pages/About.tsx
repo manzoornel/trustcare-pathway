@@ -1,6 +1,7 @@
 
 import Navbar from "@/components/Navbar";
 import { Helmet } from "react-helmet";
+import Footer from "@/components/Footer";
 
 const About = () => {
   return (
@@ -18,28 +19,30 @@ const About = () => {
           <div className="py-12">
             <h1 className="text-4xl font-bold mb-8">Who We Are</h1>
             <p className="text-lg text-gray-600 mb-8">
-              At Doctor Uncle Family Clinic, we believe in trust, transparency, and quality healthcare. 
-              Founded by Dr. Manzoor Nellancheri, our mission is to provide accessible, affordable, 
-              and high-quality healthcare for families across India.
+              At Doctor Uncle Family Clinic, we are a team of dedicated healthcare professionals committed to providing
+              exceptional medical care with a personal touch. Founded in 2020, our clinic has quickly become a trusted
+              healthcare provider in the community, offering comprehensive medical services to patients of all ages.
             </p>
             
             <h2 className="text-3xl font-bold mb-6">Our Mission</h2>
             <p className="text-lg text-gray-600 mb-8">
-              To make gold-standard healthcare available to every household through innovative 
-              technology and compassionate care.
+              Our mission is to deliver compassionate, patient-centered healthcare that focuses on prevention, 
+              education, and treatment. We strive to create a welcoming environment where every patient feels 
+              valued and receives the highest standard of care.
             </p>
 
             <h2 className="text-3xl font-bold mb-6">Our Vision</h2>
             <p className="text-lg text-gray-600 mb-8">
-              To establish 1,000 AI-enabled clinics across India, revolutionizing healthcare with 
-              advanced medical services, EHR integration, and AI-driven patient care.
+              We envision a future where healthcare is accessible to everyone, where technology enhances 
+              the doctor-patient relationship, and where preventive care leads to healthier communities.
+              Our goal is to expand our services while maintaining our commitment to personalized care.
             </p>
 
             <h2 className="text-3xl font-bold mb-6">Meet Our Founder – Dr. Manzoor Nellancheri</h2>
             <p className="text-lg text-gray-600 mb-8">
-              Dr. Manzoor Nellancheri is a doctorpreneur dedicated to transforming healthcare with 
-              AI technology and business strategies for doctors. With over 10 years of experience, 
-              he has pioneered a unique family clinic model that ensures the highest patient satisfaction.
+              Dr. Manzoor Nellancheri founded Doctor Uncle Family Clinic with the vision of transforming 
+              traditional healthcare. With over 15 years of experience in family medicine, Dr. Nellancheri 
+              combines clinical expertise with a passionate commitment to patient education and empowerment.
             </p>
 
             <div className="mt-8">
@@ -52,6 +55,7 @@ const About = () => {
             </div>
           </div>
         </div>
+        <Footer />
       </div>
     </>
   );

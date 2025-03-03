@@ -5,25 +5,25 @@ const Footer = () => {
   const socialLinks = [
     {
       name: 'Facebook',
-      href: 'https://facebook.com/docuncle',
+      href: 'https://www.facebook.com/DoctorUncleClinic',
       icon: Facebook,
       color: 'text-blue-600'
     },
     {
       name: 'Instagram',
-      href: 'https://instagram.com/docuncle',
+      href: 'https://www.instagram.com/doctoruncleclinic',
       icon: Instagram,
       color: 'text-pink-600'
     },
     {
       name: 'LinkedIn',
-      href: 'https://linkedin.com/company/docuncle',
+      href: 'https://www.linkedin.com/company/doctor-uncle-clinic',
       icon: Linkedin,
       color: 'text-blue-700'
     },
     {
       name: 'Youtube',
-      href: 'https://youtube.com/docuncle',
+      href: 'https://www.youtube.com/@DoctorUncleClinic',
       icon: Youtube,
       color: 'text-red-600'
     }
@@ -52,6 +52,12 @@ const Footer = () => {
                 <item.icon className="w-6 h-6" />
               </a>
             ))}
+          </div>
+          
+          <div className="text-center">
+            <p className="text-gray-700 mb-2">Doctor Uncle Family Clinic</p>
+            <p className="text-gray-500 text-sm">123 Healthcare Avenue, Medical District, Bangalore, Karnataka 560001</p>
+            <p className="text-gray-500 text-sm">Phone: +91 98765 43210 | Email: contact@doctoruncle.com</p>
           </div>
           
           <p className="text-gray-500 text-sm text-center">

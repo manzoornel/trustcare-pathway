@@ -2,32 +2,33 @@
 import Navbar from "@/components/Navbar";
 import { Helmet } from "react-helmet";
 import { Check } from "lucide-react";
+import Footer from "@/components/Footer";
 
 const Services = () => {
   const services = [
     {
-      title: "General Medicine",
-      description: "Expert consultation for fever, infections, and chronic diseases.",
+      title: "Primary Care",
+      description: "Comprehensive healthcare for patients of all ages, including routine check-ups, preventive care, and treatment for acute and chronic conditions.",
     },
     {
-      title: "Diabetes Management",
-      description: "Advanced diabetes care with diet plans & continuous monitoring.",
+      title: "Specialized Diabetes Care",
+      description: "Expert management of diabetes with personalized treatment plans, continuous glucose monitoring, and nutritional counseling.",
     },
     {
-      title: "Minor Surgeries",
-      description: "Safe and efficient minor surgical procedures with expert care.",
+      title: "Women's Health",
+      description: "Comprehensive women's health services including preventive screenings, prenatal care, and management of women's health concerns.",
     },
     {
-      title: "Laboratory Services",
-      description: "Blood tests, urine analysis, ECG, and more.",
+      title: "Diagnostic Services",
+      description: "State-of-the-art laboratory testing, ECG, ultrasound, and other diagnostic procedures to ensure accurate diagnosis.",
     },
     {
-      title: "Pharmacy & Medications",
-      description: "On-site pharmacy for easy access to prescribed medicines.",
+      title: "Pharmacy Services",
+      description: "Convenient on-site pharmacy providing prescription medications, over-the-counter products, and medication counseling.",
     },
     {
-      title: "Home Care & Telemedicine",
-      description: "Online consultations and home visits for elderly and disabled patients.",
+      title: "Telemedicine",
+      description: "Virtual consultations with our healthcare providers for those unable to visit in person or requiring follow-up care.",
     },
   ];
 
@@ -37,17 +38,17 @@ const Services = () => {
         <title>Healthcare Services at Doctor Uncle Family Clinic – Expert Care for Your Family</title>
         <meta
           name="description"
-          content="Explore our wide range of medical services, including diabetes management, lab tests, minor surgeries, pharmacy, and home care."
+          content="Explore our wide range of medical services, including primary care, diabetes management, women's health, diagnostic services, and telemedicine."
         />
       </Helmet>
       <div className="min-h-screen bg-white">
         <Navbar />
         <div className="pt-20 px-4 max-w-7xl mx-auto">
           <div className="py-12">
-            <h1 className="text-4xl font-bold mb-8">Comprehensive Healthcare Services for You</h1>
+            <h1 className="text-4xl font-bold mb-8">Our Healthcare Services</h1>
             <p className="text-lg text-gray-600 mb-12">
-              At Doctor Uncle Family Clinic, we offer a range of specialized healthcare services 
-              tailored to meet your family's needs.
+              At Doctor Uncle Family Clinic, we offer a comprehensive range of medical services 
+              designed to meet the diverse healthcare needs of your entire family.
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -81,6 +82,7 @@ const Services = () => {
             </div>
           </div>
         </div>
+        <Footer />
       </div>
     </>
   );
