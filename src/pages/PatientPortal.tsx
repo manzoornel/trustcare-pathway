@@ -8,6 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 import PatientInfoCard from "@/components/patient-portal/PatientInfoCard";
+import RewardsCard from "@/components/patient-portal/RewardsCard";
 import PortalTabsSection from "@/components/patient-portal/PortalTabsSection";
 
 const PatientPortal = () => {
@@ -58,12 +59,20 @@ const PatientPortal = () => {
               </Button>
             </div>
             
-            <PatientInfoCard 
-              patientName={auth.name || ""}
-              hospitalId={auth.hospitalId}
-              phone={auth.phone}
-              email={auth.email}
-            />
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2">
+                <PatientInfoCard 
+                  patientName={auth.name || ""}
+                  hospitalId={auth.hospitalId}
+                  phone={auth.phone}
+                  email={auth.email}
+                />
+              </div>
+              
+              <div className="lg:col-span-1">
+                <RewardsCard />
+              </div>
+            </div>
             
             <PortalTabsSection 
               activeTab={activeTab}

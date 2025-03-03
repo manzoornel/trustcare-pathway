@@ -11,6 +11,7 @@ type AuthState = {
   hospitalId?: string;
   email?: string;
   profileComplete?: boolean;
+  rewardPoints?: number;
 };
 
 type AuthContextType = {
@@ -26,6 +27,7 @@ const defaultAuthState: AuthState = {
   isAuthenticated: false,
   needsProfile: false,
   isVerified: false,
+  rewardPoints: 0,
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -69,6 +71,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const login = (userData: Partial<AuthState>) => {
+    // Set default reward points if not provided
+    if (userData.rewardPoints === undefined && !auth.rewardPoints) {
+      userData.rewardPoints = 140; // Starting with some points for demo
+    }
+    
     const newAuth = { 
       ...defaultAuthState, 
       ...userData, 
