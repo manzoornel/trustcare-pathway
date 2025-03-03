@@ -23,7 +23,7 @@ const Footer = () => {
     },
     {
       name: 'Youtube',
-      href: 'https://www.youtube.com/@DoctorUncleClinic',
+      href: 'https://youtube.com/@doctoruncle6549?si=9uh_nDGiRAgLzOjk',
       icon: Youtube,
       color: 'text-red-600'
     }
