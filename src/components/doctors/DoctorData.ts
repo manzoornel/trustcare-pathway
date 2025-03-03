@@ -1,4 +1,3 @@
-
 import { DoctorProfile, EntDoctorProfile } from './types';
 
 export const doctors: DoctorProfile[] = [
@@ -27,6 +26,36 @@ export const doctors: DoctorProfile[] = [
     ],
     clinicInfo: {
       location: "Doctor Uncle Family Clinic – Vakkad Branch",
+      contact: "9961 588 880 | 04942 087 888"
+    }
+  },
+  {
+    name: "Dr. Praveen V",
+    title: "MBBS, MD, DVD",
+    specialty: "Expert Dermatologist | Skin, Hair & Aesthetic Specialist",
+    experience: "Years of experience",
+    education: "MBBS, MD, DVD (Dermatology)",
+    description: "Dr. Praveen V, MBBS, MD, DVD (Dermatology), is a highly skilled dermatologist and skin specialist, offering expert treatment for skin diseases, hair fall, acne, pigmentation, and cosmetic dermatology. With years of experience in clinical and aesthetic dermatology, he provides advanced medical and laser treatments for a wide range of skin and hair conditions. As a trusted skin doctor at Doctor Uncle Family Clinic, Dr. Praveen combines cutting-edge dermatological techniques with personalized care, ensuring the best results for each patient. His expertise extends to cosmetic treatments, anti-aging solutions, and advanced skin rejuvenation procedures.",
+    image: "/lovable-uploads/d18bbc61-0f35-4480-9b29-cf9dd88e75d3.png",
+    specializations: [
+      "Acne & Pimples Treatment – Effective solutions for clear and healthy skin",
+      "Pigmentation & Skin Whitening – Advanced treatment for melasma, dark spots, and uneven skin tone",
+      "Hair Loss & Dandruff Treatment – Specialized therapies for hair regrowth and scalp health",
+      "Psoriasis & Eczema Management – Long-term care for chronic skin conditions",
+      "Skin Allergies & Infections – Expert treatment for rashes, fungal infections, and dermatitis",
+      "Anti-Aging & Skin Rejuvenation – Botox, fillers, chemical peels, and laser skin treatments",
+      "Scar & Stretch Mark Removal – Minimally invasive procedures for flawless skin"
+    ],
+    highlights: [
+      "Experienced Dermatologist & Skin Specialist – Years of expertise in skin and hair care",
+      "Advanced Dermatology & Cosmetic Treatments – Latest medical and aesthetic solutions",
+      "Personalized Skin & Hair Care Plans – Customized treatment for all skin types",
+      "Safe & Effective Laser & Cosmetic Procedures – Performed using state-of-the-art technology",
+      "Trusted by Patients – Providing compassionate care with visible results"
+    ],
+    clinicInfo: {
+      location: "Doctor Uncle Family Clinic – Vakkad Branch",
+      timing: "Daily 4:00 PM – 6:00 PM",
       contact: "9961 588 880 | 04942 087 888"
     }
   },
