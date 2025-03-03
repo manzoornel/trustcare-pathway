@@ -34,13 +34,13 @@ const AdminSidebar = () => {
   ];
 
   return (
-    <div className="w-64 bg-white border-r min-h-screen p-4 shadow-sm">
+    <div className="w-64 bg-white border-r min-h-screen p-4 shadow-sm flex flex-col">
       <div className="mb-8">
         <h1 className="text-xl font-bold">Admin Panel</h1>
         <p className="text-sm text-gray-500">Doctor Uncle Family Clinic</p>
       </div>
       
-      <nav className="space-y-2">
+      <nav className="space-y-2 flex-grow">
         {menuItems.map((item) => (
           <Button
             key={item.path}
@@ -54,7 +54,7 @@ const AdminSidebar = () => {
         ))}
       </nav>
       
-      <div className="absolute bottom-4 w-56">
+      <div className="mt-auto pt-4 border-t">
         <Button 
           variant="outline" 
           className="w-full justify-start text-red-500 hover:text-red-700 hover:bg-red-50"
