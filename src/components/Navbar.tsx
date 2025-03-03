@@ -1,9 +1,14 @@
+
 import { useState } from 'react';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, LogIn } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+  const { auth } = useAuth();
+  
   const menuItems = [{
     name: 'Home',
     href: '/'
@@ -26,9 +31,11 @@ const Navbar = () => {
     name: 'Contact',
     href: '/contact'
   }];
+  
   const isActive = (path: string) => {
     return location.pathname === path;
   };
+  
   return <nav className="fixed w-full bg-white/95 backdrop-blur-sm shadow-sm z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
@@ -43,6 +50,17 @@ const Navbar = () => {
             {menuItems.map(item => <Link key={item.name} to={item.href} className={`${isActive(item.href) ? "text-primary font-semibold" : "text-gray-600 hover:text-primary"} transition-colors duration-200 font-display`}>
                 {item.name}
               </Link>)}
+              
+            {auth.isAuthenticated ? (
+              <Link to="/patient-portal" className="flex items-center text-primary font-semibold transition-colors duration-200 font-display">
+                Patient Portal
+              </Link>
+            ) : (
+              <Link to="/login" className="flex items-center gap-1 text-primary hover:text-primary/80 font-semibold transition-colors duration-200 font-display">
+                <LogIn size={18} />
+                Patient Login
+              </Link>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -60,8 +78,20 @@ const Navbar = () => {
             {menuItems.map(item => <Link key={item.name} to={item.href} className={`block px-3 py-2 text-base font-medium ${isActive(item.href) ? "text-primary" : "text-gray-600 hover:text-primary"} font-display`} onClick={() => setIsOpen(false)}>
                 {item.name}
               </Link>)}
+              
+            {auth.isAuthenticated ? (
+              <Link to="/patient-portal" className="block px-3 py-2 text-base font-medium text-primary font-display" onClick={() => setIsOpen(false)}>
+                Patient Portal
+              </Link>
+            ) : (
+              <Link to="/login" className="flex items-center gap-1 px-3 py-2 text-base font-medium text-primary font-display" onClick={() => setIsOpen(false)}>
+                <LogIn size={18} />
+                Patient Login
+              </Link>
+            )}
           </div>
         </div>}
     </nav>;
 };
+
 export default Navbar;

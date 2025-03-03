@@ -1,12 +1,14 @@
 
-import { Calendar } from 'lucide-react';
+import { Calendar, LogIn } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 
 const HeroSection = () => {
   const [isBlinking, setIsBlinking] = useState(false);
   const [isSmiling, setIsSmiling] = useState(false);
   const [rotation, setRotation] = useState(0);
+  const { auth } = useAuth();
 
   useEffect(() => {
     // Blinking animation - every 3 seconds
@@ -48,7 +50,7 @@ const HeroSection = () => {
               Experience compassionate care and medical excellence at Doctor Uncle Family Clinic. 
               We're committed to your health and well-being.
             </p>
-            <div className="space-x-4">
+            <div className="flex flex-wrap gap-4">
               <Link 
                 to="/appointments" 
                 className="inline-flex items-center px-6 py-3 bg-primary text-white font-semibold rounded-lg hover:bg-primary/90 transition-colors duration-200"
@@ -56,9 +58,27 @@ const HeroSection = () => {
                 <Calendar className="w-5 h-5 mr-2 animate-[pulse_2s_ease-in-out_infinite]" />
                 Book Appointment
               </Link>
+              
+              {auth.isAuthenticated ? (
+                <Link 
+                  to="/patient-portal" 
+                  className="inline-flex items-center px-6 py-3 bg-white text-primary font-semibold rounded-lg border-2 border-primary hover:bg-primary/10 transition-colors duration-200"
+                >
+                  Patient Portal
+                </Link>
+              ) : (
+                <Link 
+                  to="/login" 
+                  className="inline-flex items-center px-6 py-3 bg-white text-primary font-semibold rounded-lg border-2 border-primary hover:bg-primary/10 transition-colors duration-200"
+                >
+                  <LogIn className="w-5 h-5 mr-2" />
+                  Patient Login
+                </Link>
+              )}
+              
               <Link 
                 to="/services" 
-                className="inline-flex items-center px-6 py-3 bg-white text-primary font-semibold rounded-lg border-2 border-primary hover:bg-primary/10 transition-colors duration-200"
+                className="inline-flex items-center px-6 py-3 bg-transparent text-gray-700 font-semibold rounded-lg border-2 border-gray-300 hover:bg-gray-100 transition-colors duration-200"
               >
                 Our Services
               </Link>
