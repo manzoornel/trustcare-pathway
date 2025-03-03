@@ -11,6 +11,7 @@ import AIChat from "./pages/AIChat";
 import Appointments from "./pages/Appointments";
 import Blog from "./pages/Blog";
 import Contact from "./pages/Contact";
+import PatientPortal from "./pages/PatientPortal";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,6 +30,7 @@ const App = () => (
           <Route path="/appointments" element={<Appointments />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/patient-portal" element={<PatientPortal />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
