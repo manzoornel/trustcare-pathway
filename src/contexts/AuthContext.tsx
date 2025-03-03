@@ -4,6 +4,7 @@ import { createContext, useContext, useState, useEffect, ReactNode } from "react
 type AuthState = {
   isAuthenticated: boolean;
   needsProfile: boolean;
+  isVerified: boolean;
   name?: string;
   phone?: string;
   hospitalId?: string;
@@ -16,11 +17,14 @@ type AuthContextType = {
   login: (userData: Partial<AuthState>) => void;
   logout: () => void;
   updateProfile: (profileData: Partial<AuthState>) => void;
+  verifyUser: () => void;
+  signUp: (userData: Partial<AuthState>) => void;
 };
 
 const defaultAuthState: AuthState = {
   isAuthenticated: false,
   needsProfile: false,
+  isVerified: false,
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -42,8 +46,34 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
+  const signUp = (userData: Partial<AuthState>) => {
+    const newAuth = { 
+      ...defaultAuthState, 
+      ...userData, 
+      isAuthenticated: false,
+      isVerified: false,
+    };
+    setAuth(newAuth);
+    localStorage.setItem("patientAuth", JSON.stringify(newAuth));
+  };
+
+  const verifyUser = () => {
+    const updatedAuth = { 
+      ...auth, 
+      isVerified: true,
+      isAuthenticated: true 
+    };
+    setAuth(updatedAuth);
+    localStorage.setItem("patientAuth", JSON.stringify(updatedAuth));
+  };
+
   const login = (userData: Partial<AuthState>) => {
-    const newAuth = { ...defaultAuthState, ...userData, isAuthenticated: true };
+    const newAuth = { 
+      ...defaultAuthState, 
+      ...userData, 
+      isAuthenticated: true,
+      isVerified: true
+    };
     setAuth(newAuth);
     localStorage.setItem("patientAuth", JSON.stringify(newAuth));
   };
@@ -61,7 +91,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ auth, login, logout, updateProfile }}>
+    <AuthContext.Provider value={{ auth, login, logout, updateProfile, verifyUser, signUp }}>
       {children}
     </AuthContext.Provider>
   );

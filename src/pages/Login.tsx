@@ -8,41 +8,96 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAuth } from "@/contexts/AuthContext";
+
+// Simulate a database of authenticated users
+const authenticatedUsers = [
+  { hospitalId: "H12345", phone: "1234567890", email: "patient1@example.com", name: "John Doe", password: "password123" },
+  { hospitalId: "H67890", phone: "9876543210", email: "patient2@example.com", name: "Jane Smith", password: "password456" },
+];
 
 const Login = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    name: "",
-    phone: "",
-    hospitalId: ""
+  const [activeTab, setActiveTab] = useState("password");
+  
+  const [passwordFormData, setPasswordFormData] = useState({
+    identifier: "",
+    password: ""
   });
   
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const [otpFormData, setOtpFormData] = useState({
+    identifier: ""
+  });
+  
+  const handlePasswordFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setPasswordFormData(prev => ({ ...prev, [name]: value }));
+  };
+  
+  const handleOtpFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setOtpFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handlePasswordSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
-    // In a real app, this would validate against a backend
+    // Find user by hospitalId, phone, or email
+    const user = authenticatedUsers.find(
+      u => u.hospitalId === passwordFormData.identifier ||
+           u.phone === passwordFormData.identifier ||
+           u.email === passwordFormData.identifier
+    );
+    
     setTimeout(() => {
-      // Simulate authentication check
-      if (formData.hospitalId.trim() !== "") {
-        toast.success("Authentication successful");
-        // Store auth state
-        localStorage.setItem("patientAuth", JSON.stringify({
+      if (user && user.password === passwordFormData.password) {
+        toast.success("Login successful");
+        login({
           isAuthenticated: true,
-          needsProfile: true,
-          name: formData.name,
-          phone: formData.phone,
-          hospitalId: formData.hospitalId
-        }));
-        navigate("/create-profile");
+          name: user.name,
+          phone: user.phone,
+          hospitalId: user.hospitalId,
+          email: user.email,
+          profileComplete: true
+        });
+        navigate("/patient-portal");
       } else {
-        toast.error("Invalid hospital ID");
+        toast.error("Invalid credentials");
+      }
+      setIsLoading(false);
+    }, 1500);
+  };
+  
+  const handleOtpSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    
+    // Find user by hospitalId, phone, or email
+    const user = authenticatedUsers.find(
+      u => u.hospitalId === otpFormData.identifier ||
+           u.phone === otpFormData.identifier ||
+           u.email === otpFormData.identifier
+    );
+    
+    setTimeout(() => {
+      if (user) {
+        toast.success("OTP sent to your phone and email");
+        // Store user info in localStorage for OTP verification
+        localStorage.setItem("patientAuth", JSON.stringify({
+          isAuthenticated: false,
+          isVerified: false,
+          name: user.name,
+          phone: user.phone,
+          hospitalId: user.hospitalId,
+          email: user.email
+        }));
+        navigate("/verify-otp");
+      } else {
+        toast.error("User not found");
       }
       setIsLoading(false);
     }, 1500);
@@ -64,62 +119,98 @@ const Login = () => {
           <div className="py-8">
             <h1 className="text-3xl font-bold mb-2 text-center">Patient Login</h1>
             <p className="text-gray-600 mb-8 text-center">
-              Enter your credentials to access your medical records
+              Access your medical records securely
             </p>
             
             <Card>
               <CardHeader>
                 <CardTitle>Patient Authentication</CardTitle>
                 <CardDescription>
-                  Please enter your details to verify your identity
+                  Log in with your hospital ID, phone number, or email
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="space-y-2">
-                    <label htmlFor="name" className="text-sm font-medium">Full Name</label>
-                    <Input
-                      id="name"
-                      name="name"
-                      placeholder="Enter your full name"
-                      value={formData.name}
-                      onChange={handleChange}
-                      required
-                    />
-                  </div>
+                <Tabs 
+                  defaultValue="password" 
+                  value={activeTab} 
+                  onValueChange={setActiveTab}
+                  className="w-full"
+                >
+                  <TabsList className="grid w-full grid-cols-2 mb-6">
+                    <TabsTrigger value="password">Password</TabsTrigger>
+                    <TabsTrigger value="otp">OTP</TabsTrigger>
+                  </TabsList>
                   
-                  <div className="space-y-2">
-                    <label htmlFor="phone" className="text-sm font-medium">Phone Number</label>
-                    <Input
-                      id="phone"
-                      name="phone"
-                      placeholder="Enter your phone number"
-                      value={formData.phone}
-                      onChange={handleChange}
-                      required
-                    />
-                  </div>
+                  <TabsContent value="password">
+                    <form onSubmit={handlePasswordSubmit} className="space-y-4">
+                      <div className="space-y-2">
+                        <label htmlFor="identifier" className="text-sm font-medium">Hospital ID / Phone / Email</label>
+                        <Input
+                          id="identifier"
+                          name="identifier"
+                          placeholder="Enter your Hospital ID, Phone, or Email"
+                          value={passwordFormData.identifier}
+                          onChange={handlePasswordFormChange}
+                          required
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <label htmlFor="password" className="text-sm font-medium">Password</label>
+                        <Input
+                          id="password"
+                          name="password"
+                          type="password"
+                          placeholder="Enter your password"
+                          value={passwordFormData.password}
+                          onChange={handlePasswordFormChange}
+                          required
+                        />
+                      </div>
+                      
+                      <Button 
+                        type="submit" 
+                        className="w-full" 
+                        disabled={isLoading}
+                      >
+                        {isLoading ? "Logging in..." : "Login"}
+                      </Button>
+                    </form>
+                  </TabsContent>
                   
-                  <div className="space-y-2">
-                    <label htmlFor="hospitalId" className="text-sm font-medium">Hospital ID</label>
-                    <Input
-                      id="hospitalId"
-                      name="hospitalId"
-                      placeholder="Enter your hospital ID"
-                      value={formData.hospitalId}
-                      onChange={handleChange}
-                      required
-                    />
-                  </div>
-                  
-                  <Button 
-                    type="submit" 
-                    className="w-full" 
-                    disabled={isLoading}
-                  >
-                    {isLoading ? "Verifying..." : "Login"}
-                  </Button>
-                </form>
+                  <TabsContent value="otp">
+                    <form onSubmit={handleOtpSubmit} className="space-y-4">
+                      <div className="space-y-2">
+                        <label htmlFor="otpIdentifier" className="text-sm font-medium">Hospital ID / Phone / Email</label>
+                        <Input
+                          id="otpIdentifier"
+                          name="identifier"
+                          placeholder="Enter your Hospital ID, Phone, or Email"
+                          value={otpFormData.identifier}
+                          onChange={handleOtpFormChange}
+                          required
+                        />
+                      </div>
+                      
+                      <Button 
+                        type="submit" 
+                        className="w-full" 
+                        disabled={isLoading}
+                      >
+                        {isLoading ? "Sending OTP..." : "Send OTP"}
+                      </Button>
+                    </form>
+                  </TabsContent>
+                </Tabs>
+                
+                <div className="text-center mt-6">
+                  <p className="text-sm text-gray-600">
+                    Don't have an account?{" "}
+                    <Button variant="link" className="p-0" onClick={() => navigate("/signup")}>
+                      Sign up
+                    </Button>
+                  </p>
+                </div>
               </CardContent>
             </Card>
           </div>
