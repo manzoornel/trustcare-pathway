@@ -1,55 +1,44 @@
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "@/contexts/AuthContext";
-import PrivateRoute from "@/components/PrivateRoute";
+import { Routes, Route } from 'react-router-dom';
+import { Toaster } from "sonner";
+import './App.css';
 
-import Index from "./pages/Index";
-import About from "./pages/About";
-import Services from "./pages/Services";
-import AIChat from "./pages/AIChat";
-import Appointments from "./pages/Appointments";
-import Blog from "./pages/Blog";
-import Contact from "./pages/Contact";
-import PatientPortal from "./pages/PatientPortal";
-import Login from "./pages/Login";
-import CreateProfile from "./pages/CreateProfile";
-import NotFound from "./pages/NotFound";
+// Pages
+import Index from './pages/Index';
+import About from './pages/About';
+import Services from './pages/Services';
+import Blog from './pages/Blog';
+import Contact from './pages/Contact';
+import Login from './pages/Login';
+import SignUp from './pages/SignUp';
+import VerifyOTP from './pages/VerifyOTP';
+import CreateProfile from './pages/Create-profile';
+import PatientPortal from './pages/PatientPortal';
+import NotFound from './pages/NotFound';
+import AIChat from './pages/AIChat';
+import Appointments from './pages/Appointments';
 
-const queryClient = new QueryClient();
-
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/services" element={<Services />} />
-            <Route path="/ai-chat" element={<AIChat />} />
-            <Route path="/appointments" element={<Appointments />} />
-            <Route path="/blog" element={<Blog />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/create-profile" element={<CreateProfile />} />
-            
-            {/* Protected routes */}
-            <Route element={<PrivateRoute />}>
-              <Route path="/patient-portal" element={<PatientPortal />} />
-            </Route>
-            
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </AuthProvider>
-  </QueryClientProvider>
-);
+function App() {
+  return (
+    <>
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/services" element={<Services />} />
+        <Route path="/blog" element={<Blog />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<SignUp />} />
+        <Route path="/verify-otp" element={<VerifyOTP />} />
+        <Route path="/create-profile" element={<CreateProfile />} />
+        <Route path="/patient-portal" element={<PatientPortal />} />
+        <Route path="/ai-chat" element={<AIChat />} />
+        <Route path="/appointments" element={<Appointments />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+      <Toaster />
+    </>
+  );
+}
 
 export default App;
