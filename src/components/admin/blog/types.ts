@@ -5,4 +5,5 @@ export interface BlogPost {
   excerpt: string;
   date: string;
   category: string;
+  content: string;
 }
