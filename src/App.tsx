@@ -11,6 +11,7 @@ import Careers from '@/pages/Careers';
 import SignUp from '@/pages/SignUp';
 import Verify from '@/pages/VerifyOTP';
 import PatientPortal from '@/pages/PatientPortal';
+import Login from '@/pages/Login';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import PrivateRoute from '@/components/PrivateRoute';
@@ -38,6 +39,7 @@ function App() {
         <Route path="/contact" element={<Contact />} />
         <Route path="/careers" element={<Careers />} />
         <Route path="/signup" element={<SignUp />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/verify" element={<Verify />} />
         <Route
           path="/patient-portal"

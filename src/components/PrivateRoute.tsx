@@ -23,7 +23,7 @@ const PrivateRoute = ({
 
   if (needsVerification && !auth.isVerified) {
     // Needs to be verified - redirect to OTP verification
-    return <Navigate to="/verify-otp" replace />;
+    return <Navigate to="/verify" replace />;
   }
 
   if (needsProfile && auth.needsProfile) {
