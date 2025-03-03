@@ -3,12 +3,7 @@ import { Helmet } from "react-helmet";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import LoginCard from "@/components/auth/LoginCard";
-
-// Sample authenticated users data
-const authenticatedUsers = [
-  { hospitalId: "H12345", phone: "1234567890", email: "patient1@example.com", name: "John Doe", password: "password123" },
-  { hospitalId: "H67890", phone: "9876543210", email: "patient2@example.com", name: "Jane Smith", password: "password456" },
-];
+import { authenticatedUsers } from "@/utils/auth";
 
 const Login = () => {
   return (
