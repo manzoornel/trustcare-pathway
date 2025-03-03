@@ -1,6 +1,6 @@
 
 import { useNavigate, useLocation } from "react-router-dom";
-import { LayoutDashboard, FileText, Briefcase, LogOut, Users } from "lucide-react";
+import { LayoutDashboard, FileText, Briefcase, LogOut, Users, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const AdminSidebar = () => {
@@ -21,6 +21,7 @@ const AdminSidebar = () => {
     { icon: FileText, label: "Blog Posts", path: "/admin/blog" },
     { icon: Briefcase, label: "Careers", path: "/admin/careers" },
     { icon: Users, label: "Staff Applications", path: "/admin/applications" },
+    { icon: Settings, label: "Settings", path: "/admin/settings" },
   ];
 
   return (

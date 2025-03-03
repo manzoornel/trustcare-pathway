@@ -23,6 +23,7 @@ import AdminDashboard from "@/pages/admin/Dashboard";
 import BlogManager from "@/pages/admin/BlogManager";
 import CareersManager from "@/pages/admin/CareersManager";
 import ApplicationsManager from "@/pages/admin/ApplicationsManager";
+import SettingsManager from "@/pages/admin/SettingsManager";
 import NotFound from '@/pages/NotFound';
 
 function App() {
@@ -56,6 +57,7 @@ function App() {
         <Route path="/admin/blog" element={<BlogManager />} />
         <Route path="/admin/careers" element={<CareersManager />} />
         <Route path="/admin/applications" element={<ApplicationsManager />} />
+        <Route path="/admin/settings" element={<SettingsManager />} />
         
         {/* 404 Route */}
         <Route path="*" element={<NotFound />} />

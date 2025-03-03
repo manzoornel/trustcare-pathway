@@ -6,6 +6,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 
+// Mock admin accounts
+const adminUsers = [
+  { username: "admin", password: "admin123", role: "admin" },
+  { username: "manager", password: "manager123", role: "manager" },
+  { username: "staff", password: "staff123", role: "staff" }
+];
+
 const AdminLogin = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -17,10 +24,17 @@ const AdminLogin = () => {
     setIsLoading(true);
 
     // Simple authentication check - in a real app, this would be a backend call
-    if (username === "admin" && password === "admin123") {
-      // Set authenticated in localStorage
+    const user = adminUsers.find(
+      user => user.username === username && user.password === password
+    );
+
+    if (user) {
+      // Set authenticated in localStorage with the user's role
       localStorage.setItem("adminAuthenticated", "true");
-      toast.success("Login successful");
+      localStorage.setItem("adminRole", user.role);
+      localStorage.setItem("adminUsername", user.username);
+      
+      toast.success(`Login successful. Welcome, ${user.username}!`);
       navigate("/admin/dashboard");
     } else {
       toast.error("Invalid credentials");
@@ -66,6 +80,14 @@ const AdminLogin = () => {
               />
             </div>
 
+            <div className="flex items-center justify-between">
+              <div className="text-sm">
+                <a href="#" className="font-medium text-primary hover:text-primary/80">
+                  Forgot your password?
+                </a>
+              </div>
+            </div>
+
             <div>
               <Button
                 type="submit"
@@ -74,6 +96,15 @@ const AdminLogin = () => {
               >
                 {isLoading ? "Logging in..." : "Login"}
               </Button>
+            </div>
+            
+            <div className="mt-4 text-sm text-gray-500">
+              <p>Demo accounts:</p>
+              <ul className="mt-1 list-disc pl-5">
+                <li>Username: admin / Password: admin123</li>
+                <li>Username: manager / Password: manager123</li>
+                <li>Username: staff / Password: staff123</li>
+              </ul>
             </div>
           </form>
         </div>
