@@ -46,9 +46,14 @@ const Services = () => {
         <div className="pt-20 px-4 max-w-7xl mx-auto">
           <div className="py-12">
             <h1 className="text-4xl font-bold mb-8">Our Healthcare Services</h1>
-            <p className="text-lg text-gray-600 mb-12">
+            <p className="text-lg text-gray-600 mb-6">
               At Doctor Uncle Family Clinic, we offer a comprehensive range of medical services 
               designed to meet the diverse healthcare needs of your entire family.
+            </p>
+            
+            <p className="text-lg text-gray-600 mb-12">
+              All services are available at both our Vakkad and Unniyal branches, ensuring convenient access
+              to quality healthcare no matter which location you visit.
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -73,6 +78,11 @@ const Services = () => {
             </div>
 
             <div className="mt-12 text-center">
+              <p className="text-lg text-gray-600 mb-6">
+                Visit either our Vakkad branch (near Aneesha Theatre) or our Unniyal branch (Unniyal Junction, Tanur Road)
+                to access our complete range of healthcare services.
+              </p>
+              
               <a
                 href="/appointments"
                 className="inline-flex items-center px-6 py-3 bg-primary text-white font-semibold rounded-lg hover:bg-primary/90 transition-colors duration-200"

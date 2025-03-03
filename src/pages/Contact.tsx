@@ -12,7 +12,7 @@ const Contact = () => {
         <title>Contact Doctor Uncle Family Clinic – Get in Touch</title>
         <meta
           name="description"
-          content="Find the address, phone number, and email of Doctor Uncle Family Clinic. Contact us for inquiries and appointments."
+          content="Find our branch locations, phone numbers, and email. Contact Doctor Uncle Family Clinic for inquiries and appointments at our Vakkad and Unniyal branches."
         />
       </Helmet>
       <div className="min-h-screen bg-white">
@@ -22,27 +22,77 @@ const Contact = () => {
             <h1 className="text-4xl font-bold mb-8">Contact Us</h1>
             <p className="text-lg text-gray-600 mb-12">
               We're here to answer your questions and help you schedule appointments. 
-              Feel free to reach out through any of the methods below.
+              Feel free to reach out through any of the methods below or visit one of our branches.
             </p>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-12">
+              <div className="p-6 bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-200">
+                <h2 className="text-2xl font-bold mb-4">Vakkad Branch</h2>
+                <p className="text-gray-600 italic mb-4">Near Aneesha Theatre</p>
+                
+                <div className="space-y-6">
+                  <div className="flex items-start space-x-4">
+                    <MapPin className="w-6 h-6 text-primary flex-shrink-0 mt-1" />
+                    <div>
+                      <h3 className="font-semibold mb-2">Address</h3>
+                      <p className="text-gray-600">Vakkad, Near Aneesha Theatre</p>
+                      <a 
+                        href="https://maps.app.goo.gl/APyMEnBeAxSfB5bX8"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary hover:underline mt-1 inline-block"
+                      >
+                        View on Google Maps
+                      </a>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start space-x-4">
+                    <Phone className="w-6 h-6 text-primary flex-shrink-0 mt-1" />
+                    <div>
+                      <h3 className="font-semibold mb-2">Phone Numbers</h3>
+                      <p className="text-gray-600">9961 588 880</p>
+                      <p className="text-gray-600">04942 087 888</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="p-6 bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-200">
+                <h2 className="text-2xl font-bold mb-4">Unniyal Branch</h2>
+                <p className="text-gray-600 italic mb-4">Unniyal Junction, Tanur Road</p>
+                
+                <div className="space-y-6">
+                  <div className="flex items-start space-x-4">
+                    <MapPin className="w-6 h-6 text-primary flex-shrink-0 mt-1" />
+                    <div>
+                      <h3 className="font-semibold mb-2">Address</h3>
+                      <p className="text-gray-600">Unniyal Junction, Tanur Road</p>
+                      <a 
+                        href="https://maps.app.goo.gl/GqAqenygrwV5vo3cA"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary hover:underline mt-1 inline-block"
+                      >
+                        View on Google Maps
+                      </a>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start space-x-4">
+                    <Phone className="w-6 h-6 text-primary flex-shrink-0 mt-1" />
+                    <div>
+                      <h3 className="font-semibold mb-2">Phone Numbers</h3>
+                      <p className="text-gray-600">8089 771 640</p>
+                      <p className="text-gray-600">8089 771 641</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
               <div className="space-y-8">
-                <div className="flex items-start space-x-4">
-                  <MapPin className="w-6 h-6 text-primary flex-shrink-0 mt-1" />
-                  <div>
-                    <h3 className="font-semibold mb-2">Clinic Address</h3>
-                    <p className="text-gray-600">123 Healthcare Avenue, Medical District, Bangalore, Karnataka 560001</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start space-x-4">
-                  <Phone className="w-6 h-6 text-primary flex-shrink-0 mt-1" />
-                  <div>
-                    <h3 className="font-semibold mb-2">Phone Number</h3>
-                    <p className="text-gray-600">+91 98765 43210</p>
-                  </div>
-                </div>
-
                 <div className="flex items-start space-x-4">
                   <Mail className="w-6 h-6 text-primary flex-shrink-0 mt-1" />
                   <div>

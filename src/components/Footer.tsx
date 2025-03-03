@@ -55,9 +55,37 @@ const Footer = () => {
           </div>
           
           <div className="text-center">
-            <p className="text-gray-700 mb-2">Doctor Uncle Family Clinic</p>
-            <p className="text-gray-500 text-sm">123 Healthcare Avenue, Medical District, Bangalore, Karnataka 560001</p>
-            <p className="text-gray-500 text-sm">Phone: +91 98765 43210 | Email: contact@doctoruncle.com</p>
+            <p className="text-gray-700 font-semibold mb-3">Doctor Uncle - The Complete Family Clinic</p>
+            
+            <div className="grid md:grid-cols-2 gap-4 text-sm">
+              <div className="p-3 border border-gray-100 rounded-lg">
+                <p className="font-medium text-gray-800 mb-1">Vakkad Branch (Near Aneesha Theatre):</p>
+                <p className="text-gray-500">Phone: 9961 588 880 | 04942 087 888</p>
+                <a 
+                  href="https://maps.app.goo.gl/APyMEnBeAxSfB5bX8" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline mt-1 inline-block"
+                >
+                  View on Google Maps
+                </a>
+              </div>
+              
+              <div className="p-3 border border-gray-100 rounded-lg">
+                <p className="font-medium text-gray-800 mb-1">Unniyal Branch (Unniyal Junction, Tanur Road):</p>
+                <p className="text-gray-500">Phone: 8089 771 640 | 8089 771 641</p>
+                <a 
+                  href="https://maps.app.goo.gl/GqAqenygrwV5vo3cA" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline mt-1 inline-block"
+                >
+                  View on Google Maps
+                </a>
+              </div>
+            </div>
+            
+            <p className="text-gray-500 text-sm mt-3">Email: contact@doctoruncle.com</p>
           </div>
           
           <p className="text-gray-500 text-sm text-center">
