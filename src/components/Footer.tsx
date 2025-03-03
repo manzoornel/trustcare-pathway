@@ -5,19 +5,19 @@ const Footer = () => {
   const socialLinks = [
     {
       name: 'Facebook',
-      href: 'https://www.facebook.com/DoctorUncleClinic',
+      href: 'https://m.facebook.com/Drunclefamilyclinic/',
       icon: Facebook,
       color: 'text-blue-600'
     },
     {
       name: 'Instagram',
-      href: 'https://www.instagram.com/doctoruncleclinic',
+      href: 'https://www.instagram.com/doctor_uncle_?igsh=MWNtYjhzNWg1dHZqdA%3D%3D&utm_source=qr',
       icon: Instagram,
       color: 'text-pink-600'
     },
     {
       name: 'LinkedIn',
-      href: 'https://www.linkedin.com/company/doctor-uncle-clinic',
+      href: 'https://www.linkedin.com/company/dr-uncle/',
       icon: Linkedin,
       color: 'text-blue-700'
     },
