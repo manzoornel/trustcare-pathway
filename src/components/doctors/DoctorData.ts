@@ -3,6 +3,34 @@ import { DoctorProfile, EntDoctorProfile } from './types';
 
 export const doctors: DoctorProfile[] = [
   {
+    name: "Dr. Shameem Samad PK",
+    title: "MBBS, DNB (General Medicine)",
+    specialty: "Expert Physician & Diabetologist | Thyroid & Vatha Rogangal Specialist",
+    experience: "Years of experience",
+    education: "MBBS, DNB (General Medicine)",
+    description: "Dr. Shameem Samad PK, MBBS, DNB (General Medicine), is a highly experienced physician and diabetologist, specializing in the treatment of diabetes, thyroid disorders, and vatha rogangal (rheumatic diseases). With years of expertise in internal medicine, he provides comprehensive, patient-centered care to help individuals manage chronic conditions and achieve better health outcomes. As a leading general physician at Doctor Uncle Family Clinic, Dr. Shameem offers expert consultation for a wide range of medical conditions, ensuring accurate diagnosis and advanced treatment plans. His approach emphasizes preventive healthcare, lifestyle modifications, and long-term disease management to improve patients' quality of life.",
+    image: "/lovable-uploads/b43b47a5-cb17-407e-a024-0919f8f22ad4.png",
+    specializations: [
+      "Diabetes Management – Expert guidance for blood sugar control, insulin therapy, and diabetes-related complications",
+      "Thyroid Disorders – Diagnosis and treatment of hypothyroidism, hyperthyroidism, goiter, and hormonal imbalances",
+      "Vatha Rogangal (Rheumatic Diseases) – Specialized care for arthritis, joint pain, and autoimmune conditions",
+      "Hypertension & Heart Disease – Management of high blood pressure, cholesterol, and cardiovascular risks",
+      "General Medicine & Preventive Healthcare – Treatment for infections, digestive issues, allergies, and overall wellness counseling",
+      "Weight Management & Lifestyle Medicine – Helping patients achieve optimal health through diet, exercise, and medical support"
+    ],
+    highlights: [
+      "Expert Physician & Diabetologist – Years of experience in treating chronic diseases and acute medical conditions",
+      "Specialist in Diabetes, Thyroid, & Rheumatic Diseases – Comprehensive care for lifelong health management",
+      "Patient-Centered Approach – Personalized treatment plans based on individual health needs",
+      "Advanced Diagnosis & Treatment – State-of-the-art medical technology for accurate disease detection and management",
+      "Trusted by Patients – Known for his compassionate approach and commitment to quality healthcare"
+    ],
+    clinicInfo: {
+      location: "Doctor Uncle Family Clinic – Vakkad Branch",
+      contact: "9961 588 880 | 04942 087 888"
+    }
+  },
+  {
     name: "Dr. Manzoor Nellancheri",
     title: "MBBS, CCEBDM (Diabetes), BCCPM (Pain & Palliative)",
     specialty: "Family Doctor | Diabetes & Palliative Care Specialist",
