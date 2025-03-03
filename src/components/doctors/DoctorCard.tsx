@@ -1,6 +1,8 @@
 
 import { User, Mail, Phone, CheckCircle } from 'lucide-react';
 import { DoctorProfile } from './types';
+import ClinicInfo from './ClinicInfo';
+import ClinicLocations from './ClinicLocations';
 
 interface DoctorCardProps {
   doctor: DoctorProfile;
