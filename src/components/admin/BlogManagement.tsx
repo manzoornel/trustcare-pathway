@@ -7,6 +7,7 @@ import AddBlogPostDialog from "./blog/AddBlogPostDialog";
 import EditBlogPostDialog from "./blog/EditBlogPostDialog";
 import { BlogPost } from "./blog/types";
 import { mockBlogPosts } from "./blog/mockData";
+import BlogPostList from "./blog/BlogPostList";
 
 const BlogManagement = () => {
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>(mockBlogPosts);
@@ -37,6 +38,11 @@ const BlogManagement = () => {
     }
   };
 
+  const openEditDialog = (post: BlogPost) => {
+    setCurrentPost(post);
+    setIsEditDialogOpen(true);
+  };
+
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
@@ -44,28 +50,18 @@ const BlogManagement = () => {
         <Button onClick={() => setIsAddDialogOpen(true)}>Add New Post</Button>
       </div>
 
-      <div className="grid grid-cols-1 gap-4">
-        {blogPosts.map(post => (
-          <BlogPostCard 
-            key={post.id}
-            post={post}
-            onEdit={(post) => {
-              setCurrentPost(post);
-              setIsEditDialogOpen(true);
-            }}
-            onDelete={handleDeletePost}
-          />
-        ))}
-      </div>
+      <BlogPostList 
+        blogPosts={blogPosts} 
+        onEdit={openEditDialog} 
+        onDelete={handleDeletePost} 
+      />
 
-      {/* Add Blog Post Dialog */}
       <AddBlogPostDialog
         open={isAddDialogOpen}
         onOpenChange={setIsAddDialogOpen}
         onAdd={handleAddPost}
       />
 
-      {/* Edit Blog Post Dialog */}
       <EditBlogPostDialog
         open={isEditDialogOpen}
         onOpenChange={setIsEditDialogOpen}
