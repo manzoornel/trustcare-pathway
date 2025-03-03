@@ -3,6 +3,7 @@
 export const authenticatedUsers = [
   { hospitalId: "H12345", phone: "1234567890", email: "patient1@example.com", name: "John Doe", password: "password123" },
   { hospitalId: "H67890", phone: "9876543210", email: "patient2@example.com", name: "Jane Smith", password: "password456" },
+  { hospitalId: "H55555", phone: "5555555555", email: "demo@example.com", name: "Demo User", password: "demo123" }
 ];
 
 // Function to add a new user (used during signup)
