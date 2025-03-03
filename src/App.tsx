@@ -11,7 +11,7 @@ import Careers from '@/pages/Careers';
 import SignUp from '@/pages/SignUp';
 import Verify from '@/pages/VerifyOTP';
 import PatientProfile from '@/pages/PatientPortal';
-import { AuthProvider } from './contexts/AuthContext';
+import { AuthProvider } from '@/contexts/AuthContext';
 import ProtectedRoute from '@/components/PrivateRoute';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
