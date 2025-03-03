@@ -1,13 +1,19 @@
 
-import { Navigate, Outlet } from "react-router-dom";
+import React, { ReactNode } from "react";
+import { Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 
 type PrivateRouteProps = {
+  children: ReactNode;
   needsProfile?: boolean;
   needsVerification?: boolean;
 };
 
-const PrivateRoute = ({ needsProfile = false, needsVerification = true }: PrivateRouteProps) => {
+const PrivateRoute = ({ 
+  children, 
+  needsProfile = false, 
+  needsVerification = true 
+}: PrivateRouteProps) => {
   const { auth } = useAuth();
 
   if (!auth.isAuthenticated) {
@@ -26,7 +32,7 @@ const PrivateRoute = ({ needsProfile = false, needsVerification = true }: Privat
   }
   
   // Authenticated, allow access to protected route
-  return <Outlet />;
+  return <>{children}</>;
 };
 
 export default PrivateRoute;
