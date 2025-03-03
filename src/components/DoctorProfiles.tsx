@@ -1,5 +1,5 @@
 
-import { User, Mail, Phone, CheckCircle } from 'lucide-react';
+import { User, Mail, Phone, CheckCircle, Clock, MapPin } from 'lucide-react';
 
 const DoctorProfiles = () => {
   const doctors = [
@@ -25,6 +25,34 @@ const DoctorProfiles = () => {
         "Patient-Centered Approach",
         "Available at Doctor Uncle Family Clinic"
       ]
+    },
+    {
+      name: "Dr. Wazeem Kadengal",
+      title: "MBBS, MD, FNNF",
+      specialty: "Pediatrician & Neonatologist | Expert Child & Newborn Care",
+      experience: "Extensive experience",
+      education: "MBBS, MD, FNNF",
+      description: "Dr. Wazeem Kadengal is a highly skilled pediatrician and neonatologist specializing in newborn care, child development, and pediatric emergencies. With extensive experience in treating infants, toddlers, and children, he is dedicated to ensuring healthy growth, proper nutrition, and disease prevention for every child.",
+      image: "/lovable-uploads/10544f28-fe9f-4f04-9736-0fb61e5a3f17.png",
+      specializations: [
+        "Neonatal & Infant Care – Expert management of newborn health and early development",
+        "Comprehensive Vaccination Plans – Protecting children against serious diseases",
+        "Child Growth & Nutrition Counseling – Helping parents ensure balanced nutrition",
+        "Treatment for Allergies & Respiratory Issues – Effective care for asthma, colds, and infections",
+        "Emergency Pediatric Care – Immediate attention for childhood injuries and illnesses"
+      ],
+      highlights: [
+        "Expert Pediatrician & Neonatologist – Specialized in child and newborn healthcare",
+        "Newborn & Premature Baby Care – Advanced neonatal care for preterm infants",
+        "Growth & Development Monitoring – Ensuring children reach milestones at the right age",
+        "Vaccination & Immunization – Protecting children with timely vaccinations",
+        "Compassionate & Patient-Friendly Approach – Making every child feel safe"
+      ],
+      clinicInfo: {
+        location: "Doctor Uncle Family Clinic – Vakkad Branch",
+        timing: "2:30 PM – 4:30 PM (Daily)",
+        contact: "9961 588 880"
+      }
     }
   ];
 
@@ -32,16 +60,16 @@ const DoctorProfiles = () => {
     <div className="py-16 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-gray-900">Our Medical Expert</h2>
+          <h2 className="text-3xl font-bold text-gray-900">Our Medical Experts</h2>
           <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
-            Meet the experienced physician behind Doctor Uncle Family Clinic, committed to providing you with the best care.
+            Meet the experienced physicians behind Doctor Uncle Family Clinic, committed to providing you with the best care.
           </p>
         </div>
 
         {doctors.map((doctor, index) => (
           <div 
             key={index} 
-            className="bg-white p-8 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-200 animate-fade-up max-w-5xl mx-auto"
+            className="bg-white p-8 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-200 animate-fade-up max-w-5xl mx-auto mb-8"
             style={{ animationDelay: `${index * 100}ms` }}
           >
             <div className="flex flex-col md:flex-row gap-8">
@@ -67,7 +95,7 @@ const DoctorProfiles = () => {
               
               <div className="md:w-2/3">
                 <div className="mb-6">
-                  <h4 className="text-xl font-semibold mb-3">About Dr. Manzoor Nellancheri</h4>
+                  <h4 className="text-xl font-semibold mb-3">About {doctor.name}</h4>
                   <p className="text-gray-700 leading-relaxed">{doctor.description}</p>
                 </div>
                 
@@ -84,7 +112,7 @@ const DoctorProfiles = () => {
                 </div>
                 
                 <div>
-                  <h4 className="text-xl font-semibold mb-3">Why Choose Dr. Manzoor Nellancheri?</h4>
+                  <h4 className="text-xl font-semibold mb-3">Why Choose {doctor.name}?</h4>
                   <ul className="space-y-2">
                     {doctor.highlights.map((highlight, i) => (
                       <li key={i} className="flex items-start">
@@ -95,20 +123,42 @@ const DoctorProfiles = () => {
                   </ul>
                 </div>
                 
-                <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-100">
-                  <h4 className="font-semibold mb-2">Visit Doctor Uncle Family Clinic</h4>
-                  <div className="grid md:grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <p className="font-medium text-gray-800">Vakkad Branch (Near Aneesha Theatre):</p>
-                      <p className="text-gray-600">Phone: 9961 588 880 | 04942 087 888</p>
-                    </div>
-                    
-                    <div>
-                      <p className="font-medium text-gray-800">Unniyal Branch (Jn), Tanur Road:</p>
-                      <p className="text-gray-600">Phone: 8089 771 640 | 8089 771 641</p>
+                {doctor.clinicInfo && (
+                  <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-100">
+                    <h4 className="font-semibold mb-2">Clinic Availability & Appointments</h4>
+                    <div className="space-y-2">
+                      <div className="flex items-start">
+                        <MapPin className="h-5 w-5 text-primary flex-shrink-0 mr-2 mt-0.5" />
+                        <span className="text-gray-700">{doctor.clinicInfo.location}</span>
+                      </div>
+                      <div className="flex items-start">
+                        <Clock className="h-5 w-5 text-primary flex-shrink-0 mr-2 mt-0.5" />
+                        <span className="text-gray-700">Consultation Timing: {doctor.clinicInfo.timing}</span>
+                      </div>
+                      <div className="flex items-start">
+                        <Phone className="h-5 w-5 text-primary flex-shrink-0 mr-2 mt-0.5" />
+                        <span className="text-gray-700">For Bookings & Inquiries: {doctor.clinicInfo.contact}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
+                
+                {!doctor.clinicInfo && (
+                  <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-100">
+                    <h4 className="font-semibold mb-2">Visit Doctor Uncle Family Clinic</h4>
+                    <div className="grid md:grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <p className="font-medium text-gray-800">Vakkad Branch (Near Aneesha Theatre):</p>
+                        <p className="text-gray-600">Phone: 9961 588 880 | 04942 087 888</p>
+                      </div>
+                      
+                      <div>
+                        <p className="font-medium text-gray-800">Unniyal Branch (Jn), Tanur Road:</p>
+                        <p className="text-gray-600">Phone: 8089 771 640 | 8089 771 641</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
