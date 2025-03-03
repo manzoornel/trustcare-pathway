@@ -12,7 +12,7 @@ import Contact from './pages/Contact';
 import Login from './pages/Login';
 import SignUp from './pages/SignUp';
 import VerifyOTP from './pages/VerifyOTP';
-import CreateProfile from './pages/Create-profile';
+import CreateProfile from './pages/CreateProfile'; // Fixed the import path
 import PatientPortal from './pages/PatientPortal';
 import NotFound from './pages/NotFound';
 import AIChat from './pages/AIChat';
