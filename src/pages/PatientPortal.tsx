@@ -1,8 +1,10 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Helmet } from "react-helmet";
+import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { useAuth } from "@/contexts/AuthContext";
 import { 
   Tabs, 
   TabsContent, 
@@ -14,12 +16,27 @@ import {
   CardContent, 
   CardDescription, 
   CardHeader, 
-  CardTitle 
+  CardTitle,
+  CardFooter
 } from "@/components/ui/card";
-import { FileText, Pill, ClipboardList, Calendar } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { FileText, Pill, ClipboardList, Calendar, LogOut } from "lucide-react";
 
 const PatientPortal = () => {
+  const navigate = useNavigate();
+  const { auth, logout } = useAuth();
   const [activeTab, setActiveTab] = useState("labReports");
+
+  useEffect(() => {
+    // If not authenticated, redirect to login
+    if (!auth.isAuthenticated) {
+      navigate("/login");
+    }
+    // If needs profile, redirect to profile creation
+    else if (auth.needsProfile) {
+      navigate("/create-profile");
+    }
+  }, [auth, navigate]);
 
   // Sample data - in a real app, this would come from a database
   const labReports = [
@@ -46,6 +63,11 @@ const PatientPortal = () => {
     { id: 3, type: "Follow-up", date: "2023-12-05", time: "11:15 AM", doctor: "Dr. Michael Chen", status: "Completed" },
   ];
 
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
+
   return (
     <>
       <Helmet>
@@ -60,10 +82,44 @@ const PatientPortal = () => {
         
         <div className="pt-20 px-4 max-w-7xl mx-auto">
           <div className="py-8">
-            <h1 className="text-3xl font-bold mb-2">Patient Portal</h1>
-            <p className="text-gray-600 mb-8">
-              View your medical records, lab reports, medication history, and upcoming appointments.
-            </p>
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h1 className="text-3xl font-bold mb-2">Patient Portal</h1>
+                <p className="text-gray-600">
+                  Welcome back, {auth.name || "Patient"}
+                </p>
+              </div>
+              <Button variant="outline" onClick={handleLogout} className="flex items-center gap-2">
+                <LogOut className="h-4 w-4" />
+                Logout
+              </Button>
+            </div>
+            
+            <Card className="mb-8">
+              <CardHeader>
+                <CardTitle>Patient Information</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm font-medium text-gray-500">Name</p>
+                    <p>{auth.name || "Not available"}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-500">Hospital ID</p>
+                    <p>{auth.hospitalId || "Not available"}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-500">Phone</p>
+                    <p>{auth.phone || "Not available"}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-500">Email</p>
+                    <p>{auth.email || "Not available"}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
             
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="grid grid-cols-4 mb-8">
