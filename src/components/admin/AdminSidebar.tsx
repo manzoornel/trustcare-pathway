@@ -2,6 +2,7 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { LayoutDashboard, FileText, Briefcase, LogOut, Users, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 const AdminSidebar = () => {
   const navigate = useNavigate();
@@ -12,7 +13,15 @@ const AdminSidebar = () => {
   };
 
   const handleLogout = () => {
+    // Clear all admin-related localStorage items
     localStorage.removeItem("adminAuthenticated");
+    localStorage.removeItem("adminRole");
+    localStorage.removeItem("adminUsername");
+    
+    // Show success toast
+    toast.success("Logged out successfully");
+    
+    // Navigate to admin login page
     navigate("/admin");
   };
 

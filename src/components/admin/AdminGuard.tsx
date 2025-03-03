@@ -20,7 +20,11 @@ const AdminGuard = ({ children, requiredRole }: AdminGuardProps) => {
       const userRole = localStorage.getItem("adminRole");
       
       if (adminAuthenticated !== "true") {
-        navigate("/admin");
+        // If we're already on the admin login page, don't redirect again
+        if (location.pathname !== "/admin") {
+          navigate("/admin");
+        }
+        setIsLoading(false);
         return;
       }
       
@@ -35,6 +39,7 @@ const AdminGuard = ({ children, requiredRole }: AdminGuardProps) => {
         if (!hasPermission) {
           toast.error("You don't have permission to access this page");
           navigate("/admin/dashboard");
+          setIsLoading(false);
           return;
         }
       }
