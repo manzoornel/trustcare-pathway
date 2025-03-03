@@ -1,5 +1,6 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { updateUser } from "@/utils/auth";
 
 type AuthState = {
   isAuthenticated: boolean;
@@ -85,9 +86,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const updateProfile = (profileData: Partial<AuthState>) => {
+    if (!auth.hospitalId) {
+      console.error("Cannot update profile: Missing hospital ID");
+      return;
+    }
+    
+    // Update local auth state
     const updatedAuth = { ...auth, ...profileData };
     setAuth(updatedAuth);
     localStorage.setItem("patientAuth", JSON.stringify(updatedAuth));
+    
+    // Update the user in the authenticatedUsers array (for demonstration)
+    if (profileData.name || profileData.phone || profileData.email) {
+      updateUser(auth.hospitalId, {
+        name: profileData.name,
+        phone: profileData.phone,
+        email: profileData.email
+      });
+    }
   };
 
   return (

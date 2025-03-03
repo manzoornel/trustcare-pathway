@@ -22,3 +22,28 @@ export const addUser = (newUser: {
   });
   return true;
 };
+
+// Function to update an existing user's information
+export const updateUser = (
+  hospitalId: string,
+  updatedInfo: {
+    name?: string;
+    phone?: string;
+    email?: string;
+  }
+) => {
+  // Find the user with the given hospitalId
+  const userIndex = authenticatedUsers.findIndex(user => user.hospitalId === hospitalId);
+  
+  if (userIndex === -1) {
+    return false;
+  }
+  
+  // Update the user information
+  authenticatedUsers[userIndex] = {
+    ...authenticatedUsers[userIndex],
+    ...updatedInfo
+  };
+  
+  return true;
+};
