@@ -4,12 +4,27 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { JobCategory } from "./JobListingSection";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface ApplicationFormProps {
   selectedCategory: string;
   selectedPosition: string;
   jobCategories: JobCategory[];
 }
+
+// Email validation regex
+const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+// Phone validation regex (allow various formats)
+const PHONE_REGEX = /^(\+\d{1,3}[\s.-]?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$/;
+
+type FormErrors = {
+  name?: string;
+  email?: string;
+  phone?: string;
+  experience?: string;
+  resume?: string;
+  termsAccepted?: string;
+};
 
 const ApplicationForm = ({ 
   selectedCategory, 
@@ -25,38 +40,124 @@ const ApplicationForm = ({
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [resumeFile, setResumeFile] = useState<File | null>(null);
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
 
   const selectedCategoryData = jobCategories.find((cat) => cat.id === selectedCategory);
+
+  const validateField = (name: string, value: string | File | null | boolean): string | undefined => {
+    switch (name) {
+      case "name":
+        return value && typeof value === 'string' && value.trim().length >= 3 
+          ? undefined 
+          : "Full name is required (minimum 3 characters)";
+      case "email":
+        return value && typeof value === 'string' && EMAIL_REGEX.test(value) 
+          ? undefined 
+          : "Please enter a valid email address";
+      case "phone":
+        return value && typeof value === 'string' && PHONE_REGEX.test(value) 
+          ? undefined 
+          : "Please enter a valid phone number";
+      case "experience":
+        return value && typeof value === 'string' && !isNaN(Number(value)) 
+          ? undefined 
+          : "Please enter a valid number of years";
+      case "resume":
+        return value 
+          ? undefined 
+          : "Please upload your resume (PDF format)";
+      case "termsAccepted":
+        return value === true 
+          ? undefined 
+          : "You must accept the terms and conditions";
+      default:
+        return undefined;
+    }
+  };
+
+  const validateForm = (): boolean => {
+    const newErrors: FormErrors = {};
+    
+    // Validate all fields
+    newErrors.name = validateField("name", formData.name);
+    newErrors.email = validateField("email", formData.email);
+    newErrors.phone = validateField("phone", formData.phone);
+    newErrors.experience = validateField("experience", formData.experience);
+    newErrors.resume = validateField("resume", resumeFile);
+    newErrors.termsAccepted = validateField("termsAccepted", termsAccepted);
+    
+    // Update the errors state
+    setErrors(newErrors);
+    
+    // Form is valid if no error messages exist
+    return !Object.values(newErrors).some(error => error !== undefined);
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    
+    // Mark field as touched
+    setTouched(prev => ({ ...prev, [name]: true }));
+    
+    // Validate the field
+    const error = validateField(name, value);
+    setErrors(prev => ({ ...prev, [name]: error }));
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setResumeFile(e.target.files[0]);
+      const file = e.target.files[0];
+      setResumeFile(file);
+      
+      // Validate the file
+      const error = validateField("resume", file);
+      setErrors(prev => ({ ...prev, resume: error }));
     }
+  };
+
+  const handleBlur = (fieldName: string) => {
+    setTouched(prev => ({ ...prev, [fieldName]: true }));
+    
+    // Validate the field when it loses focus
+    const value = fieldName === "resume" 
+      ? resumeFile 
+      : fieldName === "termsAccepted" 
+        ? termsAccepted 
+        : formData[fieldName as keyof typeof formData];
+        
+    const error = validateField(fieldName, value);
+    setErrors(prev => ({ ...prev, [fieldName]: error }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!selectedCategory || !selectedPosition) {
-      toast.error("Please select a job category and position");
+    // Mark all fields as touched to show all validation errors
+    const allTouched = Object.keys(formData).reduce(
+      (acc, field) => ({ ...acc, [field]: true }),
+      { resume: true, termsAccepted: true }
+    );
+    setTouched(allTouched);
+    
+    // Run full validation
+    if (!validateForm()) {
+      toast.error("Please fix the errors in the form");
       return;
     }
     
-    if (!formData.name || !formData.email || !formData.phone || !formData.experience || !resumeFile) {
-      toast.error("Please fill all required fields and upload your resume");
+    if (!selectedCategory || !selectedPosition) {
+      toast.error("Please select a job category and position");
       return;
     }
 
     try {
       setIsSubmitting(true);
       
-      // In a real implementation, we would upload the resume to storage
-      // and save the application data to a database
+      // Simulating API call with a delay
+      await new Promise(resolve => setTimeout(resolve, 1500));
       
       toast.success("Your application has been submitted successfully!");
       
@@ -69,6 +170,9 @@ const ApplicationForm = ({
         resumeUrl: "",
       });
       setResumeFile(null);
+      setTermsAccepted(false);
+      setTouched({});
+      setErrors({});
       
     } catch (error) {
       console.error("Error submitting application:", error);
@@ -97,9 +201,17 @@ const ApplicationForm = ({
               name="name"
               value={formData.name}
               onChange={handleInputChange}
+              onBlur={() => handleBlur("name")}
               placeholder="John Doe"
-              required
+              className={errors.name && touched.name ? "border-red-500" : ""}
+              aria-invalid={Boolean(errors.name && touched.name)}
+              aria-describedby={errors.name && touched.name ? "name-error" : undefined}
             />
+            {errors.name && touched.name && (
+              <p id="name-error" className="mt-1 text-sm text-red-500">
+                {errors.name}
+              </p>
+            )}
           </div>
           
           <div>
@@ -112,9 +224,17 @@ const ApplicationForm = ({
               type="email"
               value={formData.email}
               onChange={handleInputChange}
+              onBlur={() => handleBlur("email")}
               placeholder="john@example.com"
-              required
+              className={errors.email && touched.email ? "border-red-500" : ""}
+              aria-invalid={Boolean(errors.email && touched.email)}
+              aria-describedby={errors.email && touched.email ? "email-error" : undefined}
             />
+            {errors.email && touched.email && (
+              <p id="email-error" className="mt-1 text-sm text-red-500">
+                {errors.email}
+              </p>
+            )}
           </div>
           
           <div>
@@ -126,9 +246,17 @@ const ApplicationForm = ({
               name="phone"
               value={formData.phone}
               onChange={handleInputChange}
+              onBlur={() => handleBlur("phone")}
               placeholder="+91 9876543210"
-              required
+              className={errors.phone && touched.phone ? "border-red-500" : ""}
+              aria-invalid={Boolean(errors.phone && touched.phone)}
+              aria-describedby={errors.phone && touched.phone ? "phone-error" : undefined}
             />
+            {errors.phone && touched.phone && (
+              <p id="phone-error" className="mt-1 text-sm text-red-500">
+                {errors.phone}
+              </p>
+            )}
           </div>
           
           <div>
@@ -140,9 +268,17 @@ const ApplicationForm = ({
               name="experience"
               value={formData.experience}
               onChange={handleInputChange}
+              onBlur={() => handleBlur("experience")}
               placeholder="5"
-              required
+              className={errors.experience && touched.experience ? "border-red-500" : ""}
+              aria-invalid={Boolean(errors.experience && touched.experience)}
+              aria-describedby={errors.experience && touched.experience ? "experience-error" : undefined}
             />
+            {errors.experience && touched.experience && (
+              <p id="experience-error" className="mt-1 text-sm text-red-500">
+                {errors.experience}
+              </p>
+            )}
           </div>
         </div>
         
@@ -156,9 +292,45 @@ const ApplicationForm = ({
             type="file"
             accept=".pdf"
             onChange={handleFileChange}
-            required
-            className="cursor-pointer"
+            onBlur={() => handleBlur("resume")}
+            className={`cursor-pointer ${errors.resume && touched.resume ? "border-red-500" : ""}`}
+            aria-invalid={Boolean(errors.resume && touched.resume)}
+            aria-describedby={errors.resume && touched.resume ? "resume-error" : undefined}
           />
+          {resumeFile && (
+            <p className="mt-1 text-sm text-green-600">
+              Selected file: {resumeFile.name}
+            </p>
+          )}
+          {errors.resume && touched.resume && (
+            <p id="resume-error" className="mt-1 text-sm text-red-500">
+              {errors.resume}
+            </p>
+          )}
+        </div>
+        
+        <div className="flex items-start space-x-2">
+          <Checkbox 
+            id="terms" 
+            checked={termsAccepted} 
+            onCheckedChange={(checked) => {
+              setTermsAccepted(checked === true);
+              handleBlur("termsAccepted");
+            }}
+            className={errors.termsAccepted && touched.termsAccepted ? "border-red-500" : ""}
+            aria-invalid={Boolean(errors.termsAccepted && touched.termsAccepted)}
+          />
+          <div className="grid gap-1.5 leading-none">
+            <label
+              htmlFor="terms"
+              className="text-sm font-medium leading-none cursor-pointer"
+            >
+              I accept the terms and conditions *
+            </label>
+            {errors.termsAccepted && touched.termsAccepted && (
+              <p className="text-sm text-red-500">{errors.termsAccepted}</p>
+            )}
+          </div>
         </div>
         
         <Button
