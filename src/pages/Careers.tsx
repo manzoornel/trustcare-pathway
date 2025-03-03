@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 
 const jobCategories = [
   {
@@ -16,6 +15,16 @@ const jobCategories = [
       { id: "general-physician", title: "General Physician" },
       { id: "pediatrician", title: "Pediatrician" },
       { id: "cardiologist", title: "Cardiologist" },
+      { id: "gynecologist", title: "Gynecologist" },
+      { id: "neurologist", title: "Neurologist" },
+      { id: "pulmonologist", title: "Pulmonologist" },
+      { id: "ent-specialist", title: "ENT Specialist" },
+      { id: "surgeon", title: "Surgeon" },
+      { id: "ophthalmologist", title: "Ophthalmologist" },
+      { id: "dermatologist", title: "Dermatologist" },
+      { id: "radiologist", title: "Radiologist" },
+      { id: "orthopedician", title: "Orthopedician" },
+      { id: "rmo", title: "Resident Medical Officer (RMO)" },
     ],
     description:
       "Join our team of medical professionals dedicated to providing exceptional patient care.",
@@ -240,7 +249,7 @@ const Careers = () => {
             <div className="bg-gray-50 p-6 rounded-lg mb-12">
               <h3 className="text-xl font-semibold mb-4">Available Positions in {selectedCategoryData?.title}</h3>
               
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
                 {selectedCategoryData?.positions.map((position) => (
                   <div
                     key={position.id}
