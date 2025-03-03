@@ -9,12 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
-
-// Simulate database of existing patients
-const existingPatients = [
-  { hospitalId: "H12345", phone: "1234567890", email: "" },
-  { hospitalId: "H67890", phone: "9876543210", email: "" },
-];
+import { authenticatedUsers } from "@/utils/auth";
 
 const SignUp = () => {
   const navigate = useNavigate();
@@ -36,25 +31,42 @@ const SignUp = () => {
     e.preventDefault();
     setIsLoading(true);
     
+    // Verify if hospital ID and phone number are in the correct format
+    if (!/^H\d{5}$/.test(formData.hospitalId)) {
+      toast.error("Hospital ID must be in format H12345");
+      setIsLoading(false);
+      return;
+    }
+
+    if (!/^\d{10}$/.test(formData.phone)) {
+      toast.error("Phone number must be 10 digits");
+      setIsLoading(false);
+      return;
+    }
+    
     // Verify against existing patient records
-    const matchingPatient = existingPatients.find(
-      patient => patient.hospitalId === formData.hospitalId && patient.phone === formData.phone
+    const existingUser = authenticatedUsers.find(
+      user => user.hospitalId === formData.hospitalId || user.phone === formData.phone
     );
     
     setTimeout(() => {
-      if (matchingPatient) {
-        // Store signup data
-        signUp({
-          name: formData.name,
-          phone: formData.phone,
-          hospitalId: formData.hospitalId,
-          email: formData.email,
-        });
-        toast.success("Information verified! Sending OTP for verification.");
-        navigate("/verify-otp");
-      } else {
-        toast.error("Hospital ID or phone number doesn't match our records.");
+      if (existingUser) {
+        toast.error("An account with this Hospital ID or phone number already exists.");
+        setIsLoading(false);
+        return;
       }
+      
+      // Store signup data
+      signUp({
+        name: formData.name,
+        phone: formData.phone,
+        hospitalId: formData.hospitalId,
+        email: formData.email,
+        needsProfile: true
+      });
+      
+      toast.success("Account created successfully! Please verify your identity.");
+      navigate("/verify-otp");
       setIsLoading(false);
     }, 1500);
   };
@@ -82,7 +94,7 @@ const SignUp = () => {
               <CardHeader>
                 <CardTitle>Create Account</CardTitle>
                 <CardDescription>
-                  Enter your details to verify your identity
+                  Enter your details to create a new patient account
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -104,12 +116,12 @@ const SignUp = () => {
                     <Input
                       id="phone"
                       name="phone"
-                      placeholder="Enter your phone number"
+                      placeholder="Enter your 10-digit phone number"
                       value={formData.phone}
                       onChange={handleChange}
                       required
                     />
-                    <p className="text-xs text-gray-500">Must match the number you provided at the hospital</p>
+                    <p className="text-xs text-gray-500">Must be a 10-digit number</p>
                   </div>
                   
                   <div className="space-y-2">
@@ -117,11 +129,12 @@ const SignUp = () => {
                     <Input
                       id="hospitalId"
                       name="hospitalId"
-                      placeholder="Enter your hospital ID"
+                      placeholder="Enter your hospital ID (e.g., H12345)"
                       value={formData.hospitalId}
                       onChange={handleChange}
                       required
                     />
+                    <p className="text-xs text-gray-500">Format: H followed by 5 digits (e.g., H12345)</p>
                   </div>
                   
                   <div className="space-y-2">
@@ -142,7 +155,7 @@ const SignUp = () => {
                     className="w-full" 
                     disabled={isLoading}
                   >
-                    {isLoading ? "Verifying..." : "Sign Up"}
+                    {isLoading ? "Creating Account..." : "Sign Up"}
                   </Button>
                   
                   <div className="text-center mt-4">
