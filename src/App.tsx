@@ -1,18 +1,18 @@
 
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Home from './pages/Home';
-import About from './pages/About';
-import Services from './pages/Services';
-import Blog from './pages/Blog';
-import Appointments from './pages/Appointments';
-import Contact from './pages/Contact';
-import Careers from './pages/Careers';
-import SignUp from './pages/SignUp';
-import Verify from './pages/Verify';
-import PatientProfile from './pages/PatientProfile';
+import Home from '@/pages/Index';  // Change from './pages/Home' to '@/pages/Index'
+import About from '@/pages/About';  // Change from './pages/About' to '@/pages/About'
+import Services from '@/pages/Services';
+import Blog from '@/pages/Blog';
+import Appointments from '@/pages/Appointments';
+import Contact from '@/pages/Contact';
+import Careers from '@/pages/Careers';
+import SignUp from '@/pages/SignUp';
+import Verify from '@/pages/VerifyOTP';  // Change from './pages/Verify' to '@/pages/VerifyOTP'
+import PatientProfile from '@/pages/PatientPortal';  // Change from './pages/PatientProfile' to '@/pages/PatientPortal'
 import { AuthProvider } from './contexts/AuthContext';
-import ProtectedRoute from './components/ProtectedRoute';
+import ProtectedRoute from '@/components/PrivateRoute';  // Change from './components/ProtectedRoute' to '@/components/PrivateRoute'
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
