@@ -1,20 +1,26 @@
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-const AdminGuard = ({ children }: { children: React.ReactNode }) => {
+interface AdminGuardProps {
+  children: React.ReactNode;
+}
+
+const AdminGuard = ({ children }: AdminGuardProps) => {
+  const navigate = useNavigate();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const checkAuth = () => {
       const adminAuthenticated = localStorage.getItem("adminAuthenticated");
-      if (adminAuthenticated === "true") {
-        setIsAuthenticated(true);
-      } else {
+      
+      if (adminAuthenticated !== "true") {
         navigate("/admin");
+        return;
       }
+      
+      setIsAuthenticated(true);
       setIsLoading(false);
     };
 
@@ -24,7 +30,7 @@ const AdminGuard = ({ children }: { children: React.ReactNode }) => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="text-xl">Loading...</div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     );
   }

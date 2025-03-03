@@ -8,7 +8,7 @@ const AdminSidebar = () => {
   const location = useLocation();
   
   const isActive = (path: string) => {
-    return location.pathname.includes(path);
+    return location.pathname === path;
   };
 
   const handleLogout = () => {
@@ -24,7 +24,7 @@ const AdminSidebar = () => {
   ];
 
   return (
-    <div className="w-64 bg-white border-r min-h-screen p-4">
+    <div className="w-64 bg-white border-r min-h-screen p-4 shadow-sm">
       <div className="mb-8">
         <h1 className="text-xl font-bold">Admin Panel</h1>
         <p className="text-sm text-gray-500">Doctor Uncle Family Clinic</p>
