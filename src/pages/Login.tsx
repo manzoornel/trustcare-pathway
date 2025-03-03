@@ -1,7 +1,6 @@
-
 import { useState } from "react";
 import { Helmet } from "react-helmet";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,7 +10,6 @@ import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
 
-// Simulate a database of authenticated users
 const authenticatedUsers = [
   { hospitalId: "H12345", phone: "1234567890", email: "patient1@example.com", name: "John Doe", password: "password123" },
   { hospitalId: "H67890", phone: "9876543210", email: "patient2@example.com", name: "Jane Smith", password: "password456" },
@@ -46,7 +44,6 @@ const Login = () => {
     e.preventDefault();
     setIsLoading(true);
     
-    // Find user by hospitalId, phone, or email
     const user = authenticatedUsers.find(
       u => u.hospitalId === passwordFormData.identifier ||
            u.phone === passwordFormData.identifier ||
@@ -76,7 +73,6 @@ const Login = () => {
     e.preventDefault();
     setIsLoading(true);
     
-    // Find user by hospitalId, phone, or email
     const user = authenticatedUsers.find(
       u => u.hospitalId === otpFormData.identifier ||
            u.phone === otpFormData.identifier ||
@@ -86,7 +82,6 @@ const Login = () => {
     setTimeout(() => {
       if (user) {
         toast.success("OTP sent to your phone and email");
-        // Store user info in localStorage for OTP verification
         localStorage.setItem("patientAuth", JSON.stringify({
           isAuthenticated: false,
           isVerified: false,
@@ -206,9 +201,9 @@ const Login = () => {
                 <div className="text-center mt-6">
                   <p className="text-sm text-gray-600">
                     Don't have an account?{" "}
-                    <Button variant="link" className="p-0" onClick={() => navigate("/signup")}>
+                    <Link to="/signup" className="text-primary hover:underline font-medium">
                       Sign up
-                    </Button>
+                    </Link>
                   </p>
                 </div>
               </CardContent>
