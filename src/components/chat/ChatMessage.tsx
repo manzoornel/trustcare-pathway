@@ -16,7 +16,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, isCompact = false })
       <div className={`flex items-start ${isCompact ? 'max-w-[90%]' : 'max-w-[80%]'} ${message.sender === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
         <div className={`${message.sender === 'user' 
           ? `rounded-full ${isCompact ? 'p-1.5' : 'p-2'} ${isCompact ? 'ml-1.5' : 'ml-2'} bg-blue-600` 
-          : `rounded-full ${isCompact ? '' : 'p-1'} ${isCompact ? 'mr-1.5' : 'mr-2'} bg-gray-100 border border-gray-200`}`}
+          : `rounded-full ${isCompact ? 'p-1' : 'p-1'} ${isCompact ? 'mr-1.5' : 'mr-2'} bg-gray-100 border border-gray-200 flex items-center justify-center`}`}
         >
           {message.sender === 'user' ? (
             <User className={`${isCompact ? 'h-3 w-3' : 'h-5 w-5'} text-white`} />
@@ -24,7 +24,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, isCompact = false })
             <img 
               src="/lovable-uploads/c4beddef-b77c-4f28-8e9b-8f2f43be79e6.png" 
               alt="Doctor Uncle AI" 
-              className={isCompact ? "h-6 w-6" : "h-8 w-8"}
+              className={`${isCompact ? "h-5 w-5" : "h-6 w-6"} object-contain`}
             />
           )}
         </div>

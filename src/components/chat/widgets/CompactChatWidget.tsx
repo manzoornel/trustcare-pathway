@@ -55,11 +55,11 @@ const CompactChatWidget = ({
         {isLoading && (
           <div className="flex justify-start mb-3">
             <div className="flex items-start max-w-[90%]">
-              <div className="rounded-full mr-1.5 bg-gray-100 border border-gray-200">
+              <div className="rounded-full mr-1.5 bg-gray-100 border border-gray-200 flex items-center justify-center p-1">
                 <img 
                   src="/lovable-uploads/c4beddef-b77c-4f28-8e9b-8f2f43be79e6.png" 
                   alt="Doctor Uncle AI" 
-                  className="h-6 w-6" 
+                  className="h-5 w-5 object-contain" 
                 />
               </div>
               <div className="p-2 rounded-lg bg-white shadow-sm rounded-tl-none text-xs">
