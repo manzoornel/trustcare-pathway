@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { JobCategory } from "./JobListingSection";
@@ -45,7 +44,8 @@ const ApplicationForm = ({
     handleResumeSavedApplication,
     handleStartNewApplication,
     setOtpVerified,
-    setOtpSent
+    setOtpSent,
+    handleSendOTP
   } = useApplicationForm({ selectedCategory, selectedPosition });
 
   // State for confirmation dialog
@@ -71,15 +71,14 @@ const ApplicationForm = ({
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // If OTP is not sent yet, call handleSubmit directly which will trigger OTP sending
+    // If OTP is not sent yet, call handleSendOTP
     if (!otpSent) {
-      handleSubmit(e);
+      handleSendOTP();
       return;
     }
     
-    // If OTP is sent but not verified, call handleSubmit to verify OTP
+    // If OTP is sent but not verified, do nothing (OTPVerificationStep handles verification)
     if (otpSent && !otpVerified) {
-      handleSubmit(e);
       return;
     }
     

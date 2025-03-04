@@ -1,14 +1,13 @@
+
 import { useState, useEffect } from "react";
-import { toast } from "sonner";
 import { 
   FormData, 
-  FormErrors, 
   SavedApplication,
-  saveApplicationToStorage,
-  getApplicationFromStorage,
-  clearSavedApplication 
+  saveApplicationToStorage
 } from "./ApplicationFormTypes";
-import { useFormValidation } from "./useFormValidation";
+import { useOTPVerification } from "./hooks/useOTPVerification";
+import { useSavedApplication } from "./hooks/useSavedApplication";
+import { useFormSubmission } from "./hooks/useFormSubmission";
 
 interface UseApplicationFormProps {
   selectedCategory: string;
@@ -16,6 +15,7 @@ interface UseApplicationFormProps {
 }
 
 export const useApplicationForm = ({ selectedCategory, selectedPosition }: UseApplicationFormProps) => {
+  // Form state
   const [formData, setFormData] = useState<FormData>({
     name: "",
     email: "",
@@ -23,29 +23,54 @@ export const useApplicationForm = ({ selectedCategory, selectedPosition }: UseAp
     experience: "",
     resumeUrl: "",
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [termsAccepted, setTermsAccepted] = useState(false);
-  const [errors, setErrors] = useState<FormErrors>({});
-  const [touched, setTouched] = useState<Record<string, boolean>>({});
   
-  const [otpSent, setOtpSent] = useState(false);
-  const [otpVerified, setOtpVerified] = useState(false);
+  // Initialize hooks
+  const {
+    otpSent,
+    otpVerified,
+    isSubmitting: otpSubmitting,
+    setOtpSent,
+    setOtpVerified,
+    handleSendOTP
+  } = useOTPVerification({ 
+    email: formData.email, 
+    phone: formData.phone 
+  });
   
-  const [hasSavedApplication, setHasSavedApplication] = useState(false);
-
-  const { validateField, validateForm, hasErrors } = useFormValidation();
-
-  useEffect(() => {
-    const savedApplication = getApplicationFromStorage();
-    
-    if (savedApplication && 
-        savedApplication.selectedCategory === selectedCategory && 
-        savedApplication.selectedPosition === selectedPosition) {
-      setHasSavedApplication(true);
-    }
-  }, [selectedCategory, selectedPosition]);
-
+  const {
+    hasSavedApplication,
+    handleResumeSavedApplication,
+    handleStartNewApplication,
+    handleSaveAndExit
+  } = useSavedApplication({ 
+    selectedCategory, 
+    selectedPosition 
+  });
+  
+  const {
+    isSubmitting: formSubmitting,
+    errors,
+    touched,
+    handleSubmit,
+    handleBlur
+  } = useFormSubmission({
+    formData,
+    resumeFile,
+    termsAccepted,
+    otpSent,
+    otpVerified,
+    selectedCategory,
+    selectedPosition,
+    setFormData,
+    setResumeFile,
+    setTermsAccepted,
+    setOtpSent,
+    setOtpVerified
+  });
+  
+  // Save application state when form data changes
   useEffect(() => {
     if (formData.name || formData.email || formData.phone || formData.experience) {
       const applicationData: SavedApplication = {
@@ -59,185 +84,71 @@ export const useApplicationForm = ({ selectedCategory, selectedPosition }: UseAp
       saveApplicationToStorage(applicationData);
     }
   }, [formData, selectedCategory, selectedPosition, otpVerified]);
-
-  const handleResumeSavedApplication = () => {
-    const savedApplication = getApplicationFromStorage();
-    
-    if (!savedApplication) {
-      toast.error("No saved application found");
-      return;
-    }
-    
-    setFormData(savedApplication.formData);
-    setOtpVerified(savedApplication.otpVerified);
-    setOtpSent(savedApplication.otpVerified);
-    
-    const touchedFields = Object.keys(savedApplication.formData).reduce(
-      (acc, key) => ({ ...acc, [key]: true }),
-      {}
-    );
-    setTouched(touchedFields);
-    
-    setHasSavedApplication(false);
-    toast.success("Application progress restored");
-  };
-
+  
+  // Input change handlers
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     
-    setTouched(prev => ({ ...prev, [name]: true }));
+    // Mark field as touched on change
+    const newTouched = { ...touched, [name]: true };
     
-    const error = validateField(name, value);
-    setErrors(prev => ({ ...prev, [name]: error }));
+    // Validate field
+    handleBlur(name);
   };
-
+  
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       setResumeFile(file);
       
-      const error = validateField("resume", file);
-      setErrors(prev => ({ ...prev, resume: error }));
+      // Validate file
+      handleBlur("resume");
     }
   };
-
-  const handleBlur = (fieldName: string) => {
-    setTouched(prev => ({ ...prev, [fieldName]: true }));
+  
+  // Resume saved application
+  const handleResumeSavedApplicationWrapper = () => {
+    const savedApplication = handleResumeSavedApplication();
     
-    const value = fieldName === "resume" 
-      ? resumeFile 
-      : fieldName === "termsAccepted" 
-        ? termsAccepted 
-        : formData[fieldName as keyof typeof formData];
-        
-    const error = validateField(fieldName, value);
-    setErrors(prev => ({ ...prev, [fieldName]: error }));
-  };
-
-  const handleSendOTP = async () => {
-    const emailError = validateField("email", formData.email);
-    const phoneError = validateField("phone", formData.phone);
-    
-    setErrors(prev => ({ 
-      ...prev, 
-      email: emailError,
-      phone: phoneError
-    }));
-    
-    setTouched(prev => ({ 
-      ...prev, 
-      email: true,
-      phone: true 
-    }));
-    
-    if (emailError || phoneError) {
-      toast.error("Please provide valid email and phone number");
-      return;
-    }
-    
-    try {
-      setIsSubmitting(true);
+    if (savedApplication) {
+      setFormData(savedApplication.formData);
+      setOtpVerified(savedApplication.otpVerified);
+      setOtpSent(savedApplication.otpVerified);
       
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      setOtpSent(true);
-      toast.success(`Verification code sent to ${formData.phone} and ${formData.email}`);
-      
-    } catch (error) {
-      console.error("Error sending OTP:", error);
-      toast.error("Failed to send verification code. Please try again.");
-    } finally {
-      setIsSubmitting(false);
+      const touchedFields = Object.keys(savedApplication.formData).reduce(
+        (acc, key) => ({ ...acc, [key]: true }),
+        {}
+      );
     }
   };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!otpSent) {
-      handleSendOTP();
-      return;
-    }
-    
-    const newErrors = validateForm(formData, resumeFile, termsAccepted, otpSent, otpVerified, "");
-    setErrors(newErrors);
-    
-    const allTouched = Object.keys(formData).reduce(
-      (acc, field) => ({ ...acc, [field]: true }),
-      { resume: true, termsAccepted: true }
-    );
-    setTouched(allTouched);
-    
-    if (hasErrors(newErrors)) {
-      toast.error("Please fix the errors in the form");
-      return;
-    }
-    
-    if (!selectedCategory || !selectedPosition) {
-      toast.error("Please select a job category and position");
-      return;
-    }
-
-    try {
-      setIsSubmitting(true);
-      
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      toast.success("Your application has been submitted successfully!");
-      
-      clearSavedApplication();
-      
-      setFormData({
-        name: "",
-        email: "",
-        phone: "",
-        experience: "",
-        resumeUrl: "",
-      });
-      setResumeFile(null);
-      setTermsAccepted(false);
-      setTouched({});
-      setErrors({});
-      setOtpSent(false);
-      setOtpVerified(false);
-      
-    } catch (error) {
-      console.error("Error submitting application:", error);
-      toast.error("Failed to submit application. Please try again.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleSaveAndExit = () => {
-    toast.success("Your application progress has been saved. You can return to complete it later.");
-  };
-
-  const handleStartNewApplication = () => {
-    clearSavedApplication();
-    setHasSavedApplication(false);
-  };
-
+  
   return {
+    // Form state
     formData,
     resumeFile,
     termsAccepted,
     errors,
     touched,
-    isSubmitting,
+    isSubmitting: otpSubmitting || formSubmitting,
     otpSent,
     otpVerified,
     hasSavedApplication,
+    
+    // State setters
     setTermsAccepted,
+    
+    // Event handlers
     handleInputChange,
     handleFileChange,
     handleBlur,
     handleSubmit,
     handleSendOTP,
     handleSaveAndExit,
-    handleResumeSavedApplication,
+    handleResumeSavedApplication: handleResumeSavedApplicationWrapper,
     handleStartNewApplication,
+    
+    // OTP handlers
     setOtpVerified,
     setOtpSent
   };
