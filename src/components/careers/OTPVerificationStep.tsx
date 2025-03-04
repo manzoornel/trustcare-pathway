@@ -1,8 +1,8 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
 import OTPInput from "@/components/OTPInput";
+import { useOTPVerification } from "./hooks/useOTPVerification";
 
 interface OTPVerificationStepProps {
   email: string;
@@ -17,70 +17,32 @@ const OTPVerificationStep: React.FC<OTPVerificationStepProps> = ({
   onVerificationComplete,
   onBackToContact,
 }) => {
-  const [otp, setOtp] = useState("");
-  const [isVerifying, setIsVerifying] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(60);
-  const [resendDisabled, setResendDisabled] = useState(true);
+  const {
+    otp,
+    setOtp,
+    isSubmitting,
+    timeLeft,
+    resendDisabled,
+    setTimeLeft,
+    setResendDisabled,
+    handleVerifyOTP,
+    handleResendOTP,
+    decrementTimeLeft
+  } = useOTPVerification({ email, phone });
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setTimeLeft((prevTime) => {
-        if (prevTime <= 1) {
-          clearInterval(timer);
-          setResendDisabled(false);
-          return 0;
-        }
-        return prevTime - 1;
-      });
+      decrementTimeLeft();
     }, 1000);
 
     return () => clearInterval(timer);
   }, []);
 
-  const handleVerifyOTP = async () => {
-    if (!otp || otp.length !== 6) {
-      toast.error("Please enter the 6-digit verification code");
-      return;
+  const handleVerify = async () => {
+    const verified = await handleVerifyOTP();
+    if (verified) {
+      onVerificationComplete();
     }
-    
-    try {
-      setIsVerifying(true);
-      
-      // Simulate OTP verification API call with a delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // For demo, we'll consider "123456" as the valid OTP
-      if (otp === "123456") {
-        onVerificationComplete();
-        toast.success("Phone and email verified successfully");
-      } else {
-        toast.error("Invalid verification code. Please try again.");
-      }
-      
-    } catch (error) {
-      console.error("Error verifying OTP:", error);
-      toast.error("Failed to verify code. Please try again.");
-    } finally {
-      setIsVerifying(false);
-    }
-  };
-
-  const handleResendOTP = () => {
-    setResendDisabled(true);
-    setTimeLeft(60);
-    toast.info("New verification code sent to your phone and email");
-    
-    // Start the countdown again
-    const timer = setInterval(() => {
-      setTimeLeft((prevTime) => {
-        if (prevTime <= 1) {
-          clearInterval(timer);
-          setResendDisabled(false);
-          return 0;
-        }
-        return prevTime - 1;
-      });
-    }, 1000);
   };
 
   return (
@@ -127,10 +89,10 @@ const OTPVerificationStep: React.FC<OTPVerificationStepProps> = ({
           </Button>
           <Button 
             type="button" 
-            onClick={handleVerifyOTP}
-            disabled={isVerifying || otp.length !== 6}
+            onClick={handleVerify}
+            disabled={isSubmitting || otp.length !== 6}
           >
-            {isVerifying ? "Verifying..." : "Verify"}
+            {isSubmitting ? "Verifying..." : "Verify"}
           </Button>
         </div>
       </div>
