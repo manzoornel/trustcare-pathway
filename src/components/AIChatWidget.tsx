@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send, User, Bot, Eraser, Maximize2, MessageSquare } from "lucide-react";
+import { Send, User, Bot, Eraser, Maximize2, MessageSquare, X } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import {
   Dialog,
