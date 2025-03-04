@@ -1,11 +1,12 @@
 
 import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileText, Pill, ClipboardList, Calendar } from "lucide-react";
+import { FileText, Pill, ClipboardList, Calendar, MessageSquare } from "lucide-react";
 import LabReportsTab from "./LabReportsTab";
 import MedicationsTab from "./MedicationsTab";
 import MedicalSummaryTab from "./MedicalSummaryTab";
 import AppointmentsTab from "./AppointmentsTab";
+import AIChatInterface from "@/components/AIChatInterface";
 
 type PortalTabsSectionProps = {
   activeTab: string;
@@ -15,7 +16,7 @@ type PortalTabsSectionProps = {
 const PortalTabsSection = ({ activeTab, setActiveTab }: PortalTabsSectionProps) => {
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-      <TabsList className="grid grid-cols-4 mb-8">
+      <TabsList className="grid grid-cols-5 mb-8">
         <TabsTrigger value="labReports" className="flex items-center gap-2">
           <FileText className="h-4 w-4" />
           <span className="hidden sm:inline">Lab Reports</span>
@@ -31,6 +32,10 @@ const PortalTabsSection = ({ activeTab, setActiveTab }: PortalTabsSectionProps) 
         <TabsTrigger value="appointments" className="flex items-center gap-2">
           <Calendar className="h-4 w-4" />
           <span className="hidden sm:inline">Appointments</span>
+        </TabsTrigger>
+        <TabsTrigger value="aiChat" className="flex items-center gap-2">
+          <MessageSquare className="h-4 w-4" />
+          <span className="hidden sm:inline">AI Chat</span>
         </TabsTrigger>
       </TabsList>
       
@@ -48,6 +53,10 @@ const PortalTabsSection = ({ activeTab, setActiveTab }: PortalTabsSectionProps) 
       
       <TabsContent value="appointments" className="space-y-4">
         <AppointmentsTab />
+      </TabsContent>
+      
+      <TabsContent value="aiChat" className="space-y-4">
+        <AIChatInterface />
       </TabsContent>
     </Tabs>
   );
