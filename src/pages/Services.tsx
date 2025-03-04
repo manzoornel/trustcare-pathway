@@ -19,6 +19,10 @@ const Services = () => {
       description: "Comprehensive women's health services including preventive screenings, prenatal care, and management of women's health concerns.",
     },
     {
+      title: "Home Care Services",
+      description: "Professional healthcare at your doorstep including doctor visits, nursing care, physiotherapy, injections, ECG and laboratory tests.",
+    },
+    {
       title: "Diagnostic Services",
       description: "State-of-the-art laboratory testing, ECG, ultrasound, and other diagnostic procedures to ensure accurate diagnosis.",
     },
