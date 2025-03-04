@@ -1,3 +1,4 @@
+
 import React from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -129,7 +130,7 @@ const Contact = () => {
               <h2 className="text-2xl font-semibold mb-6 text-center">Our Location</h2>
               <div className="h-96 bg-gray-300 rounded-xl overflow-hidden">
                 <iframe
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d387193.30600092163!2d-74.25986548727506!3d40.69714941774138!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c24fa5d33f083b%3A0xc80b8f06e177fe62!2sNew%20York%2C%20NY%2C%20USA!5e0!3m2!1sen!2s!4v1620735052487!5m2!1sen!2s"
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3917.6916318360716!2d75.92379917584805!3d10.91266525766789!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba7b1e8ba770ecb%3A0x3ebc97b2c7f069ac!2sDoctor%20Uncle%20Family%20Clinic%20-%20Vakkad!5e0!3m2!1sen!2sin!4v1724760428753!5m2!1sen!2sin"
                   width="100%"
                   height="100%"
                   style={{ border: 0 }}
