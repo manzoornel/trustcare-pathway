@@ -3,10 +3,15 @@ import React from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Helmet } from "react-helmet";
-import { MapPin, Phone, Mail, Clock } from "lucide-react";
+import { MapPin, Phone, Mail, Clock, MessageSquare } from "lucide-react";
 import AIChatWidget from "@/components/AIChatWidget";
+import { Button } from "@/components/ui/button";
 
 const Contact = () => {
+  const openWhatsApp = () => {
+    window.open(`https://wa.me/919961588880`, '_blank');
+  };
+
   return (
     <>
       <Helmet>
@@ -121,6 +126,15 @@ const Contact = () => {
                       <h3 className="font-medium">Hours</h3>
                       <p className="text-gray-600">24/7</p>
                     </div>
+                  </div>
+                  <div>
+                    <Button 
+                      onClick={openWhatsApp}
+                      className="w-full flex items-center justify-center gap-2"
+                    >
+                      <MessageSquare className="w-5 h-5" />
+                      <span>Contact via WhatsApp</span>
+                    </Button>
                   </div>
                 </div>
               </div>
