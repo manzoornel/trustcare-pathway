@@ -4,21 +4,21 @@ import { Star } from 'lucide-react';
 const Testimonials = () => {
   const testimonials = [
     {
-      name: "John Smith",
+      name: "Anoop Menon",
       image: "/placeholder.svg",
       text: "Doctor Uncle has been caring for our family for the past 5 years. Their dedication and expertise have made all the difference in my diabetes management.",
       rating: 5
     },
     {
-      name: "Sarah Johnson",
+      name: "Priya Lakshmi",
       image: "/placeholder.svg",
-      text: "I appreciate the personal attention and care I receive at every visit. The staff is friendly and the doctors take time to listen to my concerns.",
+      text: "I appreciate the personal attention and care I receive at every visit. The clinic staff is friendly and the doctors take time to listen to my concerns, even when I bring my elderly parents.",
       rating: 5
     },
     {
-      name: "Michael Williams",
+      name: "Mohammed Rashid",
       image: "/placeholder.svg",
-      text: "The clinic's online booking system makes it so easy to schedule appointments, and I never have to wait long to see the doctor.",
+      text: "The clinic's online booking system makes it so easy to schedule appointments, and I never have to wait long to see the doctor. Their home care service was a blessing when my father was unwell.",
       rating: 4
     }
   ];
