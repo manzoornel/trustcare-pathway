@@ -1,12 +1,14 @@
 
 import React, { useState, useEffect } from "react";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { JobCategory } from "./JobListingSection";
 import ContactInfoStep from "./ContactInfoStep";
 import OTPVerificationStep from "./OTPVerificationStep";
 import ApplicationDetailsStep from "./ApplicationDetailsStep";
+import VerifiedContactInfo from "./VerifiedContactInfo";
+import NameField from "./NameField";
+import ResumeApplicationPrompt from "./ResumeApplicationPrompt";
 import { 
   FormData, 
   FormErrors, 
@@ -253,62 +255,17 @@ const ApplicationForm = ({
     const savedApplication = getApplicationFromStorage();
     if (!savedApplication) return null;
     
-    const savedDate = new Date(savedApplication.lastUpdated);
-    const formattedDate = savedDate.toLocaleDateString() + ' at ' + savedDate.toLocaleTimeString();
-    
     return (
-      <div className="bg-white p-6 rounded-lg border">
-        <h4 className="text-lg font-medium mb-4">
-          Resume Your Application
-        </h4>
-        <p className="text-gray-600 mb-4">
-          You have a saved application for this position from {formattedDate}. Would you like to continue where you left off?
-        </p>
-        <div className="flex space-x-4">
-          <Button onClick={handleResumeSavedApplication} variant="default">
-            Resume Application
-          </Button>
-          <Button 
-            onClick={() => {
-              clearSavedApplication();
-              setHasSavedApplication(false);
-            }} 
-            variant="outline"
-          >
-            Start New Application
-          </Button>
-        </div>
-      </div>
+      <ResumeApplicationPrompt
+        savedApplication={savedApplication}
+        onResume={handleResumeSavedApplication}
+        onStartNew={() => {
+          clearSavedApplication();
+          setHasSavedApplication(false);
+        }}
+      />
     );
   }
-
-  const renderVerifiedContactInfo = () => {
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Email Address (Verified)
-          </label>
-          <Input
-            value={formData.email}
-            readOnly
-            className="bg-gray-50"
-          />
-        </div>
-        
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Phone Number (Verified)
-          </label>
-          <Input
-            value={formData.phone}
-            readOnly
-            className="bg-gray-50"
-          />
-        </div>
-      </div>
-    );
-  };
 
   return (
     <div className="bg-white p-6 rounded-lg border">
@@ -326,27 +283,13 @@ const ApplicationForm = ({
       </div>
       
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-            Full Name *
-          </label>
-          <Input
-            id="name"
-            name="name"
-            value={formData.name}
-            onChange={handleInputChange}
-            onBlur={() => handleBlur("name")}
-            placeholder="John Doe"
-            className={errors.name && touched.name ? "border-red-500" : ""}
-            aria-invalid={Boolean(errors.name && touched.name)}
-            aria-describedby={errors.name && touched.name ? "name-error" : undefined}
-          />
-          {errors.name && touched.name && (
-            <p id="name-error" className="mt-1 text-sm text-red-500">
-              {errors.name}
-            </p>
-          )}
-        </div>
+        <NameField
+          name={formData.name}
+          onChange={handleInputChange}
+          onBlur={() => handleBlur("name")}
+          error={errors.name}
+          touched={touched.name}
+        />
         
         {/* Render different form sections based on the verification state */}
         {!otpSent ? (
@@ -365,7 +308,7 @@ const ApplicationForm = ({
             onBackToContact={() => setOtpSent(false)}
           />
         ) : (
-          renderVerifiedContactInfo()
+          <VerifiedContactInfo formData={formData} />
         )}
         
         {/* Show application details only after OTP verification */}
