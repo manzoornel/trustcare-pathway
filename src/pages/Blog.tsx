@@ -1,8 +1,16 @@
 
 import Navbar from "@/components/Navbar";
 import { Helmet } from "react-helmet";
+import { useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
 
 const Blog = () => {
+  const [email, setEmail] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
+
   const articles = [
     {
       title: "How to Manage Diabetes with Diet & Exercise",
@@ -29,6 +37,34 @@ const Blog = () => {
       category: "General Health"
     }
   ];
+
+  const handleSubscribe = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    
+    // Validate email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast({
+        title: "Invalid email",
+        description: "Please enter a valid email address",
+        variant: "destructive"
+      });
+      setIsSubmitting(false);
+      return;
+    }
+
+    // Here you would typically send the email to your backend
+    // Simulating API call with timeout
+    setTimeout(() => {
+      toast({
+        title: "Successfully subscribed!",
+        description: "You'll receive our newsletter at " + email,
+      });
+      setEmail("");
+      setIsSubmitting(false);
+    }, 1000);
+  };
 
   return (
     <>
@@ -65,10 +101,33 @@ const Blog = () => {
               ))}
             </div>
 
-            <div className="mt-12 text-center">
-              <button className="px-6 py-3 bg-primary text-white font-semibold rounded-lg hover:bg-primary/90 transition-colors duration-200">
-                Subscribe to our newsletter
-              </button>
+            <div className="mt-12 bg-secondary/10 p-8 rounded-xl shadow-sm">
+              <h2 className="text-2xl font-bold text-center mb-6">Subscribe to our newsletter</h2>
+              <p className="text-center text-gray-600 mb-6">
+                Get the latest health tips and medical advice directly to your inbox
+              </p>
+              
+              <form onSubmit={handleSubscribe} className="max-w-md mx-auto">
+                <div className="mb-4">
+                  <Label htmlFor="email" className="mb-2 block">Email address</Label>
+                  <Input 
+                    id="email"
+                    type="email" 
+                    placeholder="Enter your email" 
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="w-full"
+                  />
+                </div>
+                <button 
+                  type="submit" 
+                  disabled={isSubmitting}
+                  className="w-full px-6 py-3 bg-primary text-white font-semibold rounded-lg hover:bg-primary/90 transition-colors duration-200 disabled:opacity-70 disabled:cursor-not-allowed"
+                >
+                  {isSubmitting ? "Subscribing..." : "Subscribe Now"}
+                </button>
+              </form>
             </div>
           </div>
         </div>
