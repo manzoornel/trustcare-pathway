@@ -35,6 +35,7 @@ const ApplicationForm = ({
     errors,
     touched,
     isSubmitting,
+    isValidating,
     submitError,
     otpSent,
     otpVerified,
@@ -102,11 +103,21 @@ const ApplicationForm = ({
         
         {/* Save & Exit button - only show once some data has been entered */}
         {(formData.name || formData.email || formData.phone) && (
-          <Button variant="outline" onClick={handleSaveAndExit} type="button" disabled={isSubmitting}>
+          <Button variant="outline" onClick={handleSaveAndExit} type="button" disabled={isSubmitting || isValidating}>
             Save & Exit
           </Button>
         )}
       </div>
+      
+      {/* Show validation in progress message */}
+      {isValidating && (
+        <Alert className="mb-4 bg-blue-50 border-blue-200">
+          <AlertDescription className="flex items-center">
+            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            Validating your information...
+          </AlertDescription>
+        </Alert>
+      )}
       
       {submitError && (
         <Alert variant="destructive" className="mb-4">
@@ -121,7 +132,7 @@ const ApplicationForm = ({
           onBlur={() => handleBlur("name")}
           error={errors.name}
           touched={touched.name}
-          disabled={isSubmitting}
+          disabled={isSubmitting || isValidating}
         />
         
         {/* Render different form sections based on the verification state */}
@@ -132,7 +143,7 @@ const ApplicationForm = ({
             touched={touched}
             handleInputChange={handleInputChange}
             handleBlur={handleBlur}
-            disabled={isSubmitting}
+            disabled={isSubmitting || isValidating}
           />
         ) : otpSent && !otpVerified ? (
           <OTPVerificationStep 
@@ -157,19 +168,19 @@ const ApplicationForm = ({
             handleFileChange={handleFileChange}
             handleBlur={handleBlur}
             setTermsAccepted={setTermsAccepted}
-            disabled={isSubmitting}
+            disabled={isSubmitting || isValidating}
           />
         )}
         
         <Button
           type="submit"
           className="w-full"
-          disabled={isSubmitting}
+          disabled={isSubmitting || isValidating}
         >
-          {isSubmitting ? (
+          {isSubmitting || isValidating ? (
             <span className="flex items-center justify-center">
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Processing...
+              {isValidating ? "Validating..." : "Processing..."}
             </span>
           ) : !otpSent ? "Verify Contact" :
              !otpVerified ? "Verify OTP" :
@@ -187,7 +198,7 @@ const ApplicationForm = ({
           setShowConfirmDialog(false);
           handleSubmit(new Event('submit') as any);
         }}
-        isSubmitting={isSubmitting}
+        isSubmitting={isSubmitting || isValidating}
         submitError={submitError}
         selectedPosition={selectedPositionTitle}
       />

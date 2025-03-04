@@ -1,13 +1,9 @@
 
-import { useState, useEffect } from "react";
-import { 
-  FormData, 
-  SavedApplication,
-  saveApplicationToStorage
-} from "./ApplicationFormTypes";
-import { useOTPVerification } from "./hooks/useOTPVerification";
-import { useSavedApplication } from "./hooks/useSavedApplication";
+import { useState, useCallback, useEffect } from "react";
+import { toast } from "sonner";
+import { FormData, FormErrors, SavedApplication, saveApplicationToStorage, getApplicationFromStorage, clearSavedApplication } from "./ApplicationFormTypes";
 import { useFormSubmission } from "./hooks/useFormSubmission";
+import { useSavedApplication } from "./hooks/useSavedApplication";
 
 interface UseApplicationFormProps {
   selectedCategory: string;
@@ -15,7 +11,7 @@ interface UseApplicationFormProps {
 }
 
 export const useApplicationForm = ({ selectedCategory, selectedPosition }: UseApplicationFormProps) => {
-  // Form state
+  // Main form state
   const [formData, setFormData] = useState<FormData>({
     name: "",
     email: "",
@@ -25,38 +21,42 @@ export const useApplicationForm = ({ selectedCategory, selectedPosition }: UseAp
   });
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [termsAccepted, setTermsAccepted] = useState(false);
-  
-  // Initialize hooks
-  const {
-    otpSent,
-    otpVerified,
-    isSubmitting: otpSubmitting,
-    setOtpSent,
-    setOtpVerified,
-    handleSendOTP
-  } = useOTPVerification({ 
-    email: formData.email, 
-    phone: formData.phone 
-  });
-  
-  const {
-    hasSavedApplication,
-    handleResumeSavedApplication,
+
+  // Verification state
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpVerified, setOtpVerified] = useState(false);
+
+  // Get functionality from custom hooks
+  const { 
+    hasSavedApplication, 
+    handleResumeSavedApplication, 
     handleStartNewApplication,
-    handleSaveAndExit
+    handleSaveAndExit 
   } = useSavedApplication({ 
+    formData, 
+    setFormData, 
+    resumeFile, 
+    setResumeFile, 
+    termsAccepted, 
+    setTermsAccepted,
+    otpVerified,
+    setOtpVerified,
     selectedCategory, 
-    selectedPosition 
+    selectedPosition,
+    setOtpSent
   });
-  
+
   const {
-    isSubmitting: formSubmitting,
+    isSubmitting,
+    isValidating,
     submitError,
     errors,
     touched,
+    setTouched,
+    setErrors,
     handleSubmit,
-    handleBlur,
-    resetSubmitError
+    resetSubmitError,
+    handleBlur
   } = useFormSubmission({
     formData,
     resumeFile,
@@ -71,82 +71,82 @@ export const useApplicationForm = ({ selectedCategory, selectedPosition }: UseAp
     setOtpSent,
     setOtpVerified
   });
-  
-  // Save application state when form data changes
-  useEffect(() => {
-    if (formData.name || formData.email || formData.phone || formData.experience) {
-      const applicationData: SavedApplication = {
-        formData,
-        selectedCategory,
-        selectedPosition,
-        lastUpdated: Date.now(),
-        otpVerified
-      };
-      
-      saveApplicationToStorage(applicationData);
-    }
-  }, [formData, selectedCategory, selectedPosition, otpVerified]);
-  
-  // Input change handlers
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+
+  // Handle input changes
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData(prev => ({ ...prev, [name]: value }));
+  }, []);
+
+  // Handle file upload
+  const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
     
-    // Mark field as touched on change
-    // Validate field
-    handleBlur(name);
-  };
-  
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      setResumeFile(file);
+    if (file && file.type !== 'application/pdf') {
+      toast.error("Please upload a PDF file");
+      return;
+    }
+    
+    setResumeFile(file);
+  }, []);
+
+  // Handle OTP sending
+  const handleSendOTP = useCallback(() => {
+    // Validate email and phone before sending OTP
+    const emailError = formData.email.trim() === '' || 
+                       !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(formData.email);
+    
+    const phoneError = formData.phone.trim() === '' || 
+                       !/^(\+\d{1,3}[\s.-]?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$/.test(formData.phone);
+    
+    if (emailError || phoneError) {
+      setErrors({
+        ...(emailError ? { email: 'Valid email is required' } : {}),
+        ...(phoneError ? { phone: 'Valid phone number is required' } : {})
+      });
       
-      // Validate file
-      handleBlur("resume");
+      setTouched({
+        email: true,
+        phone: true
+      });
+      
+      return;
     }
-  };
-  
-  // Resume saved application
-  const handleResumeSavedApplicationWrapper = () => {
-    const savedApplication = handleResumeSavedApplication();
     
-    if (savedApplication) {
-      setFormData(savedApplication.formData);
-      setOtpVerified(savedApplication.otpVerified);
-      setOtpSent(savedApplication.otpVerified);
-    }
-  };
-  
+    // Simulate OTP sending
+    toast.info("Sending verification code...");
+    
+    setTimeout(() => {
+      setOtpSent(true);
+      toast.success("Verification code sent to your email and phone");
+    }, 1500);
+  }, [formData.email, formData.phone, setErrors, setTouched]);
+
   return {
-    // Form state
     formData,
+    setFormData,
     resumeFile,
+    setResumeFile,
     termsAccepted,
+    setTermsAccepted,
+    otpSent,
+    setOtpSent,
+    otpVerified,
+    setOtpVerified,
+    isSubmitting,
+    isValidating,
+    submitError,
     errors,
     touched,
-    isSubmitting: otpSubmitting || formSubmitting,
-    submitError,
-    otpSent,
-    otpVerified,
     hasSavedApplication,
-    
-    // State setters
-    setTermsAccepted,
-    
-    // Event handlers
     handleInputChange,
     handleFileChange,
     handleBlur,
     handleSubmit,
-    handleSendOTP,
     handleSaveAndExit,
-    handleResumeSavedApplication: handleResumeSavedApplicationWrapper,
+    handleResumeSavedApplication,
     handleStartNewApplication,
-    resetSubmitError,
-    
-    // OTP handlers
-    setOtpVerified,
-    setOtpSent
+    handleSendOTP,
+    resetSubmitError
   };
 };

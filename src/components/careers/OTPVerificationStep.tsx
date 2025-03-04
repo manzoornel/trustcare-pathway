@@ -63,7 +63,7 @@ const OTPVerificationStep: React.FC<OTPVerificationStepProps> = ({
         <OTPInput
           onComplete={(value) => setOtp(value)}
           length={6}
-          disabled={isSubmitting}
+          // disabled is not part of OTPInput props, so we remove it
         />
         {otp.length !== 6 && otp.length > 0 && (
           <p className="text-sm text-red-500 text-center mt-2">

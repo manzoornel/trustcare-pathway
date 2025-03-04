@@ -3,6 +3,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { FormData, FormErrors, clearSavedApplication } from "../ApplicationFormTypes";
 import { useFormValidation } from "../useFormValidation";
+import { supabase } from "@/integrations/supabase/client";
 
 interface UseFormSubmissionProps {
   formData: FormData;
@@ -34,11 +35,41 @@ export const useFormSubmission = ({
   setOtpVerified
 }: UseFormSubmissionProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isValidating, setIsValidating] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [errors, setErrors] = useState<FormErrors>({});
   
   const { validateField, validateForm, hasErrors } = useFormValidation();
+
+  // Function to perform server-side validation
+  const performServerValidation = async (): Promise<{ valid: boolean, errors: FormErrors }> => {
+    setIsValidating(true);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('validate-application', {
+        body: {
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          experience: formData.experience
+        }
+      });
+      
+      if (error) {
+        console.error('Server validation error:', error);
+        toast.error('Error validating form data');
+        return { valid: false, errors: {} };
+      }
+      
+      return data as { valid: boolean, errors: FormErrors };
+    } catch (err) {
+      console.error('Error during server validation:', err);
+      return { valid: false, errors: {} };
+    } finally {
+      setIsValidating(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,6 +104,7 @@ export const useFormSubmission = ({
     
     // If final form submission
     if (otpVerified) {
+      // First perform client-side validation
       const newErrors = validateForm(formData, resumeFile, termsAccepted, otpSent, otpVerified, "");
       setErrors(newErrors);
       
@@ -94,6 +126,16 @@ export const useFormSubmission = ({
 
       try {
         setIsSubmitting(true);
+        
+        // Perform server-side validation
+        const serverValidation = await performServerValidation();
+        
+        if (!serverValidation.valid && Object.keys(serverValidation.errors).length > 0) {
+          // Update our errors with server validation errors
+          setErrors(prev => ({ ...prev, ...serverValidation.errors }));
+          toast.error("Please fix the validation errors");
+          return;
+        }
         
         // Simulate API submission
         await new Promise((resolve, reject) => {
@@ -143,6 +185,7 @@ export const useFormSubmission = ({
 
   return {
     isSubmitting,
+    isValidating,
     submitError,
     errors,
     touched,
