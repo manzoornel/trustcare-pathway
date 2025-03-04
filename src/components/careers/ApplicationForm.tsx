@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -7,7 +7,14 @@ import { JobCategory } from "./JobListingSection";
 import ContactInfoStep from "./ContactInfoStep";
 import OTPVerificationStep from "./OTPVerificationStep";
 import ApplicationDetailsStep from "./ApplicationDetailsStep";
-import { FormData, FormErrors } from "./ApplicationFormTypes";
+import { 
+  FormData, 
+  FormErrors, 
+  SavedApplication,
+  saveApplicationToStorage,
+  getApplicationFromStorage,
+  clearSavedApplication 
+} from "./ApplicationFormTypes";
 import { useFormValidation } from "./useFormValidation";
 
 interface ApplicationFormProps {
@@ -37,9 +44,62 @@ const ApplicationForm = ({
   // Application form steps
   const [otpSent, setOtpSent] = useState(false);
   const [otpVerified, setOtpVerified] = useState(false);
+  
+  // Save/resume related states
+  const [hasSavedApplication, setHasSavedApplication] = useState(false);
 
   const selectedCategoryData = jobCategories.find((cat) => cat.id === selectedCategory);
   const { validateField, validateForm, hasErrors } = useFormValidation();
+
+  // Check for saved application on initial load
+  useEffect(() => {
+    const savedApplication = getApplicationFromStorage();
+    
+    if (savedApplication && 
+        savedApplication.selectedCategory === selectedCategory && 
+        savedApplication.selectedPosition === selectedPosition) {
+      setHasSavedApplication(true);
+    }
+  }, [selectedCategory, selectedPosition]);
+
+  // Load saved application data if user chooses to resume
+  const handleResumeSavedApplication = () => {
+    const savedApplication = getApplicationFromStorage();
+    
+    if (!savedApplication) {
+      toast.error("No saved application found");
+      return;
+    }
+    
+    setFormData(savedApplication.formData);
+    setOtpVerified(savedApplication.otpVerified);
+    setOtpSent(savedApplication.otpVerified); // If OTP was verified, it was also sent
+    
+    // Mark all fields as touched
+    const touchedFields = Object.keys(savedApplication.formData).reduce(
+      (acc, key) => ({ ...acc, [key]: true }),
+      {}
+    );
+    setTouched(touchedFields);
+    
+    setHasSavedApplication(false);
+    toast.success("Application progress restored");
+  };
+
+  // Auto-save application progress when form data changes
+  useEffect(() => {
+    if (formData.name || formData.email || formData.phone || formData.experience) {
+      const applicationData: SavedApplication = {
+        formData,
+        selectedCategory,
+        selectedPosition,
+        lastUpdated: Date.now(),
+        otpVerified
+      };
+      
+      saveApplicationToStorage(applicationData);
+    }
+  }, [formData, selectedCategory, selectedPosition, otpVerified]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -155,6 +215,9 @@ const ApplicationForm = ({
       
       toast.success("Your application has been submitted successfully!");
       
+      // Clear saved application on successful submission
+      clearSavedApplication();
+      
       // Reset form
       setFormData({
         name: "",
@@ -178,7 +241,46 @@ const ApplicationForm = ({
     }
   };
 
+  const handleSaveAndExit = () => {
+    // We're already auto-saving, so just need to show confirmation
+    toast.success("Your application progress has been saved. You can return to complete it later.");
+  };
+
   if (!selectedPosition) return null;
+
+  // Show resume application prompt if there's a saved application for this position
+  if (hasSavedApplication) {
+    const savedApplication = getApplicationFromStorage();
+    if (!savedApplication) return null;
+    
+    const savedDate = new Date(savedApplication.lastUpdated);
+    const formattedDate = savedDate.toLocaleDateString() + ' at ' + savedDate.toLocaleTimeString();
+    
+    return (
+      <div className="bg-white p-6 rounded-lg border">
+        <h4 className="text-lg font-medium mb-4">
+          Resume Your Application
+        </h4>
+        <p className="text-gray-600 mb-4">
+          You have a saved application for this position from {formattedDate}. Would you like to continue where you left off?
+        </p>
+        <div className="flex space-x-4">
+          <Button onClick={handleResumeSavedApplication} variant="default">
+            Resume Application
+          </Button>
+          <Button 
+            onClick={() => {
+              clearSavedApplication();
+              setHasSavedApplication(false);
+            }} 
+            variant="outline"
+          >
+            Start New Application
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   const renderVerifiedContactInfo = () => {
     return (
@@ -210,9 +312,18 @@ const ApplicationForm = ({
 
   return (
     <div className="bg-white p-6 rounded-lg border">
-      <h4 className="text-lg font-medium mb-4">
-        Apply for: {selectedCategoryData?.positions.find(p => p.id === selectedPosition)?.title}
-      </h4>
+      <div className="flex justify-between items-center mb-4">
+        <h4 className="text-lg font-medium">
+          Apply for: {selectedCategoryData?.positions.find(p => p.id === selectedPosition)?.title}
+        </h4>
+        
+        {/* Save & Exit button - only show once some data has been entered */}
+        {(formData.name || formData.email || formData.phone) && (
+          <Button variant="outline" onClick={handleSaveAndExit} type="button">
+            Save & Exit
+          </Button>
+        )}
+      </div>
       
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>

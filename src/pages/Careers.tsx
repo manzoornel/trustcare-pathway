@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import HeroSection from "@/components/careers/HeroSection";
@@ -7,10 +7,21 @@ import BenefitsSection from "@/components/careers/BenefitsSection";
 import JobListingSection from "@/components/careers/JobListingSection";
 import ApplicationForm from "@/components/careers/ApplicationForm";
 import { jobCategories } from "@/components/careers/CareersData";
+import { getApplicationFromStorage } from "@/components/careers/ApplicationFormTypes";
 
 const Careers = () => {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedPosition, setSelectedPosition] = useState("");
+
+  // Check for saved application when the page loads
+  useEffect(() => {
+    const savedApplication = getApplicationFromStorage();
+    if (savedApplication) {
+      // Set the form to the saved category and position
+      setSelectedCategory(savedApplication.selectedCategory);
+      setSelectedPosition(savedApplication.selectedPosition);
+    }
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50">
