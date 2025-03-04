@@ -144,7 +144,7 @@ const Contact = () => {
               <h2 className="text-2xl font-semibold mb-6 text-center">Our Location</h2>
               <div className="h-96 bg-gray-300 rounded-xl overflow-hidden">
                 <iframe
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3917.6916318360716!2d75.92379917584805!3d10.91266525766789!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba7b1e8ba770ecb%3A0x3ebc97b2c7f069ac!2sDoctor%20Uncle%20Family%20Clinic%20-%20Vakkad!5e0!3m2!1sen!2sin!4v1724760428753!5m2!1sen!2sin"
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3917.691631836071!2d75.92379917458328!3d10.91266525766789!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba7b1e8ba770ecb%3A0x3ebc97b2c7f069ac!2sDoctor%20Uncle%20Family%20Clinic%20-%20Vakkad!5e0!3m2!1sen!2sin!4v1725356069289!5m2!1sen!2sin"
                   width="100%"
                   height="100%"
                   style={{ border: 0 }}
