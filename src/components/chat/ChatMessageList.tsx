@@ -1,6 +1,5 @@
 
 import React, { useRef, useEffect } from 'react';
-import { Bot } from 'lucide-react';
 import ChatMessage from './ChatMessage';
 import { Message } from './types';
 
@@ -25,8 +24,12 @@ const ChatMessageList = ({ messages, isLoading }: ChatMessageListProps) => {
       {isLoading && (
         <div className="flex justify-start mb-4">
           <div className="flex items-start max-w-[80%]">
-            <div className="rounded-full p-2 mr-2 bg-gray-300">
-              <Bot className="h-5 w-5 text-gray-700" />
+            <div className="rounded-full p-1 mr-2 bg-gray-100 border border-gray-200">
+              <img 
+                src="/lovable-uploads/c4beddef-b77c-4f28-8e9b-8f2f43be79e6.png" 
+                alt="Doctor Uncle AI" 
+                className="h-8 w-8"
+              />
             </div>
             <div className="p-3 rounded-lg bg-white shadow-sm rounded-tl-none">
               <p className="flex items-center">

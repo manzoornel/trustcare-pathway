@@ -1,23 +1,30 @@
 
 import React from 'react';
-import { User, Bot } from 'lucide-react';
+import { User } from 'lucide-react';
 import { Message } from './types';
 
 interface ChatMessageProps {
   message: Message;
 }
 
-const ChatMessage = ({ message }: ChatMessageProps) => {
+const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
   return (
     <div 
       className={`mb-4 flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
     >
       <div className={`flex items-start max-w-[80%] ${message.sender === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
-        <div className={`rounded-full p-2 mr-2 ${message.sender === 'user' ? 'bg-blue-600 ml-2' : 'bg-gray-300'}`}>
+        <div className={`${message.sender === 'user' 
+          ? 'rounded-full p-2 ml-2 bg-blue-600' 
+          : 'rounded-full p-1 mr-2 bg-gray-100 border border-gray-200'}`}
+        >
           {message.sender === 'user' ? (
             <User className="h-5 w-5 text-white" />
           ) : (
-            <Bot className="h-5 w-5 text-gray-700" />
+            <img 
+              src="/lovable-uploads/c4beddef-b77c-4f28-8e9b-8f2f43be79e6.png" 
+              alt="Doctor Uncle AI" 
+              className="h-8 w-8"
+            />
           )}
         </div>
         <div className={`p-3 rounded-lg ${

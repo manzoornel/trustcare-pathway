@@ -12,9 +12,16 @@ const AIChat = () => {
   return (
     <div className="flex flex-col h-[calc(100vh-400px)] min-h-[500px] max-w-3xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
       <div className="p-4 bg-blue-700 text-white flex justify-between items-center">
-        <div>
-          <h2 className="text-xl font-semibold">Healthcare AI Assistant</h2>
-          <p className="text-sm opacity-80">Ask questions about our services, schedule appointments, and more</p>
+        <div className="flex items-center gap-2">
+          <img 
+            src="/lovable-uploads/c4beddef-b77c-4f28-8e9b-8f2f43be79e6.png" 
+            alt="Doctor Uncle AI" 
+            className="h-8 w-8" 
+          />
+          <div>
+            <h2 className="text-xl font-semibold">Doctor Uncle AI Assistant</h2>
+            <p className="text-sm opacity-80">Ask questions about our services, schedule appointments, and more</p>
+          </div>
         </div>
         <Button 
           variant="outline" 

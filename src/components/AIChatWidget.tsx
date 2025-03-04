@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send, User, Bot, Eraser, Maximize2, MessageSquare, X } from "lucide-react";
+import { Send, User, Eraser, Maximize2, MessageSquare, X } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import {
   Dialog,
@@ -246,7 +246,11 @@ const AIChatWidget = () => {
           onClick={() => setIsOpen(true)} 
           className="rounded-full w-14 h-14 bg-blue-700 hover:bg-blue-800 flex items-center justify-center shadow-lg"
         >
-          <MessageSquare className="h-6 w-6 text-white" />
+          <img 
+            src="/lovable-uploads/c4beddef-b77c-4f28-8e9b-8f2f43be79e6.png" 
+            alt="Doctor Uncle AI" 
+            className="h-10 w-10" 
+          />
         </Button>
       </div>
     );
@@ -256,8 +260,13 @@ const AIChatWidget = () => {
   const renderWidget = () => (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col w-80 h-96 bg-white rounded-xl shadow-xl overflow-hidden border border-gray-200">
       <div className="p-3 bg-blue-700 text-white flex justify-between items-center">
-        <div>
-          <h2 className="text-sm font-semibold">AI Assistant</h2>
+        <div className="flex items-center gap-2">
+          <img 
+            src="/lovable-uploads/c4beddef-b77c-4f28-8e9b-8f2f43be79e6.png" 
+            alt="Doctor Uncle AI" 
+            className="h-6 w-6" 
+          />
+          <h2 className="text-sm font-semibold">Doctor Uncle AI</h2>
         </div>
         <div className="flex items-center gap-1">
           <Button 
@@ -294,11 +303,15 @@ const AIChatWidget = () => {
             className={`mb-3 flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
           >
             <div className={`flex items-start max-w-[90%] ${message.sender === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
-              <div className={`rounded-full p-1.5 mr-1.5 ${message.sender === 'user' ? 'bg-blue-600 ml-1.5' : 'bg-gray-300'}`}>
+              <div className={`mr-1.5 ${message.sender === 'user' ? 'rounded-full p-1.5 bg-blue-600 ml-1.5' : 'rounded-full bg-gray-100 border border-gray-200'}`}>
                 {message.sender === 'user' ? (
                   <User className="h-3 w-3 text-white" />
                 ) : (
-                  <Bot className="h-3 w-3 text-gray-700" />
+                  <img 
+                    src="/lovable-uploads/c4beddef-b77c-4f28-8e9b-8f2f43be79e6.png" 
+                    alt="Doctor Uncle AI" 
+                    className="h-6 w-6" 
+                  />
                 )}
               </div>
               <div className={`p-2 rounded-lg text-xs ${
@@ -317,8 +330,12 @@ const AIChatWidget = () => {
         {isLoading && (
           <div className="flex justify-start mb-3">
             <div className="flex items-start max-w-[90%]">
-              <div className="rounded-full p-1.5 mr-1.5 bg-gray-300">
-                <Bot className="h-3 w-3 text-gray-700" />
+              <div className="rounded-full mr-1.5 bg-gray-100 border border-gray-200">
+                <img 
+                  src="/lovable-uploads/c4beddef-b77c-4f28-8e9b-8f2f43be79e6.png" 
+                  alt="Doctor Uncle AI" 
+                  className="h-6 w-6" 
+                />
               </div>
               <div className="p-2 rounded-lg bg-white shadow-sm rounded-tl-none text-xs">
                 <p className="flex items-center">
@@ -362,9 +379,16 @@ const AIChatWidget = () => {
         <Dialog open={isExpanded} onOpenChange={setIsExpanded}>
           <DialogContent className="sm:max-w-3xl sm:h-[80vh] flex flex-col p-0">
             <div className="p-4 bg-blue-700 text-white flex justify-between items-center">
-              <div>
-                <h2 className="text-xl font-semibold">Healthcare AI Assistant</h2>
-                <p className="text-sm opacity-80">Ask questions about our services, schedule appointments, and more</p>
+              <div className="flex items-center gap-2">
+                <img 
+                  src="/lovable-uploads/c4beddef-b77c-4f28-8e9b-8f2f43be79e6.png" 
+                  alt="Doctor Uncle AI" 
+                  className="h-8 w-8" 
+                />
+                <div>
+                  <h2 className="text-xl font-semibold">Doctor Uncle AI Assistant</h2>
+                  <p className="text-sm opacity-80">Ask questions about our services, schedule appointments, and more</p>
+                </div>
               </div>
               <Button 
                 variant="outline" 
@@ -384,11 +408,15 @@ const AIChatWidget = () => {
                   className={`mb-4 flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
                   <div className={`flex items-start max-w-[80%] ${message.sender === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
-                    <div className={`rounded-full p-2 mr-2 ${message.sender === 'user' ? 'bg-blue-600 ml-2' : 'bg-gray-300'}`}>
+                    <div className={`${message.sender === 'user' ? 'rounded-full p-2 ml-2 bg-blue-600' : 'rounded-full p-1 mr-2 bg-gray-100 border border-gray-200'}`}>
                       {message.sender === 'user' ? (
                         <User className="h-5 w-5 text-white" />
                       ) : (
-                        <Bot className="h-5 w-5 text-gray-700" />
+                        <img 
+                          src="/lovable-uploads/c4beddef-b77c-4f28-8e9b-8f2f43be79e6.png" 
+                          alt="Doctor Uncle AI" 
+                          className="h-8 w-8" 
+                        />
                       )}
                     </div>
                     <div className={`p-3 rounded-lg ${
@@ -407,8 +435,12 @@ const AIChatWidget = () => {
               {isLoading && (
                 <div className="flex justify-start mb-4">
                   <div className="flex items-start max-w-[80%]">
-                    <div className="rounded-full p-2 mr-2 bg-gray-300">
-                      <Bot className="h-5 w-5 text-gray-700" />
+                    <div className="rounded-full p-1 mr-2 bg-gray-100 border border-gray-200">
+                      <img 
+                        src="/lovable-uploads/c4beddef-b77c-4f28-8e9b-8f2f43be79e6.png" 
+                        alt="Doctor Uncle AI" 
+                        className="h-8 w-8" 
+                      />
                     </div>
                     <div className="p-3 rounded-lg bg-white shadow-sm rounded-tl-none">
                       <p className="flex items-center">
