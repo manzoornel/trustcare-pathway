@@ -196,7 +196,7 @@ const ApplicationForm = ({
         resumeFile={resumeFile}
         onConfirm={() => {
           setShowConfirmDialog(false);
-          handleSubmit(new Event('submit') as any);
+          handleSubmit();
         }}
         isSubmitting={isSubmitting || isValidating}
         submitError={submitError}

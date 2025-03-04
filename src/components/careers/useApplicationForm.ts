@@ -1,30 +1,23 @@
 
 import { useState, useEffect } from "react";
+import { FormData, FormErrors, SavedApplication, getApplicationFromStorage, saveApplicationToStorage, clearSavedApplication, EMAIL_REGEX, PHONE_REGEX } from "./ApplicationFormTypes";
 
 interface UseApplicationFormProps {
-  initialStep: number;
-  onStatusChange: (status: string) => void;
-  savedApplication: {
-    lastCompletedStep: number | null;
-    applicationData: any;
-    verifiedPhone: boolean;
-    verifiedEmail: boolean;
-  } | null;
+  selectedCategory: string;
+  selectedPosition: string;
 }
 
-export const useApplicationForm = ({
-  initialStep,
-  onStatusChange,
-  savedApplication,
-}: UseApplicationFormProps) => {
-  const [currentStep, setCurrentStep] = useState(initialStep);
-  const [formData, setFormData] = useState<Record<string, any>>({});
-  const [verifiedPhone, setVerifiedPhone] = useState(false);
-  const [verifiedEmail, setVerifiedEmail] = useState(false);
-  // Add the properties that were missing and causing TypeScript errors
+export const useApplicationForm = ({ selectedCategory, selectedPosition }: UseApplicationFormProps) => {
+  const [formData, setFormData] = useState<FormData>({
+    name: "",
+    email: "",
+    phone: "",
+    experience: "",
+    resumeUrl: ""
+  });
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [termsAccepted, setTermsAccepted] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [errors, setErrors] = useState<FormErrors>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
@@ -33,52 +26,103 @@ export const useApplicationForm = ({
   const [otpVerified, setOtpVerified] = useState(false);
   const [hasSavedApplication, setHasSavedApplication] = useState(false);
 
-  // Load saved application data if available
+  // Check for saved application on mount
   useEffect(() => {
-    if (savedApplication) {
-      setCurrentStep(savedApplication.lastCompletedStep || initialStep);
-      setFormData({
-        ...savedApplication.applicationData,
-      });
-      setVerifiedPhone(savedApplication.verifiedPhone || false);
-      setVerifiedEmail(savedApplication.verifiedEmail || false);
+    const savedApp = getApplicationFromStorage();
+    if (savedApp && savedApp.selectedCategory === selectedCategory && savedApp.selectedPosition === selectedPosition) {
       setHasSavedApplication(true);
     }
-  }, [savedApplication, initialStep]);
-
-  const nextStep = () => {
-    setCurrentStep((prevStep) => prevStep + 1);
-  };
-
-  const prevStep = () => {
-    setCurrentStep((prevStep) => prevStep - 1);
-  };
-
-  const updateFormData = (data: any) => {
-    setFormData((prevData) => ({ ...prevData, ...data }));
-  };
+  }, [selectedCategory, selectedPosition]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    updateFormData({ [name]: value });
-    setTouched({ ...touched, [name]: true });
+    setFormData(prev => ({ ...prev, [name]: value }));
+    setTouched(prev => ({ ...prev, [name]: true }));
   };
 
-  const handleFileChange = (file: File | null) => {
-    setResumeFile(file);
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setResumeFile(e.target.files[0]);
+      setTouched(prev => ({ ...prev, resume: true }));
+    }
   };
 
-  const handleBlur = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name } = e.target;
-    setTouched({ ...touched, [name]: true });
+  const handleBlur = (fieldName: string) => {
+    setTouched(prev => ({ ...prev, [fieldName]: true }));
+  };
+
+  const validateForm = (): boolean => {
+    const newErrors: FormErrors = {};
+    
+    // Validate name
+    if (!formData.name || formData.name.trim().length < 3) {
+      newErrors.name = "Name is required (min 3 characters)";
+    }
+    
+    // Validate email
+    if (!formData.email || !EMAIL_REGEX.test(formData.email)) {
+      newErrors.email = "Valid email is required";
+    }
+    
+    // Validate phone
+    if (!formData.phone || !PHONE_REGEX.test(formData.phone)) {
+      newErrors.phone = "Valid phone number is required";
+    }
+    
+    // Additional validations after OTP verification
+    if (otpVerified) {
+      // Validate experience
+      if (!formData.experience || isNaN(Number(formData.experience)) || Number(formData.experience) < 0) {
+        newErrors.experience = "Valid years of experience required";
+      }
+      
+      // Validate resume file
+      if (!resumeFile) {
+        newErrors.resume = "Resume is required";
+      }
+      
+      // Validate terms acceptance
+      if (!termsAccepted) {
+        newErrors.termsAccepted = "You must accept the terms and conditions";
+      }
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSendOTP = async () => {
+    // Validate contact info first
+    const contactValid = validateForm();
+    if (!contactValid) return false;
+    
+    setIsValidating(true);
+    try {
+      // Mock API call to validate and send OTP
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      setOtpSent(true);
+      setIsValidating(false);
+      return true;
+    } catch (error) {
+      setIsValidating(false);
+      setSubmitError("Failed to send verification code. Please try again.");
+      return false;
+    }
   };
 
   const handleSubmit = async () => {
+    if (!validateForm()) return false;
+    
     setIsSubmitting(true);
     setSubmitError(null);
+    
     try {
-      // Mock submission
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Mock submission to API
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Clear saved application on successful submit
+      clearSavedApplication();
+      
       setIsSubmitting(false);
       return true;
     } catch (error) {
@@ -88,25 +132,37 @@ export const useApplicationForm = ({
     }
   };
 
-  const handleSaveAndExit = async () => {
-    // Mock save operation
-    await new Promise(resolve => setTimeout(resolve, 500));
-    return true;
+  const handleSaveAndExit = () => {
+    // Save current application state to localStorage
+    const applicationData: SavedApplication = {
+      formData,
+      selectedCategory,
+      selectedPosition,
+      lastUpdated: Date.now(),
+      otpVerified
+    };
+    
+    saveApplicationToStorage(applicationData);
+    
+    // You could redirect or show a toast notification here
+    alert("Your application has been saved. You can resume later.");
   };
 
   const handleResumeSavedApplication = () => {
-    // Logic to resume saved application
+    const savedApp = getApplicationFromStorage();
+    if (savedApp) {
+      setFormData(savedApp.formData);
+      setOtpVerified(savedApp.otpVerified);
+      if (savedApp.otpVerified) {
+        setOtpSent(true);
+      }
+      setHasSavedApplication(false);
+    }
   };
 
   const handleStartNewApplication = () => {
-    // Logic to start a new application
-  };
-
-  const handleSendOTP = async (type: 'email' | 'phone') => {
-    // Mock OTP sending
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setOtpSent(true);
-    return true;
+    clearSavedApplication();
+    setHasSavedApplication(false);
   };
 
   const resetSubmitError = () => {
@@ -114,15 +170,7 @@ export const useApplicationForm = ({
   };
 
   return {
-    currentStep,
-    nextStep,
-    prevStep,
     formData,
-    updateFormData,
-    verifiedPhone,
-    setPhoneVerificationStatus: setVerifiedPhone,
-    verifiedEmail,
-    setEmailVerificationStatus: setVerifiedEmail,
     resumeFile,
     termsAccepted,
     errors,

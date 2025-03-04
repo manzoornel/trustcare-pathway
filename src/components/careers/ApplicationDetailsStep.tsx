@@ -10,7 +10,7 @@ interface ApplicationDetailsStepProps {
   termsAccepted: boolean;
   errors: FormErrors;
   touched: Record<string, boolean>;
-  handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
   handleFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleBlur: (fieldName: string) => void;
   setTermsAccepted: (value: boolean) => void;

@@ -7,7 +7,7 @@ interface ContactInfoStepProps {
   formData: FormData;
   errors: FormErrors;
   touched: Record<string, boolean>;
-  handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
   handleBlur: (fieldName: string) => void;
   disabled?: boolean;
 }
