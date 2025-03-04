@@ -2,13 +2,12 @@ import { Calendar, LogIn } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+
 const HeroSection = () => {
   const [isBlinking, setIsBlinking] = useState(false);
   const [isSmiling, setIsSmiling] = useState(false);
-  const [rotation, setRotation] = useState(0);
-  const {
-    auth
-  } = useAuth();
+  const { auth } = useAuth();
+
   useEffect(() => {
     // Blinking animation - every 3 seconds
     const blinkInterval = setInterval(() => {
@@ -22,19 +21,12 @@ const HeroSection = () => {
       setTimeout(() => setIsSmiling(false), 1500);
     }, 5000);
 
-    // Rotation animation - gentle rocking every 4 seconds
-    const rotateInterval = setInterval(() => {
-      setRotation(prev => {
-        // Rock between -5 and 5 degrees
-        return prev === 0 ? 5 : prev === 5 ? -5 : 0;
-      });
-    }, 4000);
     return () => {
       clearInterval(blinkInterval);
       clearInterval(smileInterval);
-      clearInterval(rotateInterval);
     };
   }, []);
+
   return <div className="min-h-screen flex items-center bg-gradient-to-b from-secondary to-white pt-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
@@ -69,11 +61,11 @@ const HeroSection = () => {
         }}>
             <div className="aspect-w-16 aspect-h-9 rounded-2xl overflow-hidden shadow-2xl">
               <div className="relative w-full h-full">
-                <img alt="Doctor consulting with patient" src="/lovable-uploads/d18bbc61-0f35-4480-9b29-cf9dd88e75d3.png" style={{
-                transform: `rotate(${rotation}deg)`,
-                transformOrigin: 'center center',
-                transition: 'transform 1s ease-in-out'
-              }} className="" />
+                <img 
+                  alt="Doctor consulting with patient" 
+                  src="/lovable-uploads/d18bbc61-0f35-4480-9b29-cf9dd88e75d3.png" 
+                  className="w-full h-full object-cover" 
+                />
                 {isBlinking && <div className="absolute inset-0 bg-white opacity-10 animate-pulse" />}
                 {isSmiling && <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 w-20 h-5 bg-primary opacity-20 rounded-full animate-pulse" />}
               </div>
@@ -83,4 +75,5 @@ const HeroSection = () => {
       </div>
     </div>;
 };
+
 export default HeroSection;
