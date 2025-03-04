@@ -7,7 +7,8 @@ import {
   CardHeader, 
   CardTitle 
 } from "@/components/ui/card";
-import { Calendar, Clock, UserCircle } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { CalendarDays, Clock, MapPin, User } from "lucide-react";
 
 // Updated sample data for appointments with real doctor names
 const appointments = [
@@ -53,45 +54,61 @@ const AppointmentsTab = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Appointments</CardTitle>
+        <CardTitle className="flex items-center gap-2">
+          <CalendarDays className="h-5 w-5 text-primary" />
+          Appointments
+        </CardTitle>
         <CardDescription>
           Your upcoming and past appointments
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="bg-gray-100">
-                <th className="text-left p-3 border-b">Type</th>
-                <th className="text-left p-3 border-b">Date</th>
-                <th className="text-left p-3 border-b">Time</th>
-                <th className="text-left p-3 border-b">Doctor</th>
-                <th className="text-left p-3 border-b">Location</th>
-                <th className="text-left p-3 border-b">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {appointments.map((appointment) => (
-                <tr key={appointment.id} className="hover:bg-gray-50">
-                  <td className="p-3 border-b">{appointment.type}</td>
-                  <td className="p-3 border-b">{appointment.date}</td>
-                  <td className="p-3 border-b">{appointment.time}</td>
-                  <td className="p-3 border-b">{appointment.doctor}</td>
-                  <td className="p-3 border-b">{appointment.location}</td>
-                  <td className="p-3 border-b">
-                    <span className={`px-2 py-1 rounded-full text-xs ${
-                      appointment.status === "Upcoming" 
-                        ? "bg-blue-100 text-blue-800" 
-                        : "bg-green-100 text-green-800"
-                    }`}>
-                      {appointment.status}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="space-y-4">
+          {appointments.map((appointment) => (
+            <div 
+              key={appointment.id} 
+              className={`p-4 rounded-lg border ${
+                appointment.status === "Upcoming" 
+                  ? "border-blue-100 bg-blue-50" 
+                  : "border-gray-100 bg-gray-50"
+              }`}
+            >
+              <div className="flex justify-between items-start mb-2">
+                <h3 className="font-medium text-gray-900">{appointment.type}</h3>
+                <Badge 
+                  className={`${
+                    appointment.status === "Upcoming" 
+                      ? "bg-blue-100 hover:bg-blue-100 text-blue-800" 
+                      : "bg-green-100 hover:bg-green-100 text-green-800"
+                  }`}
+                >
+                  {appointment.status}
+                </Badge>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                <div className="flex items-center gap-2">
+                  <CalendarDays className="h-4 w-4 text-gray-500" />
+                  <span>{appointment.date}</span>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-gray-500" />
+                  <span>{appointment.time}</span>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <User className="h-4 w-4 text-gray-500" />
+                  <span>{appointment.doctor}</span>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4 text-gray-500" />
+                  <span>{appointment.location}</span>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </CardContent>
     </Card>

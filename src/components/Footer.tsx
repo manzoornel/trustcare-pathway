@@ -1,31 +1,35 @@
 
-import { Facebook, Instagram, Linkedin, Youtube } from 'lucide-react';
-
 const Footer = () => {
   const socialLinks = [
     {
       name: 'Facebook',
       href: 'https://m.facebook.com/Drunclefamilyclinic/',
-      icon: Facebook,
-      color: 'text-blue-600'
+      icon: '/lovable-uploads/05174db7-3255-480c-9094-b41956a748b0.png',
+      alt: "Facebook icon"
     },
     {
       name: 'Instagram',
       href: 'https://www.instagram.com/doctor_uncle_?igsh=MWNtYjhzNWg1dHZqdA%3D%3D&utm_source=qr',
-      icon: Instagram,
-      color: 'text-pink-600'
+      icon: '/lovable-uploads/331b03e4-837c-4d4d-aaf3-1b48e5ff9d95.png',
+      alt: "Instagram icon"
     },
     {
       name: 'LinkedIn',
       href: 'https://www.linkedin.com/company/dr-uncle/',
-      icon: Linkedin,
-      color: 'text-blue-700'
+      icon: '/lovable-uploads/1695c7fc-7005-44f7-98de-4a97fa980e5d.png', 
+      alt: "LinkedIn icon"
     },
     {
       name: 'Youtube',
       href: 'https://youtube.com/@doctoruncle6549?si=9uh_nDGiRAgLzOjk',
-      icon: Youtube,
-      color: 'text-red-600'
+      icon: '/lovable-uploads/71731747-2e74-480c-b933-b5e0937f991b.png',
+      alt: "YouTube icon"
+    },
+    {
+      name: 'WhatsApp',
+      href: 'https://wa.me/919961588880',
+      icon: '/lovable-uploads/5d7efa9c-b13d-435b-ad0d-83cdc3c64d0d.png',
+      alt: "WhatsApp icon"
     }
   ];
 
@@ -46,10 +50,14 @@ const Footer = () => {
                 href={item.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`${item.color} hover:opacity-75 transition-opacity`}
+                className="hover:opacity-75 transition-opacity"
                 aria-label={item.name}
               >
-                <item.icon className="w-6 h-6" />
+                <img 
+                  src={item.icon} 
+                  alt={item.alt} 
+                  className="w-8 h-8" 
+                />
               </a>
             ))}
           </div>
