@@ -7,12 +7,46 @@ import {
   CardHeader, 
   CardTitle 
 } from "@/components/ui/card";
+import { Calendar, Clock, UserCircle } from "lucide-react";
 
-// Sample data for appointments
+// Updated sample data for appointments with real doctor names
 const appointments = [
-  { id: 1, type: "Regular Checkup", date: "2024-02-15", time: "10:30 AM", doctor: "Dr. Sarah Johnson", status: "Upcoming" },
-  { id: 2, type: "Dental Cleaning", date: "2024-01-20", time: "2:00 PM", doctor: "Dr. Lisa Patel", status: "Upcoming" },
-  { id: 3, type: "Follow-up", date: "2023-12-05", time: "11:15 AM", doctor: "Dr. Michael Chen", status: "Completed" },
+  { 
+    id: 1, 
+    type: "General Checkup", 
+    date: "2024-07-15", 
+    time: "10:30 AM", 
+    doctor: "Dr. Shameem Samad PK", 
+    status: "Upcoming",
+    location: "Vakkad Branch"
+  },
+  { 
+    id: 2, 
+    type: "Skin Consultation", 
+    date: "2024-07-20", 
+    time: "2:00 PM", 
+    doctor: "Dr. Praveen V", 
+    status: "Upcoming",
+    location: "Vakkad Branch"
+  },
+  { 
+    id: 3, 
+    type: "Follow-up", 
+    date: "2024-06-25", 
+    time: "11:15 AM", 
+    doctor: "Dr. Manzoor Nellancheri", 
+    status: "Completed",
+    location: "Unniyal Branch" 
+  },
+  { 
+    id: 4, 
+    type: "ENT Consultation", 
+    date: "2024-06-18", 
+    time: "3:30 PM", 
+    doctor: "Dr. Shahar Banu", 
+    status: "Completed",
+    location: "Vakkad Branch" 
+  },
 ];
 
 const AppointmentsTab = () => {
@@ -33,6 +67,7 @@ const AppointmentsTab = () => {
                 <th className="text-left p-3 border-b">Date</th>
                 <th className="text-left p-3 border-b">Time</th>
                 <th className="text-left p-3 border-b">Doctor</th>
+                <th className="text-left p-3 border-b">Location</th>
                 <th className="text-left p-3 border-b">Status</th>
               </tr>
             </thead>
@@ -43,6 +78,7 @@ const AppointmentsTab = () => {
                   <td className="p-3 border-b">{appointment.date}</td>
                   <td className="p-3 border-b">{appointment.time}</td>
                   <td className="p-3 border-b">{appointment.doctor}</td>
+                  <td className="p-3 border-b">{appointment.location}</td>
                   <td className="p-3 border-b">
                     <span className={`px-2 py-1 rounded-full text-xs ${
                       appointment.status === "Upcoming" 
