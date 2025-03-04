@@ -9,6 +9,7 @@ interface ContactInfoStepProps {
   touched: Record<string, boolean>;
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleBlur: (fieldName: string) => void;
+  disabled?: boolean;
 }
 
 const ContactInfoStep: React.FC<ContactInfoStepProps> = ({
@@ -17,9 +18,10 @@ const ContactInfoStep: React.FC<ContactInfoStepProps> = ({
   touched,
   handleInputChange,
   handleBlur,
+  disabled = false
 }) => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <>
       <div>
         <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
           Email Address *
@@ -31,10 +33,11 @@ const ContactInfoStep: React.FC<ContactInfoStepProps> = ({
           value={formData.email}
           onChange={handleInputChange}
           onBlur={() => handleBlur("email")}
-          placeholder="john@example.com"
+          placeholder="youremail@example.com"
           className={errors.email && touched.email ? "border-red-500" : ""}
           aria-invalid={Boolean(errors.email && touched.email)}
           aria-describedby={errors.email && touched.email ? "email-error" : undefined}
+          disabled={disabled}
         />
         {errors.email && touched.email && (
           <p id="email-error" className="mt-1 text-sm text-red-500">
@@ -50,13 +53,15 @@ const ContactInfoStep: React.FC<ContactInfoStepProps> = ({
         <Input
           id="phone"
           name="phone"
+          type="tel"
           value={formData.phone}
           onChange={handleInputChange}
           onBlur={() => handleBlur("phone")}
-          placeholder="+91 9876543210"
+          placeholder="(123) 456-7890"
           className={errors.phone && touched.phone ? "border-red-500" : ""}
           aria-invalid={Boolean(errors.phone && touched.phone)}
           aria-describedby={errors.phone && touched.phone ? "phone-error" : undefined}
+          disabled={disabled}
         />
         {errors.phone && touched.phone && (
           <p id="phone-error" className="mt-1 text-sm text-red-500">
@@ -64,7 +69,7 @@ const ContactInfoStep: React.FC<ContactInfoStepProps> = ({
           </p>
         )}
       </div>
-    </div>
+    </>
   );
 };
 

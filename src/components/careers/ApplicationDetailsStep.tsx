@@ -14,6 +14,7 @@ interface ApplicationDetailsStepProps {
   handleFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleBlur: (fieldName: string) => void;
   setTermsAccepted: (value: boolean) => void;
+  disabled?: boolean;
 }
 
 const ApplicationDetailsStep: React.FC<ApplicationDetailsStepProps> = ({
@@ -26,6 +27,7 @@ const ApplicationDetailsStep: React.FC<ApplicationDetailsStepProps> = ({
   handleFileChange,
   handleBlur,
   setTermsAccepted,
+  disabled = false
 }) => {
   return (
     <>
@@ -43,6 +45,7 @@ const ApplicationDetailsStep: React.FC<ApplicationDetailsStepProps> = ({
           className={errors.experience && touched.experience ? "border-red-500" : ""}
           aria-invalid={Boolean(errors.experience && touched.experience)}
           aria-describedby={errors.experience && touched.experience ? "experience-error" : undefined}
+          disabled={disabled}
         />
         {errors.experience && touched.experience && (
           <p id="experience-error" className="mt-1 text-sm text-red-500">
@@ -65,6 +68,7 @@ const ApplicationDetailsStep: React.FC<ApplicationDetailsStepProps> = ({
           className={`cursor-pointer ${errors.resume && touched.resume ? "border-red-500" : ""}`}
           aria-invalid={Boolean(errors.resume && touched.resume)}
           aria-describedby={errors.resume && touched.resume ? "resume-error" : undefined}
+          disabled={disabled}
         />
         {resumeFile && (
           <p className="mt-1 text-sm text-green-600">
@@ -88,11 +92,12 @@ const ApplicationDetailsStep: React.FC<ApplicationDetailsStepProps> = ({
           }}
           className={errors.termsAccepted && touched.termsAccepted ? "border-red-500" : ""}
           aria-invalid={Boolean(errors.termsAccepted && touched.termsAccepted)}
+          disabled={disabled}
         />
         <div className="grid gap-1.5 leading-none">
           <label
             htmlFor="terms"
-            className="text-sm font-medium leading-none cursor-pointer"
+            className={`text-sm font-medium leading-none cursor-pointer ${disabled ? 'text-gray-400' : ''}`}
           >
             I accept the terms and conditions *
           </label>

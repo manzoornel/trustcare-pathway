@@ -51,10 +51,12 @@ export const useApplicationForm = ({ selectedCategory, selectedPosition }: UseAp
   
   const {
     isSubmitting: formSubmitting,
+    submitError,
     errors,
     touched,
     handleSubmit,
-    handleBlur
+    handleBlur,
+    resetSubmitError
   } = useFormSubmission({
     formData,
     resumeFile,
@@ -91,8 +93,6 @@ export const useApplicationForm = ({ selectedCategory, selectedPosition }: UseAp
     setFormData((prev) => ({ ...prev, [name]: value }));
     
     // Mark field as touched on change
-    const newTouched = { ...touched, [name]: true };
-    
     // Validate field
     handleBlur(name);
   };
@@ -115,11 +115,6 @@ export const useApplicationForm = ({ selectedCategory, selectedPosition }: UseAp
       setFormData(savedApplication.formData);
       setOtpVerified(savedApplication.otpVerified);
       setOtpSent(savedApplication.otpVerified);
-      
-      const touchedFields = Object.keys(savedApplication.formData).reduce(
-        (acc, key) => ({ ...acc, [key]: true }),
-        {}
-      );
     }
   };
   
@@ -131,6 +126,7 @@ export const useApplicationForm = ({ selectedCategory, selectedPosition }: UseAp
     errors,
     touched,
     isSubmitting: otpSubmitting || formSubmitting,
+    submitError,
     otpSent,
     otpVerified,
     hasSavedApplication,
@@ -147,6 +143,7 @@ export const useApplicationForm = ({ selectedCategory, selectedPosition }: UseAp
     handleSaveAndExit,
     handleResumeSavedApplication: handleResumeSavedApplicationWrapper,
     handleStartNewApplication,
+    resetSubmitError,
     
     // OTP handlers
     setOtpVerified,

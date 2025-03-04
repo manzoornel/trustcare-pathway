@@ -3,6 +3,7 @@ import React, { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import OTPInput from "@/components/OTPInput";
 import { useOTPVerification } from "./hooks/useOTPVerification";
+import { Loader2 } from "lucide-react";
 
 interface OTPVerificationStepProps {
   email: string;
@@ -21,13 +22,16 @@ const OTPVerificationStep: React.FC<OTPVerificationStepProps> = ({
     otp,
     setOtp,
     isSubmitting,
+    verificationError,
     timeLeft,
     resendDisabled,
+    isResending,
     setTimeLeft,
     setResendDisabled,
     handleVerifyOTP,
     handleResendOTP,
-    decrementTimeLeft
+    decrementTimeLeft,
+    clearVerificationError
   } = useOTPVerification({ email, phone });
 
   useEffect(() => {
@@ -36,7 +40,7 @@ const OTPVerificationStep: React.FC<OTPVerificationStepProps> = ({
     }, 1000);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [decrementTimeLeft]);
 
   const handleVerify = async () => {
     const verified = await handleVerifyOTP();
@@ -59,10 +63,16 @@ const OTPVerificationStep: React.FC<OTPVerificationStepProps> = ({
         <OTPInput
           onComplete={(value) => setOtp(value)}
           length={6}
+          disabled={isSubmitting}
         />
         {otp.length !== 6 && otp.length > 0 && (
           <p className="text-sm text-red-500 text-center mt-2">
             Please enter the complete 6-digit verification code
+          </p>
+        )}
+        {verificationError && (
+          <p className="text-sm text-red-500 text-center mt-2">
+            {verificationError}
           </p>
         )}
       </div>
@@ -73,10 +83,19 @@ const OTPVerificationStep: React.FC<OTPVerificationStepProps> = ({
           variant="link" 
           className="p-0 h-auto" 
           onClick={handleResendOTP}
-          disabled={resendDisabled}
+          disabled={resendDisabled || isResending}
         >
-          Resend Code
-          {resendDisabled && ` (${timeLeft}s)`}
+          {isResending ? (
+            <>
+              <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+              Resending...
+            </>
+          ) : (
+            <>
+              Resend Code
+              {resendDisabled && ` (${timeLeft}s)`}
+            </>
+          )}
         </Button>
         
         <div className="space-x-2">
@@ -84,6 +103,7 @@ const OTPVerificationStep: React.FC<OTPVerificationStepProps> = ({
             type="button" 
             variant="outline" 
             onClick={onBackToContact}
+            disabled={isSubmitting}
           >
             Back
           </Button>
@@ -92,7 +112,14 @@ const OTPVerificationStep: React.FC<OTPVerificationStepProps> = ({
             onClick={handleVerify}
             disabled={isSubmitting || otp.length !== 6}
           >
-            {isSubmitting ? "Verifying..." : "Verify"}
+            {isSubmitting ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Verifying...
+              </>
+            ) : (
+              "Verify"
+            )}
           </Button>
         </div>
       </div>

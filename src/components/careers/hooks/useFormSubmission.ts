@@ -34,6 +34,7 @@ export const useFormSubmission = ({
   setOtpVerified
 }: UseFormSubmissionProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [errors, setErrors] = useState<FormErrors>({});
   
@@ -41,6 +42,9 @@ export const useFormSubmission = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Clear previous submission error
+    setSubmitError(null);
     
     // If not yet sent OTP, we should validate and send OTP
     if (!otpSent) {
@@ -92,7 +96,16 @@ export const useFormSubmission = ({
         setIsSubmitting(true);
         
         // Simulate API submission
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        await new Promise((resolve, reject) => {
+          setTimeout(() => {
+            // 10% chance of simulated error for testing
+            if (Math.random() < 0.1) {
+              reject(new Error("Network connection error"));
+            } else {
+              resolve(true);
+            }
+          }, 1500);
+        });
         
         toast.success("Your application has been submitted successfully!");
         
@@ -115,20 +128,28 @@ export const useFormSubmission = ({
         
       } catch (error) {
         console.error("Error submitting application:", error);
-        toast.error("Failed to submit application. Please try again.");
+        const errorMessage = error instanceof Error ? error.message : "Failed to submit application";
+        setSubmitError(errorMessage);
+        toast.error(errorMessage + ". Please try again.");
       } finally {
         setIsSubmitting(false);
       }
     }
   };
 
+  const resetSubmitError = () => {
+    setSubmitError(null);
+  };
+
   return {
     isSubmitting,
+    submitError,
     errors,
     touched,
     setTouched,
     setErrors,
     handleSubmit,
+    resetSubmitError,
     handleBlur: (fieldName: string) => {
       setTouched(prev => ({ ...prev, [fieldName]: true }));
       

@@ -10,7 +10,8 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { FormData } from "./ApplicationFormTypes";
-import { Check, AlertTriangle } from "lucide-react";
+import { Check, AlertTriangle, Loader2 } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface ConfirmationDialogProps {
   open: boolean;
@@ -19,6 +20,7 @@ interface ConfirmationDialogProps {
   resumeFile: File | null;
   onConfirm: () => void;
   isSubmitting: boolean;
+  submitError: string | null;
   selectedPosition: string;
 }
 
@@ -29,6 +31,7 @@ const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
   resumeFile,
   onConfirm,
   isSubmitting,
+  submitError,
   selectedPosition,
 }) => {
   return (
@@ -43,6 +46,15 @@ const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
             Please review your application details before submitting.
           </DialogDescription>
         </DialogHeader>
+        
+        {submitError && (
+          <Alert variant="destructive" className="my-2">
+            <AlertDescription className="flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4" />
+              {submitError}
+            </AlertDescription>
+          </Alert>
+        )}
         
         <div className="space-y-4 py-4">
           <div className="space-y-2">
@@ -69,7 +81,7 @@ const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
         </div>
         
         <DialogFooter className="flex sm:justify-between">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
             Back to Edit
           </Button>
           <Button 
@@ -78,7 +90,12 @@ const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
             onClick={onConfirm}
             disabled={isSubmitting}
           >
-            {isSubmitting ? "Processing..." : (
+            {isSubmitting ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Processing...
+              </>
+            ) : (
               <>
                 <Check className="h-4 w-4" />
                 Confirm & Submit

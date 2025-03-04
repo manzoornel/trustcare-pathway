@@ -1,5 +1,8 @@
+
 import React from "react";
 import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { JobCategory } from "./JobListingSection";
 import ContactInfoStep from "./ContactInfoStep";
 import OTPVerificationStep from "./OTPVerificationStep";
@@ -32,6 +35,7 @@ const ApplicationForm = ({
     errors,
     touched,
     isSubmitting,
+    submitError,
     otpSent,
     otpVerified,
     hasSavedApplication,
@@ -45,7 +49,8 @@ const ApplicationForm = ({
     handleStartNewApplication,
     setOtpVerified,
     setOtpSent,
-    handleSendOTP
+    handleSendOTP,
+    resetSubmitError
   } = useApplicationForm({ selectedCategory, selectedPosition });
 
   // State for confirmation dialog
@@ -84,6 +89,8 @@ const ApplicationForm = ({
     
     // If OTP is verified, show confirmation dialog
     setShowConfirmDialog(true);
+    // Reset any previous submit errors when opening the dialog
+    resetSubmitError();
   };
 
   return (
@@ -95,11 +102,17 @@ const ApplicationForm = ({
         
         {/* Save & Exit button - only show once some data has been entered */}
         {(formData.name || formData.email || formData.phone) && (
-          <Button variant="outline" onClick={handleSaveAndExit} type="button">
+          <Button variant="outline" onClick={handleSaveAndExit} type="button" disabled={isSubmitting}>
             Save & Exit
           </Button>
         )}
       </div>
+      
+      {submitError && (
+        <Alert variant="destructive" className="mb-4">
+          <AlertDescription>{submitError}</AlertDescription>
+        </Alert>
+      )}
       
       <form onSubmit={handleFormSubmit} className="space-y-4">
         <NameField
@@ -108,6 +121,7 @@ const ApplicationForm = ({
           onBlur={() => handleBlur("name")}
           error={errors.name}
           touched={touched.name}
+          disabled={isSubmitting}
         />
         
         {/* Render different form sections based on the verification state */}
@@ -118,6 +132,7 @@ const ApplicationForm = ({
             touched={touched}
             handleInputChange={handleInputChange}
             handleBlur={handleBlur}
+            disabled={isSubmitting}
           />
         ) : otpSent && !otpVerified ? (
           <OTPVerificationStep 
@@ -142,6 +157,7 @@ const ApplicationForm = ({
             handleFileChange={handleFileChange}
             handleBlur={handleBlur}
             setTermsAccepted={setTermsAccepted}
+            disabled={isSubmitting}
           />
         )}
         
@@ -150,10 +166,14 @@ const ApplicationForm = ({
           className="w-full"
           disabled={isSubmitting}
         >
-          {isSubmitting ? "Processing..." : 
-           !otpSent ? "Verify Contact" :
-           !otpVerified ? "Verify OTP" :
-           "Submit Application"}
+          {isSubmitting ? (
+            <span className="flex items-center justify-center">
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Processing...
+            </span>
+          ) : !otpSent ? "Verify Contact" :
+             !otpVerified ? "Verify OTP" :
+             "Submit Application"}
         </Button>
       </form>
 
@@ -168,6 +188,7 @@ const ApplicationForm = ({
           handleSubmit(new Event('submit') as any);
         }}
         isSubmitting={isSubmitting}
+        submitError={submitError}
         selectedPosition={selectedPositionTitle}
       />
     </div>

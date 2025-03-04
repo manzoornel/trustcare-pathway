@@ -8,14 +8,16 @@ interface NameFieldProps {
   onBlur: () => void;
   error?: string;
   touched?: boolean;
+  disabled?: boolean;
 }
 
-const NameField: React.FC<NameFieldProps> = ({ 
-  name, 
-  onChange, 
-  onBlur, 
-  error, 
-  touched 
+const NameField: React.FC<NameFieldProps> = ({
+  name,
+  onChange,
+  onBlur,
+  error,
+  touched,
+  disabled = false
 }) => {
   return (
     <div>
@@ -32,6 +34,7 @@ const NameField: React.FC<NameFieldProps> = ({
         className={error && touched ? "border-red-500" : ""}
         aria-invalid={Boolean(error && touched)}
         aria-describedby={error && touched ? "name-error" : undefined}
+        disabled={disabled}
       />
       {error && touched && (
         <p id="name-error" className="mt-1 text-sm text-red-500">
