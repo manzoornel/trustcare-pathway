@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { JobCategory } from "./JobListingSection";
 import { Checkbox } from "@/components/ui/checkbox";
+import OTPInput from "@/components/OTPInput";
 
 interface ApplicationFormProps {
   selectedCategory: string;
@@ -24,6 +25,7 @@ type FormErrors = {
   experience?: string;
   resume?: string;
   termsAccepted?: string;
+  otp?: string;
 };
 
 const ApplicationForm = ({ 
@@ -43,6 +45,14 @@ const ApplicationForm = ({
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
+  
+  // OTP related states
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpVerified, setOtpVerified] = useState(false);
+  const [otp, setOtp] = useState("");
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(60);
+  const [resendDisabled, setResendDisabled] = useState(true);
 
   const selectedCategoryData = jobCategories.find((cat) => cat.id === selectedCategory);
 
@@ -72,6 +82,10 @@ const ApplicationForm = ({
         return value === true 
           ? undefined 
           : "You must accept the terms and conditions";
+      case "otp":
+        return value && typeof value === 'string' && value.length === 6
+          ? undefined
+          : "Please enter the 6-digit verification code";
       default:
         return undefined;
     }
@@ -87,6 +101,11 @@ const ApplicationForm = ({
     newErrors.experience = validateField("experience", formData.experience);
     newErrors.resume = validateField("resume", resumeFile);
     newErrors.termsAccepted = validateField("termsAccepted", termsAccepted);
+    
+    // Only validate OTP if we're in the verification step
+    if (otpSent && !otpVerified) {
+      newErrors.otp = validateField("otp", otp);
+    }
     
     // Update the errors state
     setErrors(newErrors);
@@ -132,8 +151,120 @@ const ApplicationForm = ({
     setErrors(prev => ({ ...prev, [fieldName]: error }));
   };
 
+  const handleSendOTP = async () => {
+    // Validate email and phone before sending OTP
+    const emailError = validateField("email", formData.email);
+    const phoneError = validateField("phone", formData.phone);
+    
+    setErrors(prev => ({ 
+      ...prev, 
+      email: emailError,
+      phone: phoneError
+    }));
+    
+    setTouched(prev => ({ 
+      ...prev, 
+      email: true,
+      phone: true 
+    }));
+    
+    if (emailError || phoneError) {
+      toast.error("Please provide valid email and phone number");
+      return;
+    }
+    
+    try {
+      setIsSubmitting(true);
+      
+      // Simulate OTP sending API call with a delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Start the countdown timer for resend
+      setTimeLeft(60);
+      setResendDisabled(true);
+      const timer = setInterval(() => {
+        setTimeLeft((prevTime) => {
+          if (prevTime <= 1) {
+            clearInterval(timer);
+            setResendDisabled(false);
+            return 0;
+          }
+          return prevTime - 1;
+        });
+      }, 1000);
+      
+      setOtpSent(true);
+      toast.success(`Verification code sent to ${formData.phone} and ${formData.email}`);
+      
+    } catch (error) {
+      console.error("Error sending OTP:", error);
+      toast.error("Failed to send verification code. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleVerifyOTP = async () => {
+    if (!otp || otp.length !== 6) {
+      setErrors(prev => ({ ...prev, otp: "Please enter the 6-digit verification code" }));
+      return;
+    }
+    
+    try {
+      setIsVerifying(true);
+      
+      // Simulate OTP verification API call with a delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // For demo, we'll consider "123456" as the valid OTP
+      if (otp === "123456") {
+        setOtpVerified(true);
+        toast.success("Phone and email verified successfully");
+      } else {
+        toast.error("Invalid verification code. Please try again.");
+        setErrors(prev => ({ ...prev, otp: "Invalid verification code" }));
+      }
+      
+    } catch (error) {
+      console.error("Error verifying OTP:", error);
+      toast.error("Failed to verify code. Please try again.");
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
+  const handleResendOTP = () => {
+    setResendDisabled(true);
+    setTimeLeft(60);
+    toast.info("New verification code sent to your phone and email");
+    
+    // Start the countdown again
+    const timer = setInterval(() => {
+      setTimeLeft((prevTime) => {
+        if (prevTime <= 1) {
+          clearInterval(timer);
+          setResendDisabled(false);
+          return 0;
+        }
+        return prevTime - 1;
+      });
+    }, 1000);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // If OTP verification is not done yet, trigger it
+    if (!otpSent) {
+      handleSendOTP();
+      return;
+    }
+    
+    // If OTP is sent but not verified yet, verify it
+    if (otpSent && !otpVerified) {
+      handleVerifyOTP();
+      return;
+    }
     
     // Mark all fields as touched to show all validation errors
     const allTouched = Object.keys(formData).reduce(
@@ -173,6 +304,9 @@ const ApplicationForm = ({
       setTermsAccepted(false);
       setTouched({});
       setErrors({});
+      setOtpSent(false);
+      setOtpVerified(false);
+      setOtp("");
       
     } catch (error) {
       console.error("Error submitting application:", error);
@@ -184,6 +318,140 @@ const ApplicationForm = ({
 
   if (!selectedPosition) return null;
 
+  // Render different sections of the form based on the verification state
+  const renderContactAndOTPSection = () => {
+    if (!otpSent) {
+      return (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                Email Address *
+              </label>
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                onBlur={() => handleBlur("email")}
+                placeholder="john@example.com"
+                className={errors.email && touched.email ? "border-red-500" : ""}
+                aria-invalid={Boolean(errors.email && touched.email)}
+                aria-describedby={errors.email && touched.email ? "email-error" : undefined}
+              />
+              {errors.email && touched.email && (
+                <p id="email-error" className="mt-1 text-sm text-red-500">
+                  {errors.email}
+                </p>
+              )}
+            </div>
+            
+            <div>
+              <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+                Phone Number *
+              </label>
+              <Input
+                id="phone"
+                name="phone"
+                value={formData.phone}
+                onChange={handleInputChange}
+                onBlur={() => handleBlur("phone")}
+                placeholder="+91 9876543210"
+                className={errors.phone && touched.phone ? "border-red-500" : ""}
+                aria-invalid={Boolean(errors.phone && touched.phone)}
+                aria-describedby={errors.phone && touched.phone ? "phone-error" : undefined}
+              />
+              {errors.phone && touched.phone && (
+                <p id="phone-error" className="mt-1 text-sm text-red-500">
+                  {errors.phone}
+                </p>
+              )}
+            </div>
+          </div>
+        </>
+      );
+    }
+    
+    if (otpSent && !otpVerified) {
+      return (
+        <div className="rounded-lg bg-gray-50 p-4 mb-4">
+          <h3 className="text-md font-medium mb-2">Verify Your Contact</h3>
+          <p className="text-sm text-gray-600 mb-4">
+            A verification code has been sent to your phone ({formData.phone}) and email ({formData.email}).
+          </p>
+          
+          <div className="mb-4">
+            <label htmlFor="otp" className="block text-sm font-medium text-gray-700 mb-2">
+              Enter Verification Code *
+            </label>
+            <OTPInput
+              value={otp}
+              onChange={setOtp}
+              valueLength={6}
+              containerClassName="justify-center mb-2"
+            />
+            {errors.otp && (
+              <p className="text-sm text-red-500 text-center">
+                {errors.otp}
+              </p>
+            )}
+          </div>
+          
+          <div className="flex justify-between items-center">
+            <Button 
+              type="button" 
+              variant="link" 
+              className="p-0 h-auto" 
+              onClick={handleResendOTP}
+              disabled={resendDisabled}
+            >
+              Resend Code
+              {resendDisabled && ` (${timeLeft}s)`}
+            </Button>
+            
+            <Button 
+              type="button" 
+              onClick={handleVerifyOTP}
+              disabled={isVerifying || otp.length !== 6}
+            >
+              {isVerifying ? "Verifying..." : "Verify"}
+            </Button>
+          </div>
+        </div>
+      );
+    }
+    
+    // If verified, just show read-only info
+    if (otpVerified) {
+      return (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Email Address (Verified)
+            </label>
+            <Input
+              value={formData.email}
+              readOnly
+              className="bg-gray-50"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Phone Number (Verified)
+            </label>
+            <Input
+              value={formData.phone}
+              readOnly
+              className="bg-gray-50"
+            />
+          </div>
+        </div>
+      );
+    }
+  };
+
   return (
     <div className="bg-white p-6 rounded-lg border">
       <h4 className="text-lg font-medium mb-4">
@@ -191,154 +459,116 @@ const ApplicationForm = ({
       </h4>
       
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-              Full Name *
-            </label>
-            <Input
-              id="name"
-              name="name"
-              value={formData.name}
-              onChange={handleInputChange}
-              onBlur={() => handleBlur("name")}
-              placeholder="John Doe"
-              className={errors.name && touched.name ? "border-red-500" : ""}
-              aria-invalid={Boolean(errors.name && touched.name)}
-              aria-describedby={errors.name && touched.name ? "name-error" : undefined}
-            />
-            {errors.name && touched.name && (
-              <p id="name-error" className="mt-1 text-sm text-red-500">
-                {errors.name}
-              </p>
-            )}
-          </div>
-          
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-              Email Address *
-            </label>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              onBlur={() => handleBlur("email")}
-              placeholder="john@example.com"
-              className={errors.email && touched.email ? "border-red-500" : ""}
-              aria-invalid={Boolean(errors.email && touched.email)}
-              aria-describedby={errors.email && touched.email ? "email-error" : undefined}
-            />
-            {errors.email && touched.email && (
-              <p id="email-error" className="mt-1 text-sm text-red-500">
-                {errors.email}
-              </p>
-            )}
-          </div>
-          
-          <div>
-            <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
-              Phone Number *
-            </label>
-            <Input
-              id="phone"
-              name="phone"
-              value={formData.phone}
-              onChange={handleInputChange}
-              onBlur={() => handleBlur("phone")}
-              placeholder="+91 9876543210"
-              className={errors.phone && touched.phone ? "border-red-500" : ""}
-              aria-invalid={Boolean(errors.phone && touched.phone)}
-              aria-describedby={errors.phone && touched.phone ? "phone-error" : undefined}
-            />
-            {errors.phone && touched.phone && (
-              <p id="phone-error" className="mt-1 text-sm text-red-500">
-                {errors.phone}
-              </p>
-            )}
-          </div>
-          
-          <div>
-            <label htmlFor="experience" className="block text-sm font-medium text-gray-700 mb-1">
-              Years of Experience *
-            </label>
-            <Input
-              id="experience"
-              name="experience"
-              value={formData.experience}
-              onChange={handleInputChange}
-              onBlur={() => handleBlur("experience")}
-              placeholder="5"
-              className={errors.experience && touched.experience ? "border-red-500" : ""}
-              aria-invalid={Boolean(errors.experience && touched.experience)}
-              aria-describedby={errors.experience && touched.experience ? "experience-error" : undefined}
-            />
-            {errors.experience && touched.experience && (
-              <p id="experience-error" className="mt-1 text-sm text-red-500">
-                {errors.experience}
-              </p>
-            )}
-          </div>
-        </div>
-        
         <div>
-          <label htmlFor="resume" className="block text-sm font-medium text-gray-700 mb-1">
-            Upload Resume (PDF) *
+          <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+            Full Name *
           </label>
           <Input
-            id="resume"
-            name="resume"
-            type="file"
-            accept=".pdf"
-            onChange={handleFileChange}
-            onBlur={() => handleBlur("resume")}
-            className={`cursor-pointer ${errors.resume && touched.resume ? "border-red-500" : ""}`}
-            aria-invalid={Boolean(errors.resume && touched.resume)}
-            aria-describedby={errors.resume && touched.resume ? "resume-error" : undefined}
+            id="name"
+            name="name"
+            value={formData.name}
+            onChange={handleInputChange}
+            onBlur={() => handleBlur("name")}
+            placeholder="John Doe"
+            className={errors.name && touched.name ? "border-red-500" : ""}
+            aria-invalid={Boolean(errors.name && touched.name)}
+            aria-describedby={errors.name && touched.name ? "name-error" : undefined}
           />
-          {resumeFile && (
-            <p className="mt-1 text-sm text-green-600">
-              Selected file: {resumeFile.name}
-            </p>
-          )}
-          {errors.resume && touched.resume && (
-            <p id="resume-error" className="mt-1 text-sm text-red-500">
-              {errors.resume}
+          {errors.name && touched.name && (
+            <p id="name-error" className="mt-1 text-sm text-red-500">
+              {errors.name}
             </p>
           )}
         </div>
         
-        <div className="flex items-start space-x-2">
-          <Checkbox 
-            id="terms" 
-            checked={termsAccepted} 
-            onCheckedChange={(checked) => {
-              setTermsAccepted(checked === true);
-              handleBlur("termsAccepted");
-            }}
-            className={errors.termsAccepted && touched.termsAccepted ? "border-red-500" : ""}
-            aria-invalid={Boolean(errors.termsAccepted && touched.termsAccepted)}
-          />
-          <div className="grid gap-1.5 leading-none">
-            <label
-              htmlFor="terms"
-              className="text-sm font-medium leading-none cursor-pointer"
-            >
-              I accept the terms and conditions *
-            </label>
-            {errors.termsAccepted && touched.termsAccepted && (
-              <p className="text-sm text-red-500">{errors.termsAccepted}</p>
-            )}
-          </div>
-        </div>
+        {renderContactAndOTPSection()}
+        
+        {otpVerified && (
+          <>
+            <div>
+              <label htmlFor="experience" className="block text-sm font-medium text-gray-700 mb-1">
+                Years of Experience *
+              </label>
+              <Input
+                id="experience"
+                name="experience"
+                value={formData.experience}
+                onChange={handleInputChange}
+                onBlur={() => handleBlur("experience")}
+                placeholder="5"
+                className={errors.experience && touched.experience ? "border-red-500" : ""}
+                aria-invalid={Boolean(errors.experience && touched.experience)}
+                aria-describedby={errors.experience && touched.experience ? "experience-error" : undefined}
+              />
+              {errors.experience && touched.experience && (
+                <p id="experience-error" className="mt-1 text-sm text-red-500">
+                  {errors.experience}
+                </p>
+              )}
+            </div>
+            
+            <div>
+              <label htmlFor="resume" className="block text-sm font-medium text-gray-700 mb-1">
+                Upload Resume (PDF) *
+              </label>
+              <Input
+                id="resume"
+                name="resume"
+                type="file"
+                accept=".pdf"
+                onChange={handleFileChange}
+                onBlur={() => handleBlur("resume")}
+                className={`cursor-pointer ${errors.resume && touched.resume ? "border-red-500" : ""}`}
+                aria-invalid={Boolean(errors.resume && touched.resume)}
+                aria-describedby={errors.resume && touched.resume ? "resume-error" : undefined}
+              />
+              {resumeFile && (
+                <p className="mt-1 text-sm text-green-600">
+                  Selected file: {resumeFile.name}
+                </p>
+              )}
+              {errors.resume && touched.resume && (
+                <p id="resume-error" className="mt-1 text-sm text-red-500">
+                  {errors.resume}
+                </p>
+              )}
+            </div>
+            
+            <div className="flex items-start space-x-2">
+              <Checkbox 
+                id="terms" 
+                checked={termsAccepted} 
+                onCheckedChange={(checked) => {
+                  setTermsAccepted(checked === true);
+                  handleBlur("termsAccepted");
+                }}
+                className={errors.termsAccepted && touched.termsAccepted ? "border-red-500" : ""}
+                aria-invalid={Boolean(errors.termsAccepted && touched.termsAccepted)}
+              />
+              <div className="grid gap-1.5 leading-none">
+                <label
+                  htmlFor="terms"
+                  className="text-sm font-medium leading-none cursor-pointer"
+                >
+                  I accept the terms and conditions *
+                </label>
+                {errors.termsAccepted && touched.termsAccepted && (
+                  <p className="text-sm text-red-500">{errors.termsAccepted}</p>
+                )}
+              </div>
+            </div>
+          </>
+        )}
         
         <Button
           type="submit"
           className="w-full"
           disabled={isSubmitting}
         >
-          {isSubmitting ? "Submitting..." : "Submit Application"}
+          {isSubmitting ? "Processing..." : 
+           !otpSent ? "Verify Contact" :
+           !otpVerified ? "Verify OTP" :
+           "Submit Application"}
         </Button>
       </form>
     </div>
