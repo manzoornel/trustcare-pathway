@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { 
@@ -30,16 +29,13 @@ export const useApplicationForm = ({ selectedCategory, selectedPosition }: UseAp
   const [errors, setErrors] = useState<FormErrors>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   
-  // Application form steps
   const [otpSent, setOtpSent] = useState(false);
   const [otpVerified, setOtpVerified] = useState(false);
   
-  // Save/resume related states
   const [hasSavedApplication, setHasSavedApplication] = useState(false);
 
   const { validateField, validateForm, hasErrors } = useFormValidation();
 
-  // Check for saved application on initial load
   useEffect(() => {
     const savedApplication = getApplicationFromStorage();
     
@@ -50,7 +46,6 @@ export const useApplicationForm = ({ selectedCategory, selectedPosition }: UseAp
     }
   }, [selectedCategory, selectedPosition]);
 
-  // Auto-save application progress when form data changes
   useEffect(() => {
     if (formData.name || formData.email || formData.phone || formData.experience) {
       const applicationData: SavedApplication = {
@@ -75,9 +70,8 @@ export const useApplicationForm = ({ selectedCategory, selectedPosition }: UseAp
     
     setFormData(savedApplication.formData);
     setOtpVerified(savedApplication.otpVerified);
-    setOtpSent(savedApplication.otpVerified); // If OTP was verified, it was also sent
+    setOtpSent(savedApplication.otpVerified);
     
-    // Mark all fields as touched
     const touchedFields = Object.keys(savedApplication.formData).reduce(
       (acc, key) => ({ ...acc, [key]: true }),
       {}
@@ -92,10 +86,8 @@ export const useApplicationForm = ({ selectedCategory, selectedPosition }: UseAp
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     
-    // Mark field as touched
     setTouched(prev => ({ ...prev, [name]: true }));
     
-    // Validate the field
     const error = validateField(name, value);
     setErrors(prev => ({ ...prev, [name]: error }));
   };
@@ -105,7 +97,6 @@ export const useApplicationForm = ({ selectedCategory, selectedPosition }: UseAp
       const file = e.target.files[0];
       setResumeFile(file);
       
-      // Validate the file
       const error = validateField("resume", file);
       setErrors(prev => ({ ...prev, resume: error }));
     }
@@ -114,7 +105,6 @@ export const useApplicationForm = ({ selectedCategory, selectedPosition }: UseAp
   const handleBlur = (fieldName: string) => {
     setTouched(prev => ({ ...prev, [fieldName]: true }));
     
-    // Validate the field when it loses focus
     const value = fieldName === "resume" 
       ? resumeFile 
       : fieldName === "termsAccepted" 
@@ -126,7 +116,6 @@ export const useApplicationForm = ({ selectedCategory, selectedPosition }: UseAp
   };
 
   const handleSendOTP = async () => {
-    // Validate email and phone before sending OTP
     const emailError = validateField("email", formData.email);
     const phoneError = validateField("phone", formData.phone);
     
@@ -150,7 +139,6 @@ export const useApplicationForm = ({ selectedCategory, selectedPosition }: UseAp
     try {
       setIsSubmitting(true);
       
-      // Simulate OTP sending API call with a delay
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       setOtpSent(true);
@@ -167,17 +155,14 @@ export const useApplicationForm = ({ selectedCategory, selectedPosition }: UseAp
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // If OTP verification is not done yet, trigger it
     if (!otpSent) {
       handleSendOTP();
       return;
     }
     
-    // Check if all fields are valid
     const newErrors = validateForm(formData, resumeFile, termsAccepted, otpSent, otpVerified, "");
     setErrors(newErrors);
     
-    // Mark all fields as touched to show validation errors
     const allTouched = Object.keys(formData).reduce(
       (acc, field) => ({ ...acc, [field]: true }),
       { resume: true, termsAccepted: true }
@@ -197,15 +182,12 @@ export const useApplicationForm = ({ selectedCategory, selectedPosition }: UseAp
     try {
       setIsSubmitting(true);
       
-      // Simulating API call with a delay
       await new Promise(resolve => setTimeout(resolve, 1500));
       
       toast.success("Your application has been submitted successfully!");
       
-      // Clear saved application on successful submission
       clearSavedApplication();
       
-      // Reset form
       setFormData({
         name: "",
         email: "",
@@ -229,7 +211,6 @@ export const useApplicationForm = ({ selectedCategory, selectedPosition }: UseAp
   };
 
   const handleSaveAndExit = () => {
-    // We're already auto-saving, so just need to show confirmation
     toast.success("Your application progress has been saved. You can return to complete it later.");
   };
 

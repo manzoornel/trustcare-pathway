@@ -8,6 +8,7 @@ import ApplicationDetailsStep from "./ApplicationDetailsStep";
 import VerifiedContactInfo from "./VerifiedContactInfo";
 import NameField from "./NameField";
 import ResumeApplicationPrompt from "./ResumeApplicationPrompt";
+import ConfirmationDialog from "./ConfirmationDialog";
 import { getApplicationFromStorage } from "./ApplicationFormTypes";
 import { useApplicationForm } from "./useApplicationForm";
 
@@ -23,6 +24,7 @@ const ApplicationForm = ({
   jobCategories 
 }: ApplicationFormProps) => {
   const selectedCategoryData = jobCategories.find((cat) => cat.id === selectedCategory);
+  const selectedPositionTitle = selectedCategoryData?.positions.find(p => p.id === selectedPosition)?.title || "";
   
   const {
     formData,
@@ -46,6 +48,9 @@ const ApplicationForm = ({
     setOtpSent
   } = useApplicationForm({ selectedCategory, selectedPosition });
 
+  // State for confirmation dialog
+  const [showConfirmDialog, setShowConfirmDialog] = React.useState(false);
+
   if (!selectedPosition) return null;
 
   // Show resume application prompt if there's a saved application for this position
@@ -62,11 +67,31 @@ const ApplicationForm = ({
     );
   }
 
+  // Handle the form submission process
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // If OTP is not sent yet, call handleSubmit directly which will trigger OTP sending
+    if (!otpSent) {
+      handleSubmit(e);
+      return;
+    }
+    
+    // If OTP is sent but not verified, call handleSubmit to verify OTP
+    if (otpSent && !otpVerified) {
+      handleSubmit(e);
+      return;
+    }
+    
+    // If OTP is verified, show confirmation dialog
+    setShowConfirmDialog(true);
+  };
+
   return (
     <div className="bg-white p-6 rounded-lg border">
       <div className="flex justify-between items-center mb-4">
         <h4 className="text-lg font-medium">
-          Apply for: {selectedCategoryData?.positions.find(p => p.id === selectedPosition)?.title}
+          Apply for: {selectedPositionTitle}
         </h4>
         
         {/* Save & Exit button - only show once some data has been entered */}
@@ -77,7 +102,7 @@ const ApplicationForm = ({
         )}
       </div>
       
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleFormSubmit} className="space-y-4">
         <NameField
           name={formData.name}
           onChange={handleInputChange}
@@ -132,6 +157,20 @@ const ApplicationForm = ({
            "Submit Application"}
         </Button>
       </form>
+
+      {/* Confirmation Dialog */}
+      <ConfirmationDialog
+        open={showConfirmDialog}
+        onOpenChange={setShowConfirmDialog}
+        formData={formData}
+        resumeFile={resumeFile}
+        onConfirm={() => {
+          setShowConfirmDialog(false);
+          handleSubmit(new Event('submit') as any);
+        }}
+        isSubmitting={isSubmitting}
+        selectedPosition={selectedPositionTitle}
+      />
     </div>
   );
 };
