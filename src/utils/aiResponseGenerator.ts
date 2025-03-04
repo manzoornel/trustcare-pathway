@@ -1,5 +1,6 @@
 
 import { Message } from '@/components/chat/types';
+import { qaData, QAItem } from './chatQAData';
 
 interface AiResponseGeneratorOptions {
   conversationContext: string[];
@@ -20,6 +21,11 @@ export class AiResponseGenerator {
         if (userMsg.includes('covid') || userMsg.includes('vaccine')) recentTopics.add('covid');
         if (userMsg.includes('doctor') || userMsg.includes('physician')) recentTopics.add('doctors');
         if (userMsg.includes('emergency')) recentTopics.add('emergency');
+        if (userMsg.includes('lab') || userMsg.includes('test')) recentTopics.add('lab');
+        if (userMsg.includes('medicine') || userMsg.includes('medication')) recentTopics.add('medication');
+        if (userMsg.includes('symptom') || userMsg.includes('pain')) recentTopics.add('symptoms');
+        if (userMsg.includes('diet') || userMsg.includes('nutrition')) recentTopics.add('diet');
+        if (userMsg.includes('diabetes') || userMsg.includes('blood pressure')) recentTopics.add('conditions');
       }
     });
     
@@ -57,10 +63,64 @@ export class AiResponseGenerator {
       userInputLower.length < 15 // Short questions are often follow-ups
     );
   }
+
+  private findBestMatchFromQA(userInput: string): QAItem | null {
+    const userInputLower = userInput.toLowerCase();
+    
+    // First, try to find an exact match
+    for (const category of qaData) {
+      for (const item of category.questions) {
+        if (userInputLower.includes(item.question.toLowerCase())) {
+          return item;
+        }
+      }
+    }
+    
+    // If no exact match, try keyword matching
+    let bestMatch: QAItem | null = null;
+    let highestMatchScore = 0;
+    
+    // Split user input into keywords
+    const userKeywords = userInputLower
+      .replace(/[.,?!;:]/g, '')
+      .split(' ')
+      .filter(word => word.length > 2);
+    
+    for (const category of qaData) {
+      for (const item of category.questions) {
+        const questionLower = item.question.toLowerCase();
+        let matchScore = 0;
+        
+        // Count matching keywords
+        userKeywords.forEach(keyword => {
+          if (questionLower.includes(keyword)) {
+            matchScore++;
+          }
+        });
+        
+        // If this is a better match, update
+        if (matchScore > highestMatchScore) {
+          highestMatchScore = matchScore;
+          bestMatch = item;
+        }
+      }
+    }
+    
+    // Only return if we have a decent match
+    return highestMatchScore >= 2 ? bestMatch : null;
+  }
   
   public generateResponse(userInput: string, options: AiResponseGeneratorOptions): string {
     const { conversationContext } = options;
     const userInputLower = userInput.toLowerCase();
+    
+    // Check for Q&A match first
+    const qaMatch = this.findBestMatchFromQA(userInput);
+    if (qaMatch) {
+      return qaMatch.answer;
+    }
+    
+    // If no direct match in Q&A data, use original logic
     let botResponse = "I'm sorry, I don't have enough information to answer that. Could you provide more details?";
     
     // Check if this is a follow-up question
@@ -78,7 +138,7 @@ export class AiResponseGenerator {
         botResponse = "For your appointment, you'll need your insurance card and ID. Our online appointment system also lets you select your preferred doctor if they have availability.";
       }
     } else if (userInputLower.includes('hour') || userInputLower.includes('open')) {
-      botResponse = "Our clinic is open Monday to Friday from 8:00 AM to 6:00 PM, and Saturday from 9:00 AM to 2:00 PM. We are closed on Sundays.";
+      botResponse = "Our clinic operates 24/7. You can visit anytime for consultations, lab tests, and pharmacy services.";
       
       // If this is a follow-up about hours
       if (recentTopics.has('hours') && isFollowUp) {

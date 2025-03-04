@@ -22,7 +22,7 @@ export const createBotMessage = (content: string): Message => {
 export const createInitialBotMessage = (): Message => {
   return {
     id: '1',
-    content: 'Hello! I\'m Doctor Uncle\'s AI assistant. How can I help you today?',
+    content: 'Hello! I\'m Doctor Uncle\'s AI assistant. I can help you with clinic information, appointment booking, health advice, and more. How may I assist you today?',
     sender: 'bot',
     timestamp: new Date()
   };
