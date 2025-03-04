@@ -59,8 +59,8 @@ const Footer = () => {
             
             <div className="grid md:grid-cols-2 gap-4 text-sm">
               <div className="p-3 border border-gray-100 rounded-lg">
-                <p className="font-medium text-gray-800 mb-1">Vakkad Branch (Near Aneesha Theatre):</p>
-                <p className="text-gray-500">Phone: 9961 588 880 | 04942 087 888</p>
+                <p className="font-medium text-gray-800 mb-1">Vakkad Branch (Near Malayalam University):</p>
+                <p className="text-gray-500">Phone: 9961 588 880</p>
                 <a 
                   href="https://maps.app.goo.gl/APyMEnBeAxSfB5bX8" 
                   target="_blank" 
@@ -85,7 +85,7 @@ const Footer = () => {
               </div>
             </div>
             
-            <p className="text-gray-500 text-sm mt-3">Email: contact@doctoruncle.com</p>
+            <p className="text-gray-500 text-sm mt-3">Email: contact@doctoruncle.in</p>
           </div>
           
           <p className="text-gray-500 text-sm text-center">

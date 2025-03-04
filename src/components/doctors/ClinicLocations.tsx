@@ -5,8 +5,8 @@ const ClinicLocations = () => {
       <h4 className="font-semibold mb-2">Visit Doctor Uncle Family Clinic</h4>
       <div className="grid md:grid-cols-2 gap-4 text-sm">
         <div>
-          <p className="font-medium text-gray-800">Vakkad Branch (Near Aneesha Theatre):</p>
-          <p className="text-gray-600">Phone: 9961 588 880 | 04942 087 888</p>
+          <p className="font-medium text-gray-800">Vakkad Branch (Near Malayalam University):</p>
+          <p className="text-gray-600">Phone: 9961 588 880</p>
         </div>
         
         <div>

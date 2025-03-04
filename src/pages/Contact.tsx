@@ -1,4 +1,3 @@
-
 import React from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -96,8 +95,8 @@ const Contact = () => {
                     <div>
                       <h3 className="font-medium">Address</h3>
                       <p className="text-gray-600">
-                        123 Medical Drive, <br />
-                        Healthcare City, HC 12345
+                        Near Malayalam University, <br />
+                        Vakkad, Tirur, 676502, Kerala
                       </p>
                     </div>
                   </div>
@@ -105,25 +104,21 @@ const Contact = () => {
                     <Phone className="w-6 h-6 text-primary mr-4 mt-1" />
                     <div>
                       <h3 className="font-medium">Phone</h3>
-                      <p className="text-gray-600">(555) 123-4567</p>
-                      <p className="text-gray-600">Emergency: (555) 987-6543</p>
+                      <p className="text-gray-600">9961 588 880</p>
                     </div>
                   </div>
                   <div className="flex items-start">
                     <Mail className="w-6 h-6 text-primary mr-4 mt-1" />
                     <div>
                       <h3 className="font-medium">Email</h3>
-                      <p className="text-gray-600">info@doctoruncle.com</p>
-                      <p className="text-gray-600">appointments@doctoruncle.com</p>
+                      <p className="text-gray-600">contact@doctoruncle.in</p>
                     </div>
                   </div>
                   <div className="flex items-start">
                     <Clock className="w-6 h-6 text-primary mr-4 mt-1" />
                     <div>
                       <h3 className="font-medium">Hours</h3>
-                      <p className="text-gray-600">Monday - Friday: 8am - 6pm</p>
-                      <p className="text-gray-600">Saturday: 9am - 2pm</p>
-                      <p className="text-gray-600">Sunday: Closed</p>
+                      <p className="text-gray-600">24/7</p>
                     </div>
                   </div>
                 </div>

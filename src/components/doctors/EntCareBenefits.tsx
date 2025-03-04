@@ -32,11 +32,11 @@ const EntCareBenefits = () => {
         <div className="flex items-center justify-center flex-wrap gap-4">
           <div className="flex items-center">
             <MapPin className="h-5 w-5 text-primary mr-2" />
-            <span className="font-medium">Vakkad Branch (Near Aneesha Theatre)</span>
+            <span className="font-medium">Vakkad Branch (Near Malayalam University)</span>
           </div>
           <div className="flex items-center">
             <Phone className="h-5 w-5 text-primary mr-2" />
-            <span>9961 588 880 | 04942 087 888</span>
+            <span>9961 588 880</span>
           </div>
         </div>
       </div>
