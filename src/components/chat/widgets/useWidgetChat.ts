@@ -3,14 +3,10 @@ import { useState } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { Message } from '../types';
 import { aiResponseGenerator } from '@/utils/aiResponseGenerator';
+import { createUserMessage, createBotMessage, createInitialBotMessage } from '@/utils/chatMessageUtils';
 
 export const useWidgetChat = () => {
-  const [messages, setMessages] = useState<Message[]>([{
-    id: '1',
-    content: 'Hello! I\'m Doctor Uncle\'s AI assistant. How can I help you today?',
-    sender: 'bot',
-    timestamp: new Date()
-  }]);
+  const [messages, setMessages] = useState<Message[]>([createInitialBotMessage()]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [conversationContext, setConversationContext] = useState<string[]>(['Greeting: Hello! I\'m Doctor Uncle\'s AI assistant.']);
@@ -19,12 +15,8 @@ export const useWidgetChat = () => {
   const { toast } = useToast();
 
   const clearConversation = () => {
-    setMessages([{
-      id: Date.now().toString(),
-      content: 'Hello! I\'m Doctor Uncle\'s AI assistant. How can I help you today?',
-      sender: 'bot',
-      timestamp: new Date()
-    }]);
+    const initialMessage = createInitialBotMessage();
+    setMessages([initialMessage]);
     setConversationContext(['Greeting: Hello! I\'m Doctor Uncle\'s AI assistant.']);
     toast({
       title: "Conversation cleared",
@@ -35,12 +27,7 @@ export const useWidgetChat = () => {
   const handleSendMessage = async (message: string) => {
     if (!message.trim()) return;
     
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      content: message,
-      sender: 'user',
-      timestamp: new Date()
-    };
+    const userMessage = createUserMessage(message);
     
     setMessages(prev => [...prev, userMessage]);
     const updatedContext = [...conversationContext, `User: ${message}`];
@@ -54,12 +41,7 @@ export const useWidgetChat = () => {
           conversationContext: updatedContext
         });
         
-        const botMessageObj: Message = {
-          id: (Date.now() + 1).toString(),
-          content: botResponse,
-          sender: 'bot',
-          timestamp: new Date()
-        };
+        const botMessageObj = createBotMessage(botResponse);
         
         setMessages(prev => [...prev, botMessageObj]);
         setConversationContext([...updatedContext, `AI: ${botResponse}`]);

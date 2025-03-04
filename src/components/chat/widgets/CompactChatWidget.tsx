@@ -12,7 +12,7 @@ interface CompactChatWidgetProps {
   isLoading: boolean;
   inputValue: string;
   onInputChange: (value: string) => void;
-  onSendMessage: (e: React.FormEvent) => void;
+  onSendMessage: (message: string) => void;
   onClear: () => void;
   onExpand: () => void;
   onClose: () => void;
@@ -33,6 +33,12 @@ const CompactChatWidget = ({
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!inputValue.trim()) return;
+    onSendMessage(inputValue.trim());
+  };
 
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col w-80 h-96 bg-white rounded-xl shadow-xl overflow-hidden border border-gray-200">
@@ -69,7 +75,7 @@ const CompactChatWidget = ({
       </div>
       
       <div className="p-2 border-t">
-        <form onSubmit={onSendMessage} className="flex gap-1">
+        <form onSubmit={handleSubmit} className="flex gap-1">
           <Input
             type="text"
             placeholder="Type your message..."

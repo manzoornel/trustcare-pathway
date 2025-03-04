@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useToast } from "@/components/ui/use-toast";
 import { Message } from './types';
 import { aiResponseGenerator } from '@/utils/aiResponseGenerator';
+import { createUserMessage, createBotMessage, createInitialBotMessage } from '@/utils/chatMessageUtils';
 
 export const useAIChat = () => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -12,28 +13,14 @@ export const useAIChat = () => {
 
   // Initial greeting message
   useEffect(() => {
-    setMessages([
-      {
-        id: '1',
-        content: 'Hello! I\'m Doctor Uncle\'s AI assistant. How can I help you today?',
-        sender: 'bot',
-        timestamp: new Date()
-      }
-    ]);
+    setMessages([createInitialBotMessage()]);
     
     // Initialize conversation context with greeting
     setConversationContext(['Greeting: Hello! I\'m Doctor Uncle\'s AI assistant.']);
   }, []);
 
   const clearConversation = () => {
-    setMessages([
-      {
-        id: Date.now().toString(),
-        content: 'Hello! I\'m Doctor Uncle\'s AI assistant. How can I help you today?',
-        sender: 'bot',
-        timestamp: new Date()
-      }
-    ]);
+    setMessages([createInitialBotMessage()]);
     setConversationContext(['Greeting: Hello! I\'m Doctor Uncle\'s AI assistant.']);
     toast({
       title: "Conversation cleared",
@@ -43,12 +30,7 @@ export const useAIChat = () => {
 
   const handleSendMessage = async (inputValue: string) => {
     // Add user message to the chat
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      content: inputValue,
-      sender: 'user',
-      timestamp: new Date()
-    };
+    const userMessage = createUserMessage(inputValue);
     
     setMessages(prev => [...prev, userMessage]);
     
@@ -66,12 +48,7 @@ export const useAIChat = () => {
           conversationContext: updatedContext
         });
         
-        const botMessageObj: Message = {
-          id: (Date.now() + 1).toString(),
-          content: botResponse,
-          sender: 'bot',
-          timestamp: new Date()
-        };
+        const botMessageObj = createBotMessage(botResponse);
         
         setMessages(prev => [...prev, botMessageObj]);
         
