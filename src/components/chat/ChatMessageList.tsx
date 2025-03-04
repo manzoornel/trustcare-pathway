@@ -24,9 +24,9 @@ const ChatMessageList = ({ messages, isLoading }: ChatMessageListProps) => {
       {isLoading && (
         <div className="flex justify-start mb-4">
           <div className="flex items-start max-w-[80%]">
-            <div className="rounded-full p-1 mr-2 bg-gray-100 border border-gray-200 flex items-center justify-center">
+            <div className="rounded-full p-1 mr-2 bg-white border border-gray-200 flex items-center justify-center">
               <img 
-                src="/lovable-uploads/c4beddef-b77c-4f28-8e9b-8f2f43be79e6.png" 
+                src="/lovable-uploads/ae63c3bf-5d6c-4576-8d59-1311ca468c30.png" 
                 alt="Doctor Uncle AI" 
                 className="h-6 w-6 object-contain"
               />

@@ -14,7 +14,7 @@ const AIChat = () => {
       <div className="p-4 bg-blue-700 text-white flex justify-between items-center">
         <div className="flex items-center gap-2">
           <img 
-            src="/lovable-uploads/c4beddef-b77c-4f28-8e9b-8f2f43be79e6.png" 
+            src="/lovable-uploads/ae63c3bf-5d6c-4576-8d59-1311ca468c30.png" 
             alt="Doctor Uncle AI" 
             className="h-8 w-8" 
           />
