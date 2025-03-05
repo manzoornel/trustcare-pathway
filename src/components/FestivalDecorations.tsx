@@ -1,15 +1,38 @@
 
-import React from 'react';
-import { useTheme } from '@/contexts/ThemeContext';
+import React, { useEffect, useState } from 'react';
+import { useTheme, ThemeType, THEME_CHANGE_EVENT } from '@/contexts/ThemeContext';
 import { Star, Moon, Flower, Heart, Gift, Snowflake, FlowerIcon, Sparkles } from 'lucide-react';
 
 const FestivalDecorations: React.FC = () => {
   const { theme } = useTheme();
+  const [localTheme, setLocalTheme] = useState<ThemeType>(theme);
   
-  if (theme === 'default') return null;
+  // Update local theme when global theme changes
+  useEffect(() => {
+    setLocalTheme(theme);
+  }, [theme]);
+
+  // Listen for theme changes from other components
+  useEffect(() => {
+    const handleThemeChange = (e: Event) => {
+      const event = e as CustomEvent;
+      if (event.detail && event.detail.theme) {
+        console.log('FestivalDecorations: detected theme change:', event.detail.theme);
+        setLocalTheme(event.detail.theme);
+      }
+    };
+    
+    window.addEventListener(THEME_CHANGE_EVENT, handleThemeChange);
+    
+    return () => {
+      window.removeEventListener(THEME_CHANGE_EVENT, handleThemeChange);
+    };
+  }, []);
+  
+  if (localTheme === 'default') return null;
   
   const renderDecorations = () => {
-    switch (theme) {
+    switch (localTheme) {
       case 'eid':
         return (
           <>

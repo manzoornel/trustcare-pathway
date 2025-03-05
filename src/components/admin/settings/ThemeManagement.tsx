@@ -1,11 +1,12 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { useTheme, ThemeType } from '@/contexts/ThemeContext';
+import { useTheme, ThemeType, THEME_CHANGE_EVENT } from '@/contexts/ThemeContext';
 import { Label } from '@/components/ui/label';
 import { Sun, Moon, Flower, Heart, Gift, Star, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { toast } from 'react-toastify';
 
 const ThemeManagement = () => {
   const { theme, setTheme } = useTheme();
@@ -20,8 +21,30 @@ const ThemeManagement = () => {
     { id: 'xmas', label: 'Xmas', icon: <Gift className="h-5 w-5" />, color: 'bg-[#D32F2F]' },
   ];
 
+  useEffect(() => {
+    // Listen for theme changes from other components/tabs
+    const handleThemeChange = (e: Event) => {
+      const event = e as CustomEvent;
+      if (event.detail && event.detail.theme) {
+        console.log('ThemeManagement: detected theme change:', event.detail.theme);
+      }
+    };
+    
+    window.addEventListener(THEME_CHANGE_EVENT, handleThemeChange);
+    
+    return () => {
+      window.removeEventListener(THEME_CHANGE_EVENT, handleThemeChange);
+    };
+  }, []);
+
   const handleThemeChange = (value: string) => {
-    setTheme(value as ThemeType);
+    const newTheme = value as ThemeType;
+    setTheme(newTheme);
+    toast.success(`Theme changed to ${value}`, {
+      position: "top-center",
+      autoClose: 2000
+    });
+    console.log('Theme changed to:', newTheme);
   };
 
   return (

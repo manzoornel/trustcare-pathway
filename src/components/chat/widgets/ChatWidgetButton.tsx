@@ -1,7 +1,7 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { useTheme } from '@/contexts/ThemeContext';
+import { useTheme, ThemeType, THEME_CHANGE_EVENT } from '@/contexts/ThemeContext';
 
 interface ChatWidgetButtonProps {
   onClick: () => void;
@@ -9,10 +9,33 @@ interface ChatWidgetButtonProps {
 
 const ChatWidgetButton = ({ onClick }: ChatWidgetButtonProps) => {
   const { theme } = useTheme();
+  const [localTheme, setLocalTheme] = useState<ThemeType>(theme);
+  
+  // Update local theme when global theme changes
+  useEffect(() => {
+    setLocalTheme(theme);
+  }, [theme]);
+
+  // Listen for theme changes from other components
+  useEffect(() => {
+    const handleThemeChange = (e: Event) => {
+      const event = e as CustomEvent;
+      if (event.detail && event.detail.theme) {
+        console.log('ChatWidgetButton: detected theme change:', event.detail.theme);
+        setLocalTheme(event.detail.theme);
+      }
+    };
+    
+    window.addEventListener(THEME_CHANGE_EVENT, handleThemeChange);
+    
+    return () => {
+      window.removeEventListener(THEME_CHANGE_EVENT, handleThemeChange);
+    };
+  }, []);
   
   // Theme-specific button colors
   const getButtonBgColor = () => {
-    switch(theme) {
+    switch(localTheme) {
       case 'eid':
         return 'bg-[#24936E] hover:bg-[#24936E]/80';
       case 'ramzan':

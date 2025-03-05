@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 // Available themes
@@ -140,6 +141,9 @@ type ThemeContextType = {
 // Create the context
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
+// Custom event for theme changes
+export const THEME_CHANGE_EVENT = 'themeChanged';
+
 // Theme provider props
 type ThemeProviderProps = {
   children: React.ReactNode;
@@ -148,8 +152,13 @@ type ThemeProviderProps = {
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   // Get saved theme or use default
   const [theme, setThemeState] = useState<ThemeType>(() => {
-    const savedTheme = localStorage.getItem('docUncleTheme');
-    return (savedTheme as ThemeType) || 'default';
+    try {
+      const savedTheme = localStorage.getItem('docUncleTheme');
+      return (savedTheme as ThemeType) || 'default';
+    } catch (error) {
+      console.error('Error accessing localStorage:', error);
+      return 'default';
+    }
   });
   
   const [isThemeChanging, setIsThemeChanging] = useState(false);
@@ -158,8 +167,13 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   // Check if user is admin on mount
   useEffect(() => {
     const checkAdmin = () => {
-      const adminRole = localStorage.getItem('adminRole');
-      setIsAdmin(adminRole === 'admin');
+      try {
+        const adminRole = localStorage.getItem('adminRole');
+        setIsAdmin(adminRole === 'admin');
+      } catch (error) {
+        console.error('Error checking admin status:', error);
+        setIsAdmin(false);
+      }
     };
     
     checkAdmin();
@@ -180,18 +194,31 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
       return;
     }
     
+    console.log('Setting theme to:', newTheme);
     setIsThemeChanging(true);
-    setTimeout(() => {
-      setThemeState(newTheme);
+    
+    try {
       localStorage.setItem('docUncleTheme', newTheme);
+      
+      // Dispatch a custom event to notify all components about the theme change
+      const themeEvent = new CustomEvent(THEME_CHANGE_EVENT, { detail: { theme: newTheme } });
+      window.dispatchEvent(themeEvent);
+      
       setTimeout(() => {
-        setIsThemeChanging(false);
-      }, 500);
-    }, 300);
+        setThemeState(newTheme);
+        setTimeout(() => {
+          setIsThemeChanging(false);
+        }, 500);
+      }, 300);
+    } catch (error) {
+      console.error('Error saving theme to localStorage:', error);
+      setIsThemeChanging(false);
+    }
   };
 
   // Update CSS variables when theme changes
   useEffect(() => {
+    console.log('Theme changed to:', theme);
     const colors = themeColors[theme];
     
     document.documentElement.style.setProperty('--color-primary', colors.primary);
@@ -214,6 +241,23 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     document.body.className = '';
     document.body.classList.add(`theme-${theme}`);
   }, [theme]);
+
+  // Listen for theme changes from other components/instances
+  useEffect(() => {
+    const handleThemeChange = (e: Event) => {
+      const event = e as CustomEvent;
+      if (event.detail && event.detail.theme) {
+        console.log('Received theme change event:', event.detail.theme);
+        setThemeState(event.detail.theme);
+      }
+    };
+    
+    window.addEventListener(THEME_CHANGE_EVENT, handleThemeChange);
+    
+    return () => {
+      window.removeEventListener(THEME_CHANGE_EVENT, handleThemeChange);
+    };
+  }, []);
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme, isThemeChanging, isAdmin }}>

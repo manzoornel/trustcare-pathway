@@ -1,4 +1,3 @@
-
 import { Calendar, LogIn } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
@@ -85,7 +84,7 @@ const HeroSection = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           <div className="space-y-8 animate-fade-up">
-            <h1 className={`text-4xl md:text-5xl lg:text-6xl font-bold leading-tight ${theme !== 'default' ? 'festival-text-gradient' : 'text-gray-900'}`}>
+            <h1 className={`text-4xl md:text-5xl lg:text-6xl font-bold leading-tight ${theme === 'default' ? 'text-gray-900' : 'festival-text-gradient'}`}>
               {themeContent.title}
             </h1>
             <p className="text-lg text-gray-600 max-w-xl">

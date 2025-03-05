@@ -1,11 +1,34 @@
 
-import React from 'react';
-import { useTheme, ThemeType } from '@/contexts/ThemeContext';
+import React, { useEffect, useState } from 'react';
+import { useTheme, ThemeType, THEME_CHANGE_EVENT } from '@/contexts/ThemeContext';
 import { Button } from '@/components/ui/button';
 import { Moon, Sun, Flower, Heart, Gift, Star, Sparkles } from 'lucide-react';
 
 const ThemeSwitcher: React.FC = () => {
   const { theme, setTheme, isThemeChanging, isAdmin } = useTheme();
+  const [localTheme, setLocalTheme] = useState<ThemeType>(theme);
+
+  // Update local theme when global theme changes
+  useEffect(() => {
+    setLocalTheme(theme);
+  }, [theme]);
+
+  // Listen for theme changes from other components
+  useEffect(() => {
+    const handleThemeChange = (e: Event) => {
+      const event = e as CustomEvent;
+      if (event.detail && event.detail.theme) {
+        console.log('ThemeSwitcher: detected theme change:', event.detail.theme);
+        setLocalTheme(event.detail.theme);
+      }
+    };
+    
+    window.addEventListener(THEME_CHANGE_EVENT, handleThemeChange);
+    
+    return () => {
+      window.removeEventListener(THEME_CHANGE_EVENT, handleThemeChange);
+    };
+  }, []);
 
   // If user is not admin, don't render the component
   if (!isAdmin) return null;
@@ -20,16 +43,21 @@ const ThemeSwitcher: React.FC = () => {
     { id: 'xmas', label: 'Xmas', icon: <Gift className="h-4 w-4" /> },
   ];
 
+  const handleThemeChange = (newTheme: ThemeType) => {
+    console.log('ThemeSwitcher: changing theme to:', newTheme);
+    setTheme(newTheme);
+  };
+
   return (
     <div className={`fixed top-20 right-6 z-50 bg-white/90 backdrop-blur-sm shadow-lg rounded-lg p-2 transition-opacity duration-300 ${isThemeChanging ? 'opacity-50' : 'opacity-100'}`}>
       <div className="flex flex-col gap-2">
         {themes.map((t) => (
           <Button
             key={t.id}
-            variant={theme === t.id ? 'default' : 'outline'}
+            variant={localTheme === t.id ? 'default' : 'outline'}
             size="sm"
-            onClick={() => setTheme(t.id)}
-            className={`flex items-center justify-start gap-2 w-full ${theme === t.id ? 'bg-festival-primary text-white' : ''}`}
+            onClick={() => handleThemeChange(t.id)}
+            className={`flex items-center justify-start gap-2 w-full ${localTheme === t.id ? 'bg-festival-primary text-white' : ''}`}
           >
             {t.icon}
             <span className="text-xs">{t.label}</span>
