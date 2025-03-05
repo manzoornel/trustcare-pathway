@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { 
   Card, 
   CardContent, 
@@ -18,6 +18,7 @@ import {
   Calendar 
 } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 type RewardTransaction = {
   id: string;
@@ -29,56 +30,99 @@ type RewardTransaction = {
 };
 
 const RewardsCard = () => {
-  const { auth, updateProfile } = useAuth();
+  const { auth } = useAuth();
   const rewardPoints = auth.rewardPoints || 0;
   const rewardValue = Math.floor(rewardPoints);
+  const [isRedeeming, setIsRedeeming] = useState(false);
 
-  // Mock transaction history
-  const [transactions, setTransactions] = useState<RewardTransaction[]>([
-    {
-      id: "tx1",
-      date: "2023-10-15",
-      amount: 5000,
-      points: 50,
-      type: "earned",
-      description: "Regular checkup"
-    },
-    {
-      id: "tx2",
-      date: "2023-11-03",
-      amount: 3000,
-      points: 30,
-      type: "earned",
-      description: "Blood test"
-    },
-    {
-      id: "tx3",
-      date: "2023-11-20",
-      amount: 0,
-      points: 20,
-      type: "redeemed",
-      description: "Discount on consultation"
-    },
-    {
-      id: "tx4",
-      date: "2023-12-05",
-      amount: 8000,
-      points: 80,
-      type: "earned",
-      description: "Health checkup package"
+  // State for transactions
+  const [transactions, setTransactions] = useState<RewardTransaction[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      if (!auth.userId) return;
+      
+      setIsLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('reward_transactions')
+          .select('*')
+          .eq('patient_id', auth.userId)
+          .order('created_at', { ascending: false });
+          
+        if (error) throw error;
+        
+        if (data) {
+          setTransactions(data as RewardTransaction[]);
+        }
+      } catch (error) {
+        console.error('Error fetching reward transactions:', error);
+        toast.error('Failed to load reward transactions');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchTransactions();
+  }, [auth.userId]);
+
+  const handleRedeem = async () => {
+    if (!auth.userId) {
+      toast.error("You need to be logged in to redeem rewards");
+      return;
     }
-  ]);
-
-  const handleRedeem = () => {
+    
     if (rewardPoints < 10) {
       toast.error("You need at least 10 points to redeem rewards");
       return;
     }
     
-    toast.success(`Reward code generated! You can use it on your next visit.`);
+    setIsRedeeming(true);
     
-    // In a real app, this would call an API to generate a redemption code
-    // and update the user's points balance
+    try {
+      // Create a new transaction
+      const pointsToRedeem = 10;
+      const { error: transactionError } = await supabase
+        .from('reward_transactions')
+        .insert({
+          patient_id: auth.userId,
+          date: new Date().toISOString().split('T')[0],
+          points: pointsToRedeem,
+          type: 'redeemed',
+          description: 'Discount on consultation'
+        });
+        
+      if (transactionError) throw transactionError;
+      
+      // Update user's points
+      const { error: updateError } = await supabase
+        .from('patient_rewards')
+        .update({ points: rewardPoints - pointsToRedeem })
+        .eq('patient_id', auth.userId);
+        
+      if (updateError) throw updateError;
+      
+      // Refresh the transaction list
+      const { data: newTransactions, error: fetchError } = await supabase
+        .from('reward_transactions')
+        .select('*')
+        .eq('patient_id', auth.userId)
+        .order('created_at', { ascending: false });
+        
+      if (fetchError) throw fetchError;
+      
+      if (newTransactions) {
+        setTransactions(newTransactions as RewardTransaction[]);
+      }
+      
+      toast.success(`Reward code generated! You can use it on your next visit.`);
+    } catch (error: any) {
+      console.error('Error redeeming rewards:', error);
+      toast.error(error.message || 'Failed to redeem rewards');
+    } finally {
+      setIsRedeeming(false);
+    }
   };
 
   return (
@@ -123,8 +167,9 @@ const RewardsCard = () => {
               onClick={handleRedeem} 
               variant="default" 
               className="w-full bg-emerald-600 hover:bg-emerald-700"
+              disabled={isRedeeming || rewardPoints < 10}
             >
-              Redeem Now
+              {isRedeeming ? "Processing..." : "Redeem Now"}
             </Button>
           </div>
         </div>
@@ -135,39 +180,45 @@ const RewardsCard = () => {
             Transaction History
           </h3>
           <div className="overflow-hidden rounded-lg border">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="bg-gray-50">
-                    <th className="px-4 py-3 text-left font-medium text-gray-500">Date</th>
-                    <th className="px-4 py-3 text-left font-medium text-gray-500">Description</th>
-                    <th className="px-4 py-3 text-right font-medium text-gray-500">Amount</th>
-                    <th className="px-4 py-3 text-right font-medium text-gray-500">Points</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y">
-                  {transactions.map((tx) => (
-                    <tr key={tx.id} className="hover:bg-gray-50">
-                      <td className="px-4 py-3 flex items-center gap-2 whitespace-nowrap">
-                        <Calendar className="h-3 w-3 text-gray-400" />
-                        {tx.date}
-                      </td>
-                      <td className="px-4 py-3">{tx.description}</td>
-                      <td className="px-4 py-3 text-right">
-                        {tx.type === "earned" ? `₹${tx.amount}` : "-"}
-                      </td>
-                      <td className={`px-4 py-3 text-right font-medium ${
-                        tx.type === "earned" 
-                          ? "text-green-600" 
-                          : "text-red-600"
-                      }`}>
-                        {tx.type === "earned" ? `+${tx.points}` : `-${tx.points}`}
-                      </td>
+            {isLoading ? (
+              <div className="p-4 text-center text-gray-500">Loading transactions...</div>
+            ) : transactions.length === 0 ? (
+              <div className="p-4 text-center text-gray-500">No transactions yet</div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="bg-gray-50">
+                      <th className="px-4 py-3 text-left font-medium text-gray-500">Date</th>
+                      <th className="px-4 py-3 text-left font-medium text-gray-500">Description</th>
+                      <th className="px-4 py-3 text-right font-medium text-gray-500">Amount</th>
+                      <th className="px-4 py-3 text-right font-medium text-gray-500">Points</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="divide-y">
+                    {transactions.map((tx) => (
+                      <tr key={tx.id} className="hover:bg-gray-50">
+                        <td className="px-4 py-3 flex items-center gap-2 whitespace-nowrap">
+                          <Calendar className="h-3 w-3 text-gray-400" />
+                          {tx.date}
+                        </td>
+                        <td className="px-4 py-3">{tx.description}</td>
+                        <td className="px-4 py-3 text-right">
+                          {tx.type === "earned" ? `₹${tx.amount || 0}` : "-"}
+                        </td>
+                        <td className={`px-4 py-3 text-right font-medium ${
+                          tx.type === "earned" 
+                            ? "text-green-600" 
+                            : "text-red-600"
+                        }`}>
+                          {tx.type === "earned" ? `+${tx.points}` : `-${tx.points}`}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         </div>
       </CardContent>

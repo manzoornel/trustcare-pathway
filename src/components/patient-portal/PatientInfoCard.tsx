@@ -28,13 +28,14 @@ const PatientInfoCard = ({ patientName, hospitalId, phone, email }: PatientInfoC
     phone: phone || "",
     email: email || ""
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     // Validate inputs
     if (!formData.name.trim()) {
       toast.error("Name cannot be empty");
@@ -51,15 +52,21 @@ const PatientInfoCard = ({ patientName, hospitalId, phone, email }: PatientInfoC
       return;
     }
 
-    // Update profile
-    updateProfile({
-      name: formData.name,
-      phone: formData.phone,
-      email: formData.email
-    });
-    
-    toast.success("Profile updated successfully");
-    setIsEditing(false);
+    try {
+      setIsSubmitting(true);
+      // Update profile
+      await updateProfile({
+        name: formData.name,
+        phone: formData.phone,
+        email: formData.email
+      });
+      
+      setIsEditing(false);
+    } catch (error) {
+      console.error("Error updating profile:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleCancel = () => {
@@ -136,9 +143,14 @@ const PatientInfoCard = ({ patientName, hospitalId, phone, email }: PatientInfoC
             <X className="h-4 w-4" />
             Cancel
           </Button>
-          <Button size="sm" onClick={handleSave} className="flex items-center gap-1">
+          <Button 
+            size="sm" 
+            onClick={handleSave} 
+            className="flex items-center gap-1"
+            disabled={isSubmitting}
+          >
             <Save className="h-4 w-4" />
-            Save Changes
+            {isSubmitting ? "Saving..." : "Save Changes"}
           </Button>
         </CardFooter>
       )}

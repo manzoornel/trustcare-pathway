@@ -10,27 +10,59 @@ import { LogOut } from "lucide-react";
 import PatientInfoCard from "@/components/patient-portal/PatientInfoCard";
 import RewardsCard from "@/components/patient-portal/RewardsCard";
 import PortalTabsSection from "@/components/patient-portal/PortalTabsSection";
+import { supabase } from "@/integrations/supabase/client";
 
 const PatientPortal = () => {
   const navigate = useNavigate();
   const { auth, logout } = useAuth();
   const [activeTab, setActiveTab] = useState("labReports");
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // If not authenticated, redirect to login
-    if (!auth.isAuthenticated) {
-      navigate("/login");
-    }
+    // Check if user is authenticated
+    const checkAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          navigate("/login");
+        } else {
+          setIsLoading(false);
+        }
+      } catch (error) {
+        console.error("Error checking authentication:", error);
+        navigate("/login");
+      }
+    };
+    
+    checkAuth();
+  }, [navigate]);
+
+  useEffect(() => {
     // If needs profile, redirect to profile creation
-    else if (auth.needsProfile) {
+    if (auth.needsProfile) {
       navigate("/create-profile");
     }
   }, [auth, navigate]);
 
-  const handleLogout = () => {
-    logout();
-    navigate("/login");
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate("/login");
+    } catch (error) {
+      console.error("Error logging out:", error);
+    }
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading your patient portal...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>

@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Helmet } from "react-helmet";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -9,49 +9,39 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 
 const Login = () => {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { auth, login, loginWithOTP } = useAuth();
   
   const [activeTab, setActiveTab] = useState("email");
   const [hospitalId, setHospitalId] = useState("");
   const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Handle Hospital ID login
-  const handleHospitalIdLogin = async (e: React.FormEvent) => {
+  useEffect(() => {
+    // Redirect if already authenticated
+    if (auth.isAuthenticated) {
+      navigate("/patient-portal");
+    }
+  }, [auth.isAuthenticated, navigate]);
+
+  // Handle Email/Password login
+  const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
     
     try {
-      // For demo purposes, we'll just check against the auth.ts sample data
-      // In a real app, this would be an API call
-      const demoUser = {
-        isAuthenticated: true,
-        isVerified: true,
-        needsProfile: false,
-        hospitalId,
-        name: "Demo Patient",
-        email: "demo@example.com",
-        phone: "555-555-5555",
-        rewardPoints: 140
-      };
-      
-      // Simulate authentication delay
-      setTimeout(() => {
-        login(demoUser);
-        toast.success("Login successful!");
-        navigate("/patient-portal");
-      }, 1000);
-    } catch (err) {
-      setError("Invalid hospital ID or password");
-      toast.error("Login failed. Please check your credentials.");
+      await login(email, password);
+      navigate("/patient-portal");
+    } catch (err: any) {
+      setError(err.message || "Invalid email or password");
     } finally {
       setLoading(false);
     }
@@ -64,15 +54,10 @@ const Login = () => {
     setError(null);
     
     try {
-      // For demo purposes, we'll just redirect to OTP verification
-      // In a real app, this would send an OTP and then redirect
-      setTimeout(() => {
-        navigate("/verify", { state: { phone } });
-        toast.info("OTP sent to your phone number");
-      }, 1000);
-    } catch (err) {
-      setError("Failed to send OTP");
-      toast.error("Failed to send OTP. Please try again.");
+      await loginWithOTP(phone);
+      navigate("/verify-otp", { state: { phone } });
+    } catch (err: any) {
+      setError(err.message || "Failed to send OTP");
     } finally {
       setLoading(false);
     }
@@ -104,20 +89,21 @@ const Login = () => {
               <CardContent>
                 <Tabs defaultValue="email" value={activeTab} onValueChange={setActiveTab}>
                   <TabsList className="grid w-full grid-cols-2 mb-4">
-                    <TabsTrigger value="email">Hospital ID</TabsTrigger>
+                    <TabsTrigger value="email">Email</TabsTrigger>
                     <TabsTrigger value="phone">Phone</TabsTrigger>
                   </TabsList>
                   
                   <TabsContent value="email">
-                    <form onSubmit={handleHospitalIdLogin}>
+                    <form onSubmit={handleEmailLogin}>
                       <div className="grid gap-4">
                         <div className="grid gap-2">
-                          <Label htmlFor="hospitalId">Hospital ID</Label>
+                          <Label htmlFor="email">Email</Label>
                           <Input
-                            id="hospitalId"
-                            placeholder="H12345"
-                            value={hospitalId}
-                            onChange={(e) => setHospitalId(e.target.value)}
+                            id="email"
+                            type="email"
+                            placeholder="name@example.com"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
                             required
                           />
                         </div>
@@ -150,11 +136,14 @@ const Login = () => {
                           <Label htmlFor="phone">Phone Number</Label>
                           <Input
                             id="phone"
-                            placeholder="(555) 555-5555"
+                            placeholder="1234567890"
                             value={phone}
                             onChange={(e) => setPhone(e.target.value)}
                             required
                           />
+                          <p className="text-xs text-gray-500">
+                            Enter your 10-digit phone number
+                          </p>
                         </div>
                         
                         {error && <p className="text-sm text-red-500">{error}</p>}

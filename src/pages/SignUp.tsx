@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
-import { authenticatedUsers } from "@/utils/auth";
+import { supabase } from "@/integrations/supabase/client";
 
 const SignUp = () => {
   const navigate = useNavigate();
@@ -20,6 +20,8 @@ const SignUp = () => {
     phone: "",
     hospitalId: "",
     email: "",
+    password: "",
+    confirmPassword: "",
   });
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -27,7 +29,7 @@ const SignUp = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
@@ -44,31 +46,56 @@ const SignUp = () => {
       return;
     }
     
-    // Verify against existing patient records
-    const existingUser = authenticatedUsers.find(
-      user => user.hospitalId === formData.hospitalId || user.phone === formData.phone
-    );
+    // Verify passwords match
+    if (formData.password !== formData.confirmPassword) {
+      toast.error("Passwords do not match");
+      setIsLoading(false);
+      return;
+    }
     
-    setTimeout(() => {
-      if (existingUser) {
-        toast.error("An account with this Hospital ID or phone number already exists.");
+    // Verify password length
+    if (formData.password.length < 6) {
+      toast.error("Password must be at least 6 characters");
+      setIsLoading(false);
+      return;
+    }
+    
+    try {
+      // Check if hospital ID or phone already exists
+      const { data: existingProfile, error: checkError } = await supabase
+        .from('patient_profiles')
+        .select('hospital_id, phone')
+        .or(`hospital_id.eq.${formData.hospitalId},phone.eq.${formData.phone}`)
+        .maybeSingle();
+        
+      if (checkError) throw checkError;
+      
+      if (existingProfile) {
+        if (existingProfile.hospital_id === formData.hospitalId) {
+          toast.error("An account with this Hospital ID already exists");
+        } else {
+          toast.error("An account with this phone number already exists");
+        }
         setIsLoading(false);
         return;
       }
       
-      // Store signup data
-      signUp({
+      // Sign up the user
+      await signUp({
         name: formData.name,
+        email: formData.email,
+        password: formData.password,
         phone: formData.phone,
         hospitalId: formData.hospitalId,
-        email: formData.email,
-        needsProfile: true
       });
       
-      toast.success("Account created successfully! Please verify your identity.");
       navigate("/verify-otp");
+    } catch (error: any) {
+      console.error("Signup error:", error);
+      toast.error(error.message || "Failed to create account");
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   return (
@@ -145,6 +172,33 @@ const SignUp = () => {
                       type="email"
                       placeholder="Enter your email address"
                       value={formData.email}
+                      onChange={handleChange}
+                      required
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <label htmlFor="password" className="text-sm font-medium">Password</label>
+                    <Input
+                      id="password"
+                      name="password"
+                      type="password"
+                      placeholder="Create a password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      required
+                    />
+                    <p className="text-xs text-gray-500">Must be at least 6 characters</p>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <label htmlFor="confirmPassword" className="text-sm font-medium">Confirm Password</label>
+                    <Input
+                      id="confirmPassword"
+                      name="confirmPassword"
+                      type="password"
+                      placeholder="Confirm your password"
+                      value={formData.confirmPassword}
                       onChange={handleChange}
                       required
                     />
