@@ -46,20 +46,23 @@ const AdminGuard = ({ children, requiredRole }: AdminGuardProps) => {
       
       setIsAuthenticated(true);
       setIsLoading(false);
+      
+      // Dispatch event for admin status change
+      window.dispatchEvent(new CustomEvent('adminStatusChanged'));
     };
 
     checkAuth();
   }, [navigate, location.pathname, requiredRole]);
 
-  if (isLoading) {
-    return (
+  return (
+    isLoading ? (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
-    );
-  }
-
-  return isAuthenticated ? <>{children}</> : null;
+    ) : (
+      isAuthenticated ? <>{children}</> : null
+    )
+  );
 };
 
 export default AdminGuard;

@@ -2,15 +2,20 @@
 import React from 'react';
 import { useTheme, ThemeType } from '@/contexts/ThemeContext';
 import { Button } from '@/components/ui/button';
-import { Moon, Sun, Flower, Heart, Gift } from 'lucide-react';
+import { Moon, Sun, Flower, Heart, Gift, Star, Sparkles } from 'lucide-react';
 
 const ThemeSwitcher: React.FC = () => {
-  const { theme, setTheme, isThemeChanging } = useTheme();
+  const { theme, setTheme, isThemeChanging, isAdmin } = useTheme();
+
+  // If user is not admin, don't render the component
+  if (!isAdmin) return null;
 
   const themes: Array<{ id: ThemeType; label: string; icon: React.ReactNode }> = [
     { id: 'default', label: 'Default', icon: <Sun className="h-4 w-4" /> },
     { id: 'eid', label: 'Eid', icon: <Moon className="h-4 w-4" /> },
+    { id: 'ramzan', label: 'Ramzan', icon: <Star className="h-4 w-4" /> },
     { id: 'onam', label: 'Onam', icon: <Flower className="h-4 w-4" /> },
+    { id: 'deepavali', label: 'Deepavali', icon: <Sparkles className="h-4 w-4" /> },
     { id: 'health', label: 'Health Day', icon: <Heart className="h-4 w-4" /> },
     { id: 'xmas', label: 'Xmas', icon: <Gift className="h-4 w-4" /> },
   ];

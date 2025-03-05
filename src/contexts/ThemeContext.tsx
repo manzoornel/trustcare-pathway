@@ -1,8 +1,7 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 // Available themes
-export type ThemeType = 'default' | 'eid' | 'onam' | 'health' | 'xmas';
+export type ThemeType = 'default' | 'eid' | 'onam' | 'health' | 'xmas' | 'ramzan' | 'deepavali';
 
 // Theme color properties
 type ThemeColors = {
@@ -47,56 +46,86 @@ const themeColors: Record<ThemeType, ThemeColors> = {
     accentForeground: '#000000',
     muted: '#F5F5F5',
     mutedForeground: '#666666',
-    festivalPrimary: '#24936E', // Green
-    festivalSecondary: '#D4AF37', // Gold
-    festivalAccent: '#7B5D2F', // Brown gold
-    festivalLight: '#F8F0DD', // Light cream
-    festivalDark: '#4A3933', // Dark brown
+    festivalPrimary: '#24936E',
+    festivalSecondary: '#D4AF37',
+    festivalAccent: '#7B5D2F',
+    festivalLight: '#F8F0DD',
+    festivalDark: '#4A3933',
   },
   onam: {
-    primary: '#F97316', // Orange
+    primary: '#F97316',
     primaryForeground: '#FFFFFF',
-    secondary: '#2E7D32', // Green
+    secondary: '#2E7D32',
     secondaryForeground: '#FFFFFF',
-    accent: '#FFD700', // Yellow
+    accent: '#FFD700',
     accentForeground: '#000000',
-    muted: '#FEF7CD', // Light Yellow
+    muted: '#FEF7CD',
     mutedForeground: '#666666',
-    festivalPrimary: '#F97316', // Orange
-    festivalSecondary: '#2E7D32', // Green
-    festivalAccent: '#FFD700', // Yellow
-    festivalLight: '#FEF7CD', // Light Yellow
-    festivalDark: '#8D4004', // Dark Orange
+    festivalPrimary: '#F97316',
+    festivalSecondary: '#2E7D32',
+    festivalAccent: '#FFD700',
+    festivalLight: '#FEF7CD',
+    festivalDark: '#8D4004',
   },
   health: {
-    primary: '#2196F3', // Blue
+    primary: '#2196F3',
     primaryForeground: '#FFFFFF',
-    secondary: '#E91E63', // Pink
+    secondary: '#E91E63',
     secondaryForeground: '#FFFFFF',
-    accent: '#4CAF50', // Green
+    accent: '#4CAF50',
     accentForeground: '#FFFFFF',
-    muted: '#E3F2FD', // Light Blue
+    muted: '#E3F2FD',
     mutedForeground: '#666666',
-    festivalPrimary: '#2196F3', // Blue
-    festivalSecondary: '#E91E63', // Pink
-    festivalAccent: '#4CAF50', // Green
-    festivalLight: '#E3F2FD', // Light Blue
-    festivalDark: '#0D47A1', // Dark Blue
+    festivalPrimary: '#2196F3',
+    festivalSecondary: '#E91E63',
+    festivalAccent: '#4CAF50',
+    festivalLight: '#E3F2FD',
+    festivalDark: '#0D47A1',
   },
   xmas: {
-    primary: '#D32F2F', // Red
+    primary: '#D32F2F',
     primaryForeground: '#FFFFFF',
-    secondary: '#388E3C', // Green
+    secondary: '#388E3C',
     secondaryForeground: '#FFFFFF',
-    accent: '#FFC107', // Gold
+    accent: '#FFC107',
     accentForeground: '#000000',
-    muted: '#FFEBEE', // Light Red
+    muted: '#FFEBEE',
     mutedForeground: '#666666',
-    festivalPrimary: '#D32F2F', // Red
-    festivalSecondary: '#388E3C', // Green
-    festivalAccent: '#FFC107', // Gold
-    festivalLight: '#FFEBEE', // Light Red
-    festivalDark: '#B71C1C', // Dark Red
+    festivalPrimary: '#D32F2F',
+    festivalSecondary: '#388E3C',
+    festivalAccent: '#FFC107',
+    festivalLight: '#FFEBEE',
+    festivalDark: '#B71C1C',
+  },
+  ramzan: {
+    primary: '#3A6351',
+    primaryForeground: '#FFFFFF',
+    secondary: '#6D9886',
+    secondaryForeground: '#FFFFFF',
+    accent: '#F0CAA3',
+    accentForeground: '#000000',
+    muted: '#F7F7F7',
+    mutedForeground: '#666666',
+    festivalPrimary: '#3A6351',
+    festivalSecondary: '#6D9886',
+    festivalAccent: '#F0CAA3',
+    festivalLight: '#F7F7F7',
+    festivalDark: '#3A6351',
+  },
+  deepavali: {
+    primary: '#9B4DCA',
+    primaryForeground: '#FFFFFF',
+    secondary: '#F39C12',
+    secondaryForeground: '#FFFFFF',
+    accent: '#FFC300',
+    accentForeground: '#000000',
+    muted: '#F1E5F9',
+    mutedForeground: '#666666',
+    festivalPrimary: '#9B4DCA',
+    festivalSecondary: '#F39C12',
+    festivalAccent: '#FFC300',
+    festivalLight: '#F1E5F9',
+    festivalDark: '#6A1B9A',
   },
 };
 
@@ -105,6 +134,7 @@ type ThemeContextType = {
   theme: ThemeType;
   setTheme: (theme: ThemeType) => void;
   isThemeChanging: boolean;
+  isAdmin: boolean;
 };
 
 // Create the context
@@ -123,9 +153,33 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   });
   
   const [isThemeChanging, setIsThemeChanging] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  // Check if user is admin on mount
+  useEffect(() => {
+    const checkAdmin = () => {
+      const adminRole = localStorage.getItem('adminRole');
+      setIsAdmin(adminRole === 'admin');
+    };
+    
+    checkAdmin();
+    
+    // Listen for admin login/logout events
+    window.addEventListener('adminStatusChanged', checkAdmin);
+    
+    return () => {
+      window.removeEventListener('adminStatusChanged', checkAdmin);
+    };
+  }, []);
 
   // Set theme with animation transition
   const setTheme = (newTheme: ThemeType) => {
+    // Only allow theme change if user is admin
+    if (!isAdmin) {
+      console.warn('Only admin users can change the theme');
+      return;
+    }
+    
     setIsThemeChanging(true);
     setTimeout(() => {
       setThemeState(newTheme);
@@ -162,7 +216,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   }, [theme]);
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme, isThemeChanging }}>
+    <ThemeContext.Provider value={{ theme, setTheme, isThemeChanging, isAdmin }}>
       {children}
     </ThemeContext.Provider>
   );

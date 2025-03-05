@@ -29,8 +29,12 @@ export const getFestivalGreeting = (theme: string): string => {
   switch (theme) {
     case 'eid':
       return 'Eid Mubarak!';
+    case 'ramzan':
+      return 'Ramzan Kareem!';
     case 'onam':
       return 'Happy Onam!';
+    case 'deepavali':
+      return 'Happy Deepavali!';
     case 'health':
       return 'Happy World Health Day!';
     case 'xmas':
@@ -44,8 +48,12 @@ export const getFestivalMessage = (theme: string): string => {
   switch (theme) {
     case 'eid':
       return 'We wish you a blessed Eid. Remember to stay hydrated and maintain a balanced diet during festivities.';
+    case 'ramzan':
+      return 'Wishing you a blessed Ramzan. Make sure to hydrate properly during non-fasting hours and maintain regular health check-ups.';
     case 'onam':
       return 'Happy Onam! Enjoy the festivities while keeping your health in check.';
+    case 'deepavali':
+      return 'May the festival of lights bring joy and good health to you and your family. Remember to stay safe during celebrations.';
     case 'health':
       return 'On World Health Day, we remind you to prioritize your well-being. Schedule your annual check-up today!';
     case 'xmas':

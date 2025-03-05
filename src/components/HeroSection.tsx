@@ -39,11 +39,23 @@ const HeroSection = () => {
           subtitle: "Experience compassionate care during this blessed season. We're open during Eid to serve our community.",
           bgClass: "bg-gradient-to-b from-[#24936E]/90 to-[#F8F0DD]"
         };
+      case 'ramzan':
+        return {
+          title: "Ramzan Kareem from Doctor Uncle",
+          subtitle: "Wishing you health and happiness during this holy month. We're offering extended clinic hours for your convenience.",
+          bgClass: "bg-gradient-to-b from-[#3A6351]/90 to-[#F7F7F7]"
+        };
       case 'onam':
         return {
           title: "Happy Onam from Doctor Uncle",
           subtitle: "Celebrating the harvest festival with special health packages for the entire family.",
           bgClass: "bg-gradient-to-b from-[#F97316]/90 to-[#FEF7CD]"
+        };
+      case 'deepavali':
+        return {
+          title: "Happy Deepavali from Doctor Uncle",
+          subtitle: "May the festival of lights bring you good health and happiness. Book your post-festival health check-up today.",
+          bgClass: "bg-gradient-to-b from-[#9B4DCA]/90 to-[#F1E5F9]"
         };
       case 'health':
         return {
@@ -118,7 +130,9 @@ const HeroSection = () => {
               <div className={`p-4 rounded-lg bg-white/80 backdrop-blur-sm border ${theme !== 'default' ? 'border-festival-primary/30' : 'border-primary/30'} shadow-sm mt-6 animate-fade-in`}>
                 <p className="text-sm font-medium text-gray-800">
                   {theme === 'eid' && "Special Eid consultation hours: 9AM-8PM during the festival week"}
+                  {theme === 'ramzan' && "Ramzan Special: Extended evening hours from 8PM-11PM throughout the holy month"}
                   {theme === 'onam' && "Onam Special: 20% off on family health packages until September 30th"}
+                  {theme === 'deepavali' && "Deepavali Special: Free post-festival detox consultation until November 15th"}
                   {theme === 'health' && "World Health Day: Free basic health check-ups on April 7th"}
                   {theme === 'xmas' && "Holiday Hours: Dec 24th: 9AM-1PM, Dec 25th: Closed, Dec 26th: 10AM-4PM"}
                 </p>

@@ -15,8 +15,12 @@ const ChatWidgetButton = ({ onClick }: ChatWidgetButtonProps) => {
     switch(theme) {
       case 'eid':
         return 'bg-[#24936E] hover:bg-[#24936E]/80';
+      case 'ramzan':
+        return 'bg-[#3A6351] hover:bg-[#3A6351]/80';
       case 'onam':
         return 'bg-[#F97316] hover:bg-[#F97316]/80';
+      case 'deepavali':
+        return 'bg-[#9B4DCA] hover:bg-[#9B4DCA]/80';
       case 'health':
         return 'bg-[#2196F3] hover:bg-[#2196F3]/80';
       case 'xmas':

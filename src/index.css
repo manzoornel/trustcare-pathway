@@ -51,8 +51,16 @@
     background-image: radial-gradient(circle at 50% 50%, var(--festival-light) 0%, rgba(255, 255, 255, 0.8) 100%);
   }
 
+  body.theme-ramzan {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(247, 247, 247, 0.3) 100%);
+  }
+
   body.theme-onam {
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(254, 247, 205, 0.3) 100%);
+  }
+
+  body.theme-deepavali {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(241, 229, 249, 0.3) 100%);
   }
 
   body.theme-health {
@@ -80,10 +88,22 @@
     background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 30" width="100" height="30"><path d="M0,30 L50,0 L100,30 Z" fill="%2324936E" opacity="0.2"/></svg>');
   }
   
+  /* Ramzan theme components */
+  .theme-ramzan .festival-decoration-top {
+    @apply bg-contain bg-repeat-x bg-center;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 30" width="100" height="30"><path d="M50,10 L55,25 L70,25 L60,35 L65,50 L50,40 L35,50 L40,35 L30,25 L45,25 Z" fill="%233A6351" opacity="0.2" transform="translate(0, -15) scale(0.5)"/></svg>');
+  }
+  
   /* Onam theme components */
   .theme-onam .festival-decoration-top {
     @apply bg-contain bg-repeat-x bg-center;
     background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 30" width="100" height="30"><circle cx="50" cy="15" r="15" fill="%23F97316" opacity="0.2"/><circle cx="15" cy="15" r="10" fill="%232E7D32" opacity="0.2"/><circle cx="85" cy="15" r="10" fill="%232E7D32" opacity="0.2"/></svg>');
+  }
+  
+  /* Deepavali theme components */
+  .theme-deepavali .festival-decoration-top {
+    @apply bg-contain bg-repeat-x bg-center;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 30" width="100" height="30"><circle cx="50" cy="15" r="10" fill="%239B4DCA" opacity="0.2"/><circle cx="25" cy="15" r="8" fill="%23F39C12" opacity="0.2"/><circle cx="75" cy="15" r="8" fill="%23F39C12" opacity="0.2"/></svg>');
   }
   
   /* Health theme components */
@@ -99,18 +119,11 @@
   }
 
   /* Festival button styles */
-  .theme-eid .btn-festival {
-    @apply bg-festival-primary text-white hover:bg-festival-primary/80;
-  }
-  
-  .theme-onam .btn-festival {
-    @apply bg-festival-primary text-white hover:bg-festival-primary/80;
-  }
-  
-  .theme-health .btn-festival {
-    @apply bg-festival-primary text-white hover:bg-festival-primary/80;
-  }
-  
+  .theme-eid .btn-festival,
+  .theme-ramzan .btn-festival,
+  .theme-onam .btn-festival,
+  .theme-deepavali .btn-festival,
+  .theme-health .btn-festival,
   .theme-xmas .btn-festival {
     @apply bg-festival-primary text-white hover:bg-festival-primary/80;
   }

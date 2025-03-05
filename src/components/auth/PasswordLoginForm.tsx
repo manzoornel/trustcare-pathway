@@ -1,101 +1,92 @@
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Input } from "@/components/ui/input";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
-interface PasswordLoginFormProps {
-  authenticatedUsers: Array<{
-    hospitalId: string;
-    phone: string;
-    email: string;
-    name: string;
-    password: string;
-  }>;
-}
+// Define the form schema
+const formSchema = z.object({
+  email: z.string().email({ message: "Please enter a valid email address" }),
+  password: z.string().min(6, { message: "Password must be at least 6 characters" }),
+});
 
-const PasswordLoginForm: React.FC<PasswordLoginFormProps> = ({ authenticatedUsers }) => {
-  const navigate = useNavigate();
+export default function PasswordLoginForm() {
   const { login } = useAuth();
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  const [passwordFormData, setPasswordFormData] = useState({
-    identifier: "",
-    password: ""
+
+  // Initialize the form
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
   });
 
-  const handlePasswordFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setPasswordFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handlePasswordSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  // Handle form submission
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
-    
-    const user = authenticatedUsers.find(
-      u => u.hospitalId === passwordFormData.identifier ||
-           u.phone === passwordFormData.identifier ||
-           u.email === passwordFormData.identifier
-    );
-    
-    setTimeout(() => {
-      if (user && user.password === passwordFormData.password) {
-        toast.success("Login successful");
-        login({
-          isAuthenticated: true,
-          name: user.name,
-          phone: user.phone,
-          hospitalId: user.hospitalId,
-          email: user.email,
-          profileComplete: true,
-          needsProfile: false
-        });
-        navigate("/patient-portal");
-      } else {
-        toast.error("Invalid credentials");
-      }
+    try {
+      await login(values.email, values.password);
+      navigate("/patient-portal");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to login");
+    } finally {
       setIsLoading(false);
-    }, 1500);
-  };
+    }
+  }
 
   return (
-    <form onSubmit={handlePasswordSubmit} className="space-y-4">
-      <div className="space-y-2">
-        <label htmlFor="identifier" className="text-sm font-medium">Hospital ID / Phone / Email</label>
-        <Input
-          id="identifier"
-          name="identifier"
-          placeholder="Enter your Hospital ID, Phone, or Email"
-          value={passwordFormData.identifier}
-          onChange={handlePasswordFormChange}
-          required
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <Input 
+                  placeholder="you@example.com" 
+                  {...field} 
+                  type="email"
+                  autoComplete="email"
+                  disabled={isLoading}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </div>
-      
-      <div className="space-y-2">
-        <label htmlFor="password" className="text-sm font-medium">Password</label>
-        <Input
-          id="password"
+        <FormField
+          control={form.control}
           name="password"
-          type="password"
-          placeholder="Enter your password"
-          value={passwordFormData.password}
-          onChange={handlePasswordFormChange}
-          required
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Password</FormLabel>
+              <FormControl>
+                <Input 
+                  {...field} 
+                  type="password"
+                  autoComplete="current-password"
+                  disabled={isLoading}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </div>
-      
-      <Button 
-        type="submit" 
-        className="w-full" 
-        disabled={isLoading}
-      >
-        {isLoading ? "Logging in..." : "Login"}
-      </Button>
-    </form>
+        <Button type="submit" className="w-full" disabled={isLoading}>
+          {isLoading ? "Logging in..." : "Login"}
+        </Button>
+      </form>
+    </Form>
   );
-};
-
-export default PasswordLoginForm;
+}
