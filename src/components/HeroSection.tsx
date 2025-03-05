@@ -1,12 +1,15 @@
+
 import { Calendar, LogIn } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTheme } from '@/contexts/ThemeContext';
 
 const HeroSection = () => {
   const [isBlinking, setIsBlinking] = useState(false);
   const [isSmiling, setIsSmiling] = useState(false);
   const { auth } = useAuth();
+  const { theme } = useTheme();
 
   useEffect(() => {
     // Blinking animation - every 3 seconds
@@ -27,38 +30,104 @@ const HeroSection = () => {
     };
   }, []);
 
-  return <div className="min-h-screen flex items-center bg-gradient-to-b from-secondary to-white pt-16">
+  // Theme-specific content
+  const getThemeContent = () => {
+    switch(theme) {
+      case 'eid':
+        return {
+          title: "Eid Mubarak from Doctor Uncle",
+          subtitle: "Experience compassionate care during this blessed season. We're open during Eid to serve our community.",
+          bgClass: "bg-gradient-to-b from-[#24936E]/90 to-[#F8F0DD]"
+        };
+      case 'onam':
+        return {
+          title: "Happy Onam from Doctor Uncle",
+          subtitle: "Celebrating the harvest festival with special health packages for the entire family.",
+          bgClass: "bg-gradient-to-b from-[#F97316]/90 to-[#FEF7CD]"
+        };
+      case 'health':
+        return {
+          title: "World Health Day Specials",
+          subtitle: "Join us in celebrating World Health Day with free health check-ups and consultations.",
+          bgClass: "bg-gradient-to-b from-[#2196F3]/90 to-[#E3F2FD]"
+        };
+      case 'xmas':
+        return {
+          title: "Season's Greetings from Doctor Uncle",
+          subtitle: "Wishing you health and happiness this festive season. Special holiday hours available.",
+          bgClass: "bg-gradient-to-b from-[#D32F2F]/90 to-[#FFEBEE]"
+        };
+      default:
+        return {
+          title: "Your Trusted Healthcare Partner",
+          subtitle: "Experience compassionate care and medical excellence at Doctor Uncle Family Clinic. We're committed to your health and well-being.",
+          bgClass: "bg-gradient-to-b from-secondary to-white"
+        };
+    }
+  };
+
+  const themeContent = getThemeContent();
+
+  return (
+    <div className={`min-h-screen flex items-center ${themeContent.bgClass} pt-16 transition-all duration-500`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           <div className="space-y-8 animate-fade-up">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight text-gray-900">
-              Your Trusted Healthcare Partner
+            <h1 className={`text-4xl md:text-5xl lg:text-6xl font-bold leading-tight ${theme !== 'default' ? 'festival-text-gradient' : 'text-gray-900'}`}>
+              {themeContent.title}
             </h1>
             <p className="text-lg text-gray-600 max-w-xl">
-              Experience compassionate care and medical excellence at Doctor Uncle Family Clinic. 
-              We're committed to your health and well-being.
+              {themeContent.subtitle}
             </p>
             <div className="flex flex-wrap gap-4">
-              <Link to="/appointments" className="inline-flex items-center px-6 py-3 bg-primary text-white font-semibold rounded-lg hover:bg-primary/90 transition-colors duration-200">
+              <Link 
+                to="/appointments" 
+                className={`inline-flex items-center px-6 py-3 ${theme !== 'default' ? 'bg-festival-primary' : 'bg-primary'} text-white font-semibold rounded-lg hover:opacity-90 transition-colors duration-200`}
+              >
                 <Calendar className="w-5 h-5 mr-2 animate-[pulse_2s_ease-in-out_infinite]" />
                 Book Appointment
               </Link>
               
-              {auth.isAuthenticated ? <Link to="/patient-portal" className="inline-flex items-center px-6 py-3 bg-white text-primary font-semibold rounded-lg border-2 border-primary hover:bg-primary/10 transition-colors duration-200">
+              {auth.isAuthenticated ? (
+                <Link 
+                  to="/patient-portal" 
+                  className={`inline-flex items-center px-6 py-3 bg-white ${theme !== 'default' ? 'text-festival-primary border-festival-primary hover:bg-festival-primary/10' : 'text-primary border-primary hover:bg-primary/10'} font-semibold rounded-lg border-2 transition-colors duration-200`}
+                >
                   Patient Portal
-                </Link> : <Link to="/login" className="inline-flex items-center px-6 py-3 bg-white text-primary font-semibold rounded-lg border-2 border-primary hover:bg-primary/10 transition-colors duration-200">
+                </Link>
+              ) : (
+                <Link 
+                  to="/login" 
+                  className={`inline-flex items-center px-6 py-3 bg-white ${theme !== 'default' ? 'text-festival-primary border-festival-primary hover:bg-festival-primary/10' : 'text-primary border-primary hover:bg-primary/10'} font-semibold rounded-lg border-2 transition-colors duration-200`}
+                >
                   <LogIn className="w-5 h-5 mr-2" />
                   Patient Login
-                </Link>}
+                </Link>
+              )}
               
-              <Link to="/services" className="inline-flex items-center px-6 py-3 bg-transparent text-gray-700 font-semibold rounded-lg border-2 border-gray-300 hover:bg-gray-100 transition-colors duration-200">
+              <Link 
+                to="/services" 
+                className="inline-flex items-center px-6 py-3 bg-transparent text-gray-700 font-semibold rounded-lg border-2 border-gray-300 hover:bg-gray-100 transition-colors duration-200"
+              >
                 Our Services
               </Link>
             </div>
+
+            {/* Festival-specific callout */}
+            {theme !== 'default' && (
+              <div className={`p-4 rounded-lg bg-white/80 backdrop-blur-sm border ${theme !== 'default' ? 'border-festival-primary/30' : 'border-primary/30'} shadow-sm mt-6 animate-fade-in`}>
+                <p className="text-sm font-medium text-gray-800">
+                  {theme === 'eid' && "Special Eid consultation hours: 9AM-8PM during the festival week"}
+                  {theme === 'onam' && "Onam Special: 20% off on family health packages until September 30th"}
+                  {theme === 'health' && "World Health Day: Free basic health check-ups on April 7th"}
+                  {theme === 'xmas' && "Holiday Hours: Dec 24th: 9AM-1PM, Dec 25th: Closed, Dec 26th: 10AM-4PM"}
+                </p>
+              </div>
+            )}
           </div>
           <div className="relative animate-fade-up" style={{
-          animationDelay: '200ms'
-        }}>
+            animationDelay: '200ms'
+          }}>
             <div className="aspect-w-16 aspect-h-9 rounded-2xl overflow-hidden shadow-2xl">
               <div className="relative w-full h-full">
                 <img 
@@ -73,7 +142,8 @@ const HeroSection = () => {
           </div>
         </div>
       </div>
-    </div>;
+    </div>
+  );
 };
 
 export default HeroSection;

@@ -21,24 +21,32 @@ export default {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "#00C6C6", // Turquoise color from the logo
-          foreground: "#FFFFFF",
+          DEFAULT: "var(--color-primary)", // Changed to CSS variable for theme switching
+          foreground: "var(--color-primary-foreground)",
         },
         secondary: {
-          DEFAULT: "#2D3B41", // Dark background color from second image
-          foreground: "#FFFFFF",
+          DEFAULT: "var(--color-secondary)", // Changed to CSS variable
+          foreground: "var(--color-secondary-foreground)",
         },
         accent: {
-          DEFAULT: "#004F9F",
-          foreground: "#FFFFFF",
+          DEFAULT: "var(--color-accent)", // Changed to CSS variable
+          foreground: "var(--color-accent-foreground)",
         },
         muted: {
-          DEFAULT: "#F0F0F0",
-          foreground: "#666666",
+          DEFAULT: "var(--color-muted)", // Changed to CSS variable
+          foreground: "var(--color-muted-foreground)",
+        },
+        // Festival theme specific colors
+        festival: {
+          primary: "var(--festival-primary)",
+          secondary: "var(--festival-secondary)",
+          accent: "var(--festival-accent)",
+          light: "var(--festival-light)",
+          dark: "var(--festival-dark)",
         },
       },
       fontFamily: {
-        display: ['Poppins', 'sans-serif'], // The font appears similar to Poppins
+        display: ['Poppins', 'sans-serif'],
         body: ['Inter', 'sans-serif'],
       },
       keyframes: {
@@ -60,10 +68,34 @@ export default {
             opacity: "1",
           },
         },
+        "float": {
+          "0%, 100%": {
+            transform: "translateY(0)",
+          },
+          "50%": {
+            transform: "translateY(-10px)",
+          },
+        },
+        "pulse-soft": {
+          "0%, 100%": {
+            opacity: "1",
+          },
+          "50%": {
+            opacity: "0.8",
+          },
+        },
       },
       animation: {
         "fade-up": "fade-up 0.5s ease-out",
         "fade-in": "fade-in 0.5s ease-out",
+        "float": "float 3s ease-in-out infinite",
+        "pulse-soft": "pulse-soft 2s ease-in-out infinite",
+      },
+      backgroundImage: {
+        "eid-pattern": "url('/lovable-uploads/eid-pattern.png')",
+        "onam-pattern": "url('/lovable-uploads/onam-pattern.png')",
+        "health-pattern": "url('/lovable-uploads/health-pattern.png')",
+        "xmas-pattern": "url('/lovable-uploads/xmas-pattern.png')",
       },
     },
   },

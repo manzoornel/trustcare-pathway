@@ -6,6 +6,7 @@ import { Send } from "lucide-react";
 import ChatWidgetHeader from './ChatWidgetHeader';
 import { Message } from '../types';
 import ChatMessage from '../ChatMessage';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface CompactChatWidgetProps {
   messages: Message[];
@@ -29,6 +30,7 @@ const CompactChatWidget = ({
   onClose
 }: CompactChatWidgetProps) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { theme } = useTheme();
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -39,6 +41,24 @@ const CompactChatWidget = ({
     if (!inputValue.trim()) return;
     onSendMessage(inputValue.trim());
   };
+
+  // Theme-specific button colors
+  const getButtonBgColor = () => {
+    switch(theme) {
+      case 'eid':
+        return 'bg-[#24936E] hover:bg-[#24936E]/80';
+      case 'onam':
+        return 'bg-[#F97316] hover:bg-[#F97316]/80';
+      case 'health':
+        return 'bg-[#2196F3] hover:bg-[#2196F3]/80';
+      case 'xmas':
+        return 'bg-[#D32F2F] hover:bg-[#D32F2F]/80';
+      default:
+        return 'bg-blue-700 hover:bg-blue-800';
+    }
+  };
+  
+  const buttonBgColor = getButtonBgColor();
 
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col w-80 h-96 bg-white rounded-xl shadow-xl overflow-hidden border border-gray-200">
@@ -88,7 +108,7 @@ const CompactChatWidget = ({
             type="submit" 
             size="sm"
             disabled={isLoading || !inputValue.trim()}
-            className="bg-blue-700 hover:bg-blue-800 h-8 w-8 p-0"
+            className={`${buttonBgColor} h-8 w-8 p-0`}
           >
             <Send className="h-3 w-3" />
           </Button>

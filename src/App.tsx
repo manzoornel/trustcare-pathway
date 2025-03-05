@@ -16,6 +16,9 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import PrivateRoute from '@/components/PrivateRoute';
 import AIChat from '@/pages/AIChat';
+import ThemeSwitcher from '@/components/ThemeSwitcher';
+import FestivalDecorations from '@/components/FestivalDecorations';
+import { useTheme } from '@/contexts/ThemeContext';
 
 // Admin components
 import Admin from "@/pages/Admin";
@@ -27,9 +30,20 @@ import SettingsManager from "@/pages/admin/SettingsManager";
 import NotFound from '@/pages/NotFound';
 
 function App() {
+  const { isThemeChanging } = useTheme();
+
   return (
     <>
       <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} newestOnTop closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />
+      
+      {/* Theme fade transition */}
+      {isThemeChanging && (
+        <div className="fixed inset-0 bg-white z-[9999] animate-fade-in" style={{ animationDirection: 'reverse' }}></div>
+      )}
+      
+      <ThemeSwitcher />
+      <FestivalDecorations />
+      
       <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/about" element={<About />} />

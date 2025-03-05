@@ -6,6 +6,32 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    /* Default theme colors */
+    --color-primary: #00C6C6;
+    --color-primary-foreground: #FFFFFF;
+    --color-secondary: #2D3B41;
+    --color-secondary-foreground: #FFFFFF;
+    --color-accent: #004F9F;
+    --color-accent-foreground: #FFFFFF;
+    --color-muted: #F0F0F0;
+    --color-muted-foreground: #666666;
+
+    /* Festival colors */
+    --festival-primary: #00C6C6;
+    --festival-secondary: #2D3B41;
+    --festival-accent: #004F9F;
+    --festival-light: #F0F0F0;
+    --festival-dark: #2D3B41;
+
+    /* Other variables */
+    --border: 215.4 16.3% 46.9%;
+    --input: 215.4 16.3% 46.9%;
+    --ring: 215.4 16.3% 46.9%;
+    --background: 0 0% 100%;
+    --foreground: 222.2 47.4% 11.2%;
+  }
+
   html {
     scroll-behavior: smooth;
     font-family: 'Inter', sans-serif;
@@ -13,15 +39,99 @@
 
   body {
     @apply bg-background text-foreground antialiased;
+    transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
   }
 
   h1, h2, h3, h4, h5, h6 {
     @apply font-display;
+  }
+
+  /* Festival-specific body styles */
+  body.theme-eid {
+    background-image: radial-gradient(circle at 50% 50%, var(--festival-light) 0%, rgba(255, 255, 255, 0.8) 100%);
+  }
+
+  body.theme-onam {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(254, 247, 205, 0.3) 100%);
+  }
+
+  body.theme-health {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(227, 242, 253, 0.3) 100%);
+  }
+
+  body.theme-xmas {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 235, 238, 0.3) 100%);
+  }
+}
+
+@layer components {
+  /* Festival decorations */
+  .festival-decoration-top {
+    @apply absolute top-0 left-0 right-0 h-16 pointer-events-none overflow-hidden z-10;
+  }
+  
+  .festival-decoration-bottom {
+    @apply absolute bottom-0 left-0 right-0 h-16 pointer-events-none overflow-hidden z-10;
+  }
+
+  /* Eid theme components */
+  .theme-eid .festival-decoration-top {
+    @apply bg-contain bg-repeat-x bg-center;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 30" width="100" height="30"><path d="M0,30 L50,0 L100,30 Z" fill="%2324936E" opacity="0.2"/></svg>');
+  }
+  
+  /* Onam theme components */
+  .theme-onam .festival-decoration-top {
+    @apply bg-contain bg-repeat-x bg-center;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 30" width="100" height="30"><circle cx="50" cy="15" r="15" fill="%23F97316" opacity="0.2"/><circle cx="15" cy="15" r="10" fill="%232E7D32" opacity="0.2"/><circle cx="85" cy="15" r="10" fill="%232E7D32" opacity="0.2"/></svg>');
+  }
+  
+  /* Health theme components */
+  .theme-health .festival-decoration-top {
+    @apply bg-contain bg-repeat-x bg-center;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 30" width="100" height="30"><path d="M20,15 L35,15 L35,0 L50,0 L50,15 L65,15 L65,30 L50,30 L50,45 L35,45 L35,30 L20,30 Z" fill="%232196F3" opacity="0.2" transform="translate(10, -7.5) scale(0.6)"/></svg>');
+  }
+  
+  /* Xmas theme components */
+  .theme-xmas .festival-decoration-top {
+    @apply bg-contain bg-repeat-x bg-center;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 30" width="100" height="30"><path d="M50,0 L60,20 L80,20 L65,32 L70,50 L50,40 L30,50 L35,32 L20,20 L40,20 Z" fill="%23D32F2F" opacity="0.2" transform="translate(0, -10) scale(0.4)"/></svg>');
+  }
+
+  /* Festival button styles */
+  .theme-eid .btn-festival {
+    @apply bg-festival-primary text-white hover:bg-festival-primary/80;
+  }
+  
+  .theme-onam .btn-festival {
+    @apply bg-festival-primary text-white hover:bg-festival-primary/80;
+  }
+  
+  .theme-health .btn-festival {
+    @apply bg-festival-primary text-white hover:bg-festival-primary/80;
+  }
+  
+  .theme-xmas .btn-festival {
+    @apply bg-festival-primary text-white hover:bg-festival-primary/80;
   }
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+
+  /* Festival specific utilities */
+  .festival-text-gradient {
+    @apply bg-gradient-to-r from-festival-primary to-festival-secondary bg-clip-text text-transparent;
+  }
+
+  .festival-border {
+    @apply border-festival-primary;
+  }
+
+  .festival-shadow {
+    box-shadow: 0 4px 6px -1px rgba(var(--festival-primary-rgb), 0.1), 
+                0 2px 4px -1px rgba(var(--festival-primary-rgb), 0.06);
   }
 }
