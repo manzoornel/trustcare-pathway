@@ -49,7 +49,8 @@ const PasswordLoginForm: React.FC<PasswordLoginFormProps> = ({ authenticatedUser
           phone: user.phone,
           hospitalId: user.hospitalId,
           email: user.email,
-          profileComplete: true
+          profileComplete: true,
+          needsProfile: false
         });
         navigate("/patient-portal");
       } else {
