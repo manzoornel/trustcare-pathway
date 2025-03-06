@@ -60,6 +60,7 @@ const ChatWidgetButton = ({ onClick }: ChatWidgetButtonProps) => {
       <Button 
         onClick={onClick} 
         className={`rounded-full w-14 h-14 ${buttonBgColor} flex items-center justify-center shadow-lg`}
+        aria-label="Chat with Doctor Uncle AI"
       >
         <img 
           src="/lovable-uploads/ae63c3bf-5d6c-4576-8d59-1311ca468c30.png" 
