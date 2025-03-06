@@ -19,7 +19,7 @@ const ThemeSwitcher: React.FC = () => {
       const event = e as CustomEvent;
       if (event.detail && event.detail.theme) {
         console.log('ThemeSwitcher: detected theme change:', event.detail.theme);
-        setLocalTheme(event.detail.theme);
+        setLocalTheme(event.detail.theme as ThemeType);
       }
     };
     

@@ -1,10 +1,17 @@
 
-import { doctors, entDoctors } from './DoctorData';
+import { doctors } from './DoctorData';
 import DoctorCard from './DoctorCard';
-import EntDoctorCard from './EntDoctorCard';
-import EntCareBenefits from './EntCareBenefits';
 
-const DoctorProfiles = () => {
+interface DoctorProfilesProps {
+  featuredOnly?: boolean;
+}
+
+const DoctorProfiles = ({ featuredOnly = true }: DoctorProfilesProps) => {
+  // Filter doctors if featuredOnly is true
+  const displayedDoctors = featuredOnly 
+    ? doctors.filter(doctor => doctor.featured)
+    : doctors;
+
   return (
     <div className="py-16 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -15,34 +22,25 @@ const DoctorProfiles = () => {
           </p>
         </div>
 
-        {/* Primary Care Doctors */}
-        <div className="mb-16">
-          <h3 className="text-2xl font-semibold text-gray-800 mb-8 text-center">Primary Care & Specialties</h3>
-          <div className="grid grid-cols-1 gap-8">
-            {doctors.map((doctor, index) => (
-              <DoctorCard 
-                key={index}
-                doctor={doctor} 
-              />
-            ))}
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {displayedDoctors.map((doctor) => (
+            <DoctorCard 
+              key={doctor.id}
+              doctor={doctor} 
+            />
+          ))}
         </div>
-
-        {/* ENT Specialists */}
-        <div>
-          <h3 className="text-2xl font-semibold text-gray-800 mb-8 text-center">Our ENT Specialists</h3>
-          <div className="grid grid-cols-1 gap-8">
-            {entDoctors.map((doctor, index) => (
-              <EntDoctorCard 
-                key={`ent-${index}`}
-                doctor={doctor}
-              />
-            ))}
+        
+        {featuredOnly && displayedDoctors.length > 0 && (
+          <div className="text-center mt-10">
+            <a 
+              href="/doctors" 
+              className="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              View All Doctors
+            </a>
           </div>
-        </div>
-
-        {/* Why Choose Doctor Uncle for ENT Care */}
-        <EntCareBenefits />
+        )}
       </div>
     </div>
   );

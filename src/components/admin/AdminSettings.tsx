@@ -12,7 +12,7 @@ const AdminSettings = () => {
   // Listen for theme changes
   useEffect(() => {
     const handleThemeChange = (e: Event) => {
-      const event = e as CustomEvent;
+      const event = e as CustomEvent<{theme: string}>;
       if (event.detail && event.detail.theme) {
         console.log('AdminSettings: detected theme change:', event.detail.theme);
       }

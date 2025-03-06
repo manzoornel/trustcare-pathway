@@ -22,7 +22,7 @@ const ChatWidgetButton = ({ onClick }: ChatWidgetButtonProps) => {
       const event = e as CustomEvent;
       if (event.detail && event.detail.theme) {
         console.log('ChatWidgetButton: detected theme change:', event.detail.theme);
-        setLocalTheme(event.detail.theme);
+        setLocalTheme(event.detail.theme as ThemeType);
       }
     };
     

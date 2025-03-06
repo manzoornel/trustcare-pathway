@@ -42,7 +42,7 @@ const ThemeManagement = () => {
     setTheme(newTheme);
     toast.success(`Theme changed to ${value}`, {
       position: "top-center",
-      autoClose: 2000
+      duration: 2000
     });
     console.log('Theme changed to:', newTheme);
     

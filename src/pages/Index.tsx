@@ -37,12 +37,12 @@ const Index = () => {
 
       <Navbar />
       <main>
-        <FestivalDecorations theme={theme} />
+        <FestivalDecorations />
         <HeroSection />
         <CasualtyServiceBanner />
         <ServicePreview />
         <HomeCareServices />
-        <DoctorProfiles featuredOnly={true} />
+        <DoctorProfiles />
         <PatientReviews />
         <Testimonials />
         <BlogPreview />
