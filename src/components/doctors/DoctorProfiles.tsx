@@ -1,4 +1,3 @@
-
 import { doctors } from './DoctorData';
 import DoctorCard from './DoctorCard';
 
@@ -7,10 +6,17 @@ interface DoctorProfilesProps {
 }
 
 const DoctorProfiles = ({ featuredOnly = true }: DoctorProfilesProps) => {
+  // Sort doctors to put Dr. Manzoor first
+  const sortedDoctors = [...doctors].sort((a, b) => {
+    if (a.id === "dr-manzoor") return -1;
+    if (b.id === "dr-manzoor") return 1;
+    return 0;
+  });
+
   // Filter doctors if featuredOnly is true
   const displayedDoctors = featuredOnly 
-    ? doctors.filter(doctor => doctor.featured)
-    : doctors;
+    ? sortedDoctors.filter(doctor => doctor.featured)
+    : sortedDoctors;
 
   return (
     <div className="py-16 bg-gray-50">
