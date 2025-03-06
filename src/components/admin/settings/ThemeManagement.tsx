@@ -6,7 +6,7 @@ import { useTheme, ThemeType, THEME_CHANGE_EVENT } from '@/contexts/ThemeContext
 import { Label } from '@/components/ui/label';
 import { Sun, Moon, Flower, Heart, Gift, Star, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { toast } from 'react-toastify';
+import { toast } from "sonner";
 
 const ThemeManagement = () => {
   const { theme, setTheme } = useTheme();
@@ -45,6 +45,9 @@ const ThemeManagement = () => {
       autoClose: 2000
     });
     console.log('Theme changed to:', newTheme);
+    
+    // Print to console for debugging
+    console.log(`Theme changed to: ${newTheme}`);
   };
 
   return (
@@ -57,6 +60,12 @@ const ThemeManagement = () => {
         </CardDescription>
       </CardHeader>
       <CardContent>
+        <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+          <p className="text-sm text-yellow-800">
+            <strong>Note:</strong> When you change the theme, it will be visible to all visitors on the website. 
+            The current active theme is: <span className="font-semibold">{theme.charAt(0).toUpperCase() + theme.slice(1)}</span>
+          </p>
+        </div>
         <RadioGroup value={theme} onValueChange={handleThemeChange} className="grid gap-4 grid-cols-1 md:grid-cols-2">
           {themes.map((t) => (
             <div key={t.id} className={cn(

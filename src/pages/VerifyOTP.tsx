@@ -5,10 +5,10 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
+import OTPInput from "@/components/OTPInput";
 
 const VerifyOTP = () => {
   const navigate = useNavigate();
@@ -40,14 +40,6 @@ const VerifyOTP = () => {
     return () => clearInterval(timer);
   }, [auth, navigate]);
 
-  const handleOtpChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    // Only allow numeric input
-    if (/^\d*$/.test(value) && value.length <= 6) {
-      setOtp(value);
-    }
-  };
-
   const handleResendOTP = () => {
     setResendDisabled(true);
     setTimeLeft(60);
@@ -64,6 +56,10 @@ const VerifyOTP = () => {
         return prevTime - 1;
       });
     }, 1000);
+  };
+
+  const handleOtpComplete = (otpValue: string) => {
+    setOtp(otpValue);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -112,17 +108,14 @@ const VerifyOTP = () => {
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="space-y-2">
+                  <div className="space-y-4">
                     <label htmlFor="otp" className="text-sm font-medium">Verification Code</label>
-                    <Input
-                      id="otp"
-                      placeholder="Enter 6-digit OTP"
-                      value={otp}
-                      onChange={handleOtpChange}
-                      maxLength={6}
-                      required
-                      className="text-center text-lg tracking-widest"
-                    />
+                    <div className="flex justify-center">
+                      <OTPInput
+                        onComplete={handleOtpComplete}
+                        length={6}
+                      />
+                    </div>
                     <p className="text-xs text-gray-500 text-center">
                       An OTP has been sent to your phone ({auth.phone?.slice(-4)}) and email
                     </p>
