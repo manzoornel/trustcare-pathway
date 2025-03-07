@@ -20,6 +20,21 @@ export type DemoPatient = {
   phone: string;
 };
 
+export type Credentials = {
+  name: string;
+  email: string;
+  password: string;
+  phone: string;
+  hospitalId: string;
+};
+
+export type UserProfile = Partial<{
+  name: string;
+  email: string;
+  phone: string;
+  hospitalId: string;
+}>;
+
 export type AuthContextType = {
   auth: AuthState;
   login: (email: string, password: string) => Promise<void>;
@@ -28,7 +43,7 @@ export type AuthContextType = {
   logout: () => Promise<void>;
   updateProfile: (profileData: Partial<AuthState>) => Promise<void>;
   verifyUser: () => void;
-  signUp: (userData: { name: string, email: string, password: string, phone: string, hospitalId: string }) => Promise<void>;
+  signup: (userData: Credentials) => Promise<void>;
 };
 
 export const defaultAuthState: AuthState = {
