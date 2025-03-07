@@ -21,7 +21,7 @@ type PatientInfoCardProps = {
 };
 
 const PatientInfoCard = ({ patientName, hospitalId, phone, email }: PatientInfoCardProps) => {
-  const { updateProfile } = useAuth();
+  const { updateProfile, auth } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     name: patientName || "",
@@ -79,10 +79,15 @@ const PatientInfoCard = ({ patientName, hospitalId, phone, email }: PatientInfoC
     setIsEditing(false);
   };
 
+  const isDemoAccount = auth.userId?.startsWith('demo-');
+
   return (
     <Card className="mb-8">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <CardTitle>Patient Information</CardTitle>
+        {isDemoAccount && (
+          <div className="text-xs px-2 py-1 bg-yellow-100 text-yellow-800 rounded">Demo Account</div>
+        )}
         {!isEditing && (
           <Button variant="ghost" size="sm" onClick={() => setIsEditing(true)} className="flex items-center gap-1">
             <Edit className="h-4 w-4" />

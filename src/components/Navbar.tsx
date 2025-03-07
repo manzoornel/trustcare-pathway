@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Menu, X, LogIn } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
@@ -38,6 +39,8 @@ const Navbar = () => {
     return location.pathname === path;
   };
   
+  const isDemoAccount = auth.userId?.startsWith('demo-');
+  
   return <nav className="fixed w-full bg-white/95 backdrop-blur-sm shadow-sm z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
@@ -59,8 +62,13 @@ const Navbar = () => {
               </Link>)}
               
             {auth.isAuthenticated ? (
-              <Link to="/patient-portal" className="flex items-center text-primary font-semibold transition-colors duration-200 font-display">
-                Patient Portal
+              <Link to="/patient-portal" className="flex items-center gap-1">
+                <span className="text-primary font-semibold transition-colors duration-200 font-display">
+                  Patient Portal
+                </span>
+                {isDemoAccount && (
+                  <span className="text-xs px-1.5 py-0.5 bg-yellow-100 text-yellow-800 rounded">Demo</span>
+                )}
               </Link>
             ) : (
               <Link to="/login" className="flex items-center gap-1 text-primary hover:text-primary/80 font-semibold transition-colors duration-200 font-display">
@@ -87,8 +95,13 @@ const Navbar = () => {
               </Link>)}
               
             {auth.isAuthenticated ? (
-              <Link to="/patient-portal" className="block px-3 py-2 text-base font-medium text-primary font-display" onClick={() => setIsOpen(false)}>
-                Patient Portal
+              <Link to="/patient-portal" className="flex items-center gap-1 px-3 py-2" onClick={() => setIsOpen(false)}>
+                <span className="text-base font-medium text-primary font-display">
+                  Patient Portal
+                </span>
+                {isDemoAccount && (
+                  <span className="text-xs px-1.5 py-0.5 bg-yellow-100 text-yellow-800 rounded">Demo</span>
+                )}
               </Link>
             ) : (
               <Link to="/login" className="flex items-center gap-1 px-3 py-2 text-base font-medium text-primary font-display" onClick={() => setIsOpen(false)}>

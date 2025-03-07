@@ -35,6 +35,25 @@ const defaultAuthState: AuthState = {
   rewardPoints: 0,
 };
 
+// Demo patients that can be used for quick login
+// This should match the data in the Login component
+const demoPatients = [
+  {
+    name: "John Smith",
+    hospitalId: "H12345",
+    email: "john.smith@example.com",
+    password: "password123",
+    phone: "1234567890"
+  },
+  {
+    name: "Sarah Johnson",
+    hospitalId: "H67890",
+    email: "sarah.johnson@example.com",
+    password: "password123",
+    phone: "9876543210"
+  }
+];
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
@@ -177,6 +196,33 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = async (email: string, password: string) => {
     try {
+      // Check if this is a demo account
+      const demoPatient = demoPatients.find(patient => patient.email === email);
+      
+      if (demoPatient && password === demoPatient.password) {
+        // Simulate a successful login with demo account
+        console.log("Demo login successful", demoPatient);
+        
+        // Create a random user ID for the demo account
+        const demoUserId = `demo-${Math.random().toString(36).substring(2, 15)}`;
+        
+        setAuth({
+          isAuthenticated: true,
+          isVerified: true,
+          needsProfile: false,
+          userId: demoUserId,
+          name: demoPatient.name,
+          email: demoPatient.email,
+          phone: demoPatient.phone,
+          hospitalId: demoPatient.hospitalId,
+          rewardPoints: 250, // Demo reward points
+        });
+        
+        toast.success("Demo login successful!");
+        return;
+      }
+      
+      // Real authentication with Supabase
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -194,6 +240,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const loginWithOTP = async (phone: string) => {
     try {
+      // Check if this is a demo account
+      const demoPatient = demoPatients.find(patient => patient.phone === phone);
+      
+      if (demoPatient) {
+        // Store the phone number for verification
+        localStorage.setItem('verifyPhone', phone);
+        toast.info("OTP sent to your phone (simulated for demo account)");
+        return Promise.resolve();
+      }
+      
       // In a real implementation, this would send an OTP via SMS
       // For this demo, we'll simulate it
       toast.info("OTP sent to your phone (simulated)");
@@ -211,6 +267,32 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const verifyOTP = async (phone: string, otp: string) => {
     try {
+      // Check if this is a demo account
+      const demoPatient = demoPatients.find(patient => patient.phone === phone);
+      
+      if (demoPatient) {
+        // Simulate a successful verification for demo account
+        console.log("Demo OTP verification successful", demoPatient);
+        
+        // Create a random user ID for the demo account
+        const demoUserId = `demo-${Math.random().toString(36).substring(2, 15)}`;
+        
+        setAuth({
+          isAuthenticated: true,
+          isVerified: true,
+          needsProfile: false,
+          userId: demoUserId,
+          name: demoPatient.name,
+          email: demoPatient.email,
+          phone: demoPatient.phone,
+          hospitalId: demoPatient.hospitalId,
+          rewardPoints: 250, // Demo reward points
+        });
+        
+        toast.success("Demo OTP verified successfully!");
+        return Promise.resolve();
+      }
+      
       // In a real implementation, this would verify the OTP
       // For this demo, we'll accept any OTP
       
@@ -247,6 +329,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const logout = async () => {
     try {
+      // Check if this is a demo account
+      if (auth.userId?.startsWith('demo-')) {
+        setAuth(defaultAuthState);
+        toast.success("Logged out of demo account successfully");
+        return;
+      }
+      
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
       
@@ -262,6 +351,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (!auth.userId) {
       toast.error("Cannot update profile: Not logged in");
       return Promise.reject("Not logged in");
+    }
+    
+    // For demo accounts, update only in memory
+    if (auth.userId.startsWith('demo-')) {
+      setAuth(prev => ({ ...prev, ...profileData }));
+      toast.success("Profile updated successfully (Demo mode)");
+      return Promise.resolve();
     }
     
     try {
