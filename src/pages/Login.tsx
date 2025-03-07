@@ -4,32 +4,9 @@ import { Helmet } from "react-helmet";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Label } from "@/components/ui/label";
-import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
-import { Info } from "lucide-react";
-
-// Demo patients that can be used for quick login
-const demoPatients = [
-  {
-    name: "John Smith",
-    hospitalId: "H12345",
-    email: "john.smith@example.com",
-    password: "password123",
-    phone: "1234567890"
-  },
-  {
-    name: "Sarah Johnson",
-    hospitalId: "H67890",
-    email: "sarah.johnson@example.com",
-    password: "password123",
-    phone: "9876543210"
-  }
-];
+import LoginTabs from "@/components/login/LoginTabs";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -42,7 +19,6 @@ const Login = () => {
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showDemoAccounts, setShowDemoAccounts] = useState(false);
 
   useEffect(() => {
     // Redirect if already authenticated
@@ -84,13 +60,13 @@ const Login = () => {
   };
 
   // Quick login with demo account
-  const loginWithDemoAccount = async (patient: typeof demoPatients[0]) => {
+  const loginWithDemoAccount = async (email: string, password: string) => {
     setLoading(true);
     setError(null);
     try {
-      setEmail(patient.email);
-      setPassword(patient.password);
-      await login(patient.email, patient.password);
+      setEmail(email);
+      setPassword(password);
+      await login(email, password);
       navigate("/patient-portal");
     } catch (err: any) {
       setError(err.message || "Failed to login with demo account");
@@ -123,115 +99,21 @@ const Login = () => {
               </CardHeader>
               
               <CardContent>
-                <Tabs defaultValue="email" value={activeTab} onValueChange={setActiveTab}>
-                  <TabsList className="grid w-full grid-cols-2 mb-4">
-                    <TabsTrigger value="email">Email</TabsTrigger>
-                    <TabsTrigger value="phone">Phone</TabsTrigger>
-                  </TabsList>
-                  
-                  <TabsContent value="email">
-                    <form onSubmit={handleEmailLogin}>
-                      <div className="grid gap-4">
-                        <div className="grid gap-2">
-                          <Label htmlFor="email">Email</Label>
-                          <Input
-                            id="email"
-                            type="email"
-                            placeholder="name@example.com"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            required
-                          />
-                        </div>
-                        
-                        <div className="grid gap-2">
-                          <Label htmlFor="password">Password</Label>
-                          <Input
-                            id="password"
-                            type="password"
-                            placeholder="••••••••"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                          />
-                        </div>
-                        
-                        {error && <p className="text-sm text-red-500">{error}</p>}
-                        
-                        <Button type="submit" className="w-full" disabled={loading}>
-                          {loading ? "Logging in..." : "Login"}
-                        </Button>
-                      </div>
-                    </form>
-                  </TabsContent>
-                  
-                  <TabsContent value="phone">
-                    <form onSubmit={handlePhoneLogin}>
-                      <div className="grid gap-4">
-                        <div className="grid gap-2">
-                          <Label htmlFor="phone">Phone Number</Label>
-                          <Input
-                            id="phone"
-                            placeholder="1234567890"
-                            value={phone}
-                            onChange={(e) => setPhone(e.target.value)}
-                            required
-                          />
-                          <p className="text-xs text-gray-500">
-                            Enter your 10-digit phone number
-                          </p>
-                        </div>
-                        
-                        {error && <p className="text-sm text-red-500">{error}</p>}
-                        
-                        <Button type="submit" className="w-full" disabled={loading}>
-                          {loading ? "Sending OTP..." : "Send OTP"}
-                        </Button>
-                      </div>
-                    </form>
-                  </TabsContent>
-                </Tabs>
-
-                <div className="mt-8">
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm text-gray-500">For testing purposes:</p>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={() => setShowDemoAccounts(!showDemoAccounts)}
-                      className="flex items-center gap-1"
-                    >
-                      <Info className="h-4 w-4" />
-                      {showDemoAccounts ? "Hide Demo Accounts" : "Show Demo Accounts"}
-                    </Button>
-                  </div>
-                  
-                  {showDemoAccounts && (
-                    <div className="mt-2 border rounded-md p-3 bg-gray-50">
-                      <p className="text-sm font-medium mb-2">Quick Login with Demo Accounts:</p>
-                      <div className="space-y-2">
-                        {demoPatients.map((patient, index) => (
-                          <div key={index} className="border rounded-md p-2 bg-white">
-                            <div className="flex justify-between items-center">
-                              <div>
-                                <p className="font-medium">{patient.name}</p>
-                                <p className="text-xs text-gray-500">Hospital ID: {patient.hospitalId}</p>
-                                <p className="text-xs text-gray-500">Email: {patient.email}</p>
-                              </div>
-                              <Button 
-                                size="sm" 
-                                onClick={() => loginWithDemoAccount(patient)}
-                                disabled={loading}
-                              >
-                                Login
-                              </Button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
+                <LoginTabs 
+                  activeTab={activeTab}
+                  setActiveTab={setActiveTab}
+                  email={email}
+                  setEmail={setEmail}
+                  password={password}
+                  setPassword={setPassword}
+                  phone={phone}
+                  setPhone={setPhone}
+                  handleEmailLogin={handleEmailLogin}
+                  handlePhoneLogin={handlePhoneLogin}
+                  loginWithDemoAccount={loginWithDemoAccount}
+                  error={error}
+                  loading={loading}
+                />
               </CardContent>
               
               <CardFooter className="flex flex-col gap-4">
