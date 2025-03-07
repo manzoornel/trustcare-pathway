@@ -13,10 +13,6 @@ const Login = () => {
   const { auth, login, loginWithOTP } = useAuth();
   
   const [activeTab, setActiveTab] = useState("email");
-  const [hospitalId, setHospitalId] = useState("");
-  const [password, setPassword] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -28,8 +24,7 @@ const Login = () => {
   }, [auth.isAuthenticated, navigate]);
 
   // Handle Email/Password login
-  const handleEmailLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleEmailLogin = async ({ email, password }: { email: string; password: string }) => {
     setLoading(true);
     setError(null);
     
@@ -44,8 +39,7 @@ const Login = () => {
   };
 
   // Handle Phone login
-  const handlePhoneLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handlePhoneLogin = async ({ phone }: { phone: string }) => {
     setLoading(true);
     setError(null);
     
@@ -64,8 +58,6 @@ const Login = () => {
     setLoading(true);
     setError(null);
     try {
-      setEmail(email);
-      setPassword(password);
       await login(email, password);
       navigate("/patient-portal");
     } catch (err: any) {
@@ -102,12 +94,6 @@ const Login = () => {
                 <LoginTabs 
                   activeTab={activeTab}
                   setActiveTab={setActiveTab}
-                  email={email}
-                  setEmail={setEmail}
-                  password={password}
-                  setPassword={setPassword}
-                  phone={phone}
-                  setPhone={setPhone}
                   handleEmailLogin={handleEmailLogin}
                   handlePhoneLogin={handlePhoneLogin}
                   loginWithDemoAccount={loginWithDemoAccount}

@@ -8,14 +8,8 @@ import DemoAccountsSection from "./DemoAccountsSection";
 interface LoginTabsProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
-  email: string;
-  setEmail: (email: string) => void;
-  password: string;
-  setPassword: (password: string) => void;
-  phone: string;
-  setPhone: (phone: string) => void;
-  handleEmailLogin: (e: React.FormEvent) => Promise<void>;
-  handlePhoneLogin: (e: React.FormEvent) => Promise<void>;
+  handleEmailLogin: (values: { email: string; password: string }) => Promise<void>;
+  handlePhoneLogin: (values: { phone: string }) => Promise<void>;
   loginWithDemoAccount: (email: string, password: string) => Promise<void>;
   error: string | null;
   loading: boolean;
@@ -24,12 +18,6 @@ interface LoginTabsProps {
 const LoginTabs = ({
   activeTab,
   setActiveTab,
-  email,
-  setEmail,
-  password,
-  setPassword,
-  phone,
-  setPhone,
   handleEmailLogin,
   handlePhoneLogin,
   loginWithDemoAccount,
@@ -45,10 +33,6 @@ const LoginTabs = ({
       
       <TabsContent value="email">
         <EmailLoginForm 
-          email={email}
-          setEmail={setEmail}
-          password={password}
-          setPassword={setPassword}
           handleEmailLogin={handleEmailLogin}
           error={error}
           loading={loading}
@@ -57,8 +41,6 @@ const LoginTabs = ({
       
       <TabsContent value="phone">
         <PhoneLoginForm
-          phone={phone}
-          setPhone={setPhone}
           handlePhoneLogin={handlePhoneLogin}
           error={error}
           loading={loading}
