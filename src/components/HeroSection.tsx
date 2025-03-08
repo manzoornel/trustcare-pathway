@@ -1,6 +1,7 @@
+
 import React from 'react';
 import { useTheme } from '@/contexts/ThemeContext';
-import { Snowflakes } from 'lucide-react';
+import { Snowflake } from 'lucide-react';
 import { useFestival } from '@/contexts/FestivalContext';
 
 const HeroSection = () => {
@@ -12,12 +13,12 @@ const HeroSection = () => {
       return null;
     }
 
-    if (activeFestival === "christmas" && theme === "light") {
+    if (activeFestival === "christmas" && theme === "xmas") {
       return (
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-0 left-0 w-full h-full flex flex-col items-center justify-start gap-4">
             {[...Array(30)].map((_, i) => (
-              <Snowflakes key={i} className="text-white animate-fall" style={{
+              <Snowflake key={i} className="text-white animate-fall" style={{
                 fontSize: `${Math.random() * 2 + 1}rem`,
                 left: `${Math.random() * 100}%`,
                 animationDuration: `${Math.random() * 5 + 5}s`,
