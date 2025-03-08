@@ -3,10 +3,10 @@ export type AuthState = {
   isAuthenticated: boolean;
   needsProfile: boolean;
   isVerified: boolean;
-  name?: string;
-  phone?: string;
-  hospitalId?: string;
-  email?: string;
+  name?: string | null;
+  phone?: string | null;
+  hospitalId?: string | null;
+  email?: string | null;
   profileComplete?: boolean;
   rewardPoints?: number;
   userId?: string;
@@ -29,10 +29,10 @@ export type Credentials = {
 };
 
 export type UserProfile = Partial<{
-  name: string;
-  email: string;
-  phone: string;
-  hospitalId: string;
+  name: string | null;
+  email: string | null;
+  phone: string | null;
+  hospitalId: string | null;
 }>;
 
 export type AuthContextType = {
@@ -41,7 +41,7 @@ export type AuthContextType = {
   loginWithOTP: (phone: string) => Promise<void>;
   verifyOTP: (phone: string, otp: string) => Promise<void>;
   logout: () => Promise<void>;
-  updateProfile: (profileData: Partial<AuthState>) => Promise<void>;
+  updateProfile: (profileData: Partial<UserProfile>) => Promise<void>;
   verifyUser: () => void;
   signup: (userData: Credentials) => Promise<void>;
 };

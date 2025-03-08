@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,13 +6,13 @@ import PasswordLoginForm from "./PasswordLoginForm";
 import OTPLoginForm from "./OTPLoginForm";
 
 interface LoginCardProps {
-  authenticatedUsers: Array<{
+  authenticatedUsers?: {
     hospitalId: string;
     phone: string;
     email: string;
     name: string;
     password: string;
-  }>;
+  }[];
 }
 
 const LoginCard: React.FC<LoginCardProps> = ({ authenticatedUsers }) => {
