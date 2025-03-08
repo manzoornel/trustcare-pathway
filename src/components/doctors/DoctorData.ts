@@ -1,3 +1,4 @@
+
 export interface Doctor {
   id: string;
   name: string;
@@ -86,9 +87,6 @@ export const doctors: Doctor[] = [
     featured: false
   }
 ];
-
-// Export the doctors array as entDoctors too
-export const entDoctors = doctors;
 
 export const getFeaturedDoctors = (): Doctor[] => {
   return doctors.filter(doctor => doctor.featured);
