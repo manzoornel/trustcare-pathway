@@ -1,62 +1,43 @@
 
-import React, { useState } from "react";
+import React from 'react';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import PasswordLoginForm from "@/components/auth/PasswordLoginForm";
-import OTPLoginForm from "@/components/auth/OTPLoginForm";
-import { demoPatients } from "@/data/demoPatients";
+import PasswordLoginForm from './PasswordLoginForm';
+import OTPLoginForm from './OTPLoginForm';
+import { demoPatients } from '@/data/demoPatients';
 
 const LoginCard = () => {
-  const [activeTab, setActiveTab] = useState("password");
-
   return (
-    <div className="mx-auto w-full max-w-md p-6 bg-white rounded-lg shadow-md">
-      <div className="mb-6 text-center">
-        <h2 className="text-2xl font-bold text-primary">Welcome Back</h2>
-        <p className="text-sm text-gray-500 mt-2">
-          Sign in to access your account
+    <Card className="w-full max-w-md mx-auto">
+      <CardHeader>
+        <CardTitle className="text-2xl font-bold">Welcome Back</CardTitle>
+        <CardDescription>
+          Login to access your health information and services
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Tabs defaultValue="password" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-8">
+            <TabsTrigger value="password">Password</TabsTrigger>
+            <TabsTrigger value="otp">OTP Login</TabsTrigger>
+          </TabsList>
+          <TabsContent value="password">
+            <PasswordLoginForm />
+          </TabsContent>
+          <TabsContent value="otp">
+            <OTPLoginForm authenticatedUsers={demoPatients} />
+          </TabsContent>
+        </Tabs>
+      </CardContent>
+      <CardFooter className="flex justify-center border-t pt-4">
+        <p className="text-sm text-gray-500">
+          Don't have an account?{" "}
+          <a href="/signup" className="text-primary font-medium hover:underline">
+            Sign up
+          </a>
         </p>
-      </div>
-
-      <Tabs defaultValue="password" onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-2 mb-6">
-          <TabsTrigger value="password">Password</TabsTrigger>
-          <TabsTrigger value="otp">OTP</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="password">
-          <PasswordLoginForm />
-        </TabsContent>
-        
-        <TabsContent value="otp">
-          <OTPLoginForm />
-        </TabsContent>
-      </Tabs>
-
-      {activeTab === "password" && (
-        <div className="mt-6">
-          <div className="text-sm text-center mb-2 text-gray-500">
-            Demo Accounts (for testing)
-          </div>
-          <div className="grid gap-2">
-            {demoPatients.map((user, index) => (
-              <button
-                key={index}
-                className="py-2 px-3 text-xs bg-gray-100 hover:bg-gray-200 rounded transition-colors text-left"
-                onClick={() => {
-                  // Handle demo login logic here
-                  console.log("Demo login with:", user);
-                }}
-              >
-                <div className="font-medium">{user.name}</div>
-                <div className="text-gray-500 text-xs">
-                  Email: {user.email}, Password: {user.password}
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
+      </CardFooter>
+    </Card>
   );
 };
 
