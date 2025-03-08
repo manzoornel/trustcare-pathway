@@ -18,3 +18,8 @@ export const demoPatients: DemoPatient[] = [
     phone: "9876543210"
   }
 ];
+
+// Utility function to get a demo patient by email
+export const getDemoPatient = (email: string): DemoPatient | undefined => {
+  return demoPatients.find(patient => patient.email === email);
+};
