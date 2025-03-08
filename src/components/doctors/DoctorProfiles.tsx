@@ -27,8 +27,8 @@ const DoctorProfiles = ({ featuredOnly = true }: DoctorProfilesProps) => {
 
   // Sort doctors to put Dr. Manzoor first
   const sortedDoctors = [...doctorProfiles].sort((a, b) => {
-    if (a.name.includes("Manzoor")) return -1;
-    if (b.name.includes("Manzoor")) return 1;
+    if (a.name.includes("Manzoor Nellancheri")) return -1;
+    if (b.name.includes("Manzoor Nellancheri")) return 1;
     return 0;
   });
 
