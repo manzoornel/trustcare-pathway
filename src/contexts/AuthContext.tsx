@@ -1,275 +1,304 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
-import { AuthState, Credentials, UserProfile } from '@/types/auth.types';
-import { getDemoPatient } from '@/utils/authUtils';
+import { AuthState, AuthContextType, defaultAuthState, Credentials, UserProfile } from '@/types/auth.types';
+import { demoPatients } from '@/data/demoPatients';
 
-// Create the auth context
-const AuthContext = createContext<{
-  auth: AuthState;
-  login: (email: string, password: string) => Promise<void>;
-  loginWithOTP: (phone: string) => Promise<void>;
-  verifyOTP: (phone: string, otp: string) => Promise<void>;
-  logout: () => Promise<void>;
-  signup: (credentials: Credentials) => Promise<void>;
-  updateProfile: (profile: Partial<UserProfile>) => Promise<void>;
-}>({
-  auth: { isAuthenticated: false, userId: null, userEmail: null, userName: null, userPhone: null, hospitalId: null },
+const AuthContext = createContext<AuthContextType>({
+  auth: defaultAuthState,
   login: async () => {},
   loginWithOTP: async () => {},
   verifyOTP: async () => {},
   logout: async () => {},
-  signup: async () => {},
   updateProfile: async () => {},
+  verifyUser: () => {},
+  signup: async () => {},
 });
 
-// Create a provider component
-export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [auth, setAuth] = useState<AuthState>({
-    isAuthenticated: false,
-    userId: null,
-    userEmail: null,
-    userName: null,
-    userPhone: null,
-    hospitalId: null,
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [auth, setAuth] = useState<AuthState>(() => {
+    // Check if there's session data in localStorage
+    const savedAuth = localStorage.getItem('authState');
+    if (savedAuth) {
+      try {
+        return JSON.parse(savedAuth) as AuthState;
+      } catch (error) {
+        console.error('Failed to parse saved auth state:', error);
+      }
+    }
+    return defaultAuthState;
   });
 
-  // Check for existing session on mount
+  // Save auth state to localStorage whenever it changes
   useEffect(() => {
-    const checkSession = async () => {
-      try {
-        const { data, error } = await supabase.auth.getSession();
-        
-        if (error) {
-          console.error("Session check error:", error);
-          return;
-        }
-        
-        if (data?.session) {
-          const { user } = data.session;
-          const isDemoUser = user.id.startsWith('demo-');
-          
-          if (isDemoUser) {
-            const demoData = getDemoPatient(user.email || '');
-            setAuth({
-              isAuthenticated: true,
-              userId: user.id,
-              userEmail: user.email,
-              userName: demoData?.name || null,
-              userPhone: demoData?.phone || null,
-              hospitalId: demoData?.hospitalId || null,
-            });
-          } else {
-            setAuth({
-              isAuthenticated: true,
-              userId: user.id,
-              userEmail: user.email,
-              userName: user.user_metadata?.name || null,
-              userPhone: user.phone || null,
-              hospitalId: user.user_metadata?.hospitalId || null,
-            });
-          }
-        }
-      } catch (err) {
-        console.error("Session check failed:", err);
-      }
-    };
-    
-    checkSession();
-    
-    // Set up auth state change listener
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (event === 'SIGNED_IN' && session) {
-          const { user } = session;
-          const isDemoUser = user.id.startsWith('demo-');
-          
-          if (isDemoUser) {
-            const demoData = getDemoPatient(user.email || '');
-            setAuth({
-              isAuthenticated: true,
-              userId: user.id,
-              userEmail: user.email,
-              userName: demoData?.name || null,
-              userPhone: demoData?.phone || null,
-              hospitalId: demoData?.hospitalId || null,
-            });
-          } else {
-            setAuth({
-              isAuthenticated: true,
-              userId: user.id,
-              userEmail: user.email,
-              userName: user.user_metadata?.name || null,
-              userPhone: user.phone || null,
-              hospitalId: user.user_metadata?.hospitalId || null,
-            });
-          }
-        } else if (event === 'SIGNED_OUT') {
-          setAuth({
-            isAuthenticated: false,
-            userId: null,
-            userEmail: null,
-            userName: null,
-            userPhone: null,
-            hospitalId: null,
-          });
-        }
-      }
-    );
-    
-    // Cleanup
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
-  }, []);
-  
-  // Login with email and password
+    localStorage.setItem('authState', JSON.stringify(auth));
+  }, [auth]);
+
   const login = async (email: string, password: string) => {
     try {
       // Check if it's a demo account
-      const demoPatient = getDemoPatient(email);
+      const demoUser = demoPatients.find(p => p.email === email && p.password === password);
       
-      if (demoPatient) {
-        // This is a demo account, create a custom session
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
+      if (demoUser) {
+        // For demo users, we don't validate with Supabase
+        setAuth({
+          isAuthenticated: true,
+          isVerified: true,
+          needsProfile: false,
+          name: demoUser.name,
+          email: demoUser.email,
+          phone: demoUser.phone,
+          hospitalId: demoUser.hospitalId,
+          profileComplete: true,
+          userId: `demo-${Date.now()}`,
+          rewardPoints: 250
         });
         
-        if (error) throw error;
-        
-        toast.success(`Welcome, ${demoPatient.name}!`);
+        toast.success(`Welcome, ${demoUser.name}! You're logged in as a demo user.`);
         return;
       }
       
-      // Regular authentication flow
+      // For real users, validate with Supabase
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
-        password,
+        password
       });
-      
-      if (error) throw error;
-      
-      const userName = data.user?.user_metadata?.name || 'Patient';
-      toast.success(`Welcome, ${userName}!`);
-      
-    } catch (error: any) {
-      console.error("Login error:", error);
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      // User authenticated successfully
+      if (data.user) {
+        setAuth({
+          isAuthenticated: true,
+          isVerified: true,
+          needsProfile: false,
+          name: data.user.user_metadata.name,
+          email: data.user.email || '',
+          phone: data.user.phone || '',
+          profileComplete: true,
+          userId: data.user.id,
+          rewardPoints: 0
+        });
+        toast.success('Login successful!');
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Login failed. Please try again.';
+      toast.error(message);
       throw error;
     }
   };
-  
-  // Login with OTP
+
   const loginWithOTP = async (phone: string) => {
     try {
       const { error } = await supabase.auth.signInWithOtp({
-        phone,
+        phone
       });
-      
-      if (error) throw error;
-      
-      toast.success("OTP sent successfully!");
-    } catch (error: any) {
-      console.error("OTP send error:", error);
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      toast.success('OTP sent to your phone!');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to send OTP. Please try again.';
+      toast.error(message);
       throw error;
     }
   };
-  
-  // Verify OTP
+
   const verifyOTP = async (phone: string, otp: string) => {
     try {
       const { data, error } = await supabase.auth.verifyOtp({
         phone,
         token: otp,
-        type: 'sms',
+        type: 'sms'
       });
-      
-      if (error) throw error;
-      
-      toast.success("Phone verified successfully!");
-    } catch (error: any) {
-      console.error("OTP verification error:", error);
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      // OTP verified successfully
+      if (data.user) {
+        const needsProfile = !data.user.user_metadata.name;
+        
+        setAuth({
+          isAuthenticated: true,
+          isVerified: true,
+          needsProfile,
+          name: data.user.user_metadata.name,
+          email: data.user.email || '',
+          phone: data.user.phone || '',
+          profileComplete: !needsProfile,
+          userId: data.user.id,
+          rewardPoints: 0
+        });
+        
+        if (needsProfile) {
+          toast.info('Please complete your profile');
+        } else {
+          toast.success('Login successful!');
+        }
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to verify OTP. Please try again.';
+      toast.error(message);
       throw error;
     }
   };
-  
-  // Logout
+
   const logout = async () => {
     try {
       const { error } = await supabase.auth.signOut();
       
-      if (error) throw error;
+      if (error) {
+        throw new Error(error.message);
+      }
       
-      toast.success("Logged out successfully");
-    } catch (error: any) {
-      console.error("Logout error:", error);
+      setAuth(defaultAuthState);
+      toast.success('Logged out successfully');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Logout failed. Please try again.';
+      toast.error(message);
       throw error;
     }
   };
-  
-  // Sign up
-  const signup = async (credentials: Credentials) => {
+
+  const updateProfile = async (profileData: Partial<AuthState>) => {
     try {
+      // Only update if user is authenticated
+      if (!auth.isAuthenticated) {
+        throw new Error('You must be logged in to update your profile');
+      }
+      
+      // If not a demo user, update profile in Supabase
+      if (!auth.userId?.startsWith('demo-')) {
+        const { error } = await supabase.auth.updateUser({
+          data: {
+            name: profileData.name,
+            hospital_id: profileData.hospitalId,
+          }
+        });
+        
+        if (error) {
+          throw new Error(error.message);
+        }
+      }
+      
+      // Update local state
+      setAuth({
+        ...auth,
+        ...profileData,
+        needsProfile: false,
+        profileComplete: true
+      });
+      
+      toast.success('Profile updated successfully');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to update profile. Please try again.';
+      toast.error(message);
+      throw error;
+    }
+  };
+
+  // This function is used after signup to mark the user as verified
+  const verifyUser = () => {
+    setAuth(prevAuth => ({
+      ...prevAuth,
+      isVerified: true
+    }));
+  };
+
+  const signup = async (userData: Credentials) => {
+    try {
+      // Check if email already exists
+      const { data: existingUsers, error: searchError } = await supabase
+        .from('profiles')
+        .select('email')
+        .eq('email', userData.email)
+        .limit(1);
+        
+      if (searchError) {
+        throw new Error(searchError.message);
+      }
+        
+      if (existingUsers && existingUsers.length > 0) {
+        throw new Error('Email already in use. Please login instead.');
+      }
+        
+      // Create new user in Supabase Auth
       const { data, error } = await supabase.auth.signUp({
-        email: credentials.email,
-        password: credentials.password,
+        email: userData.email,
+        password: userData.password,
+        phone: userData.phone,
         options: {
           data: {
-            name: credentials.name,
-            hospitalId: credentials.hospitalId,
-          },
-        },
+            name: userData.name,
+            hospital_id: userData.hospitalId
+          }
+        }
       });
-      
-      if (error) throw error;
-      
-      toast.success("Account created successfully! Please verify your email.");
-    } catch (error: any) {
-      console.error("Signup error:", error);
+        
+      if (error) {
+        throw new Error(error.message);
+      }
+        
+      if (data.user) {
+        // Update local state (but keep isVerified false until they verify email)
+        setAuth({
+          isAuthenticated: true,
+          isVerified: false, // User needs to verify email
+          needsProfile: false,
+          name: userData.name,
+          email: userData.email,
+          phone: userData.phone,
+          hospitalId: userData.hospitalId,
+          profileComplete: true,
+          userId: data.user.id,
+          rewardPoints: 0
+        });
+          
+        // Create profile record in our database
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert([
+            { 
+              user_id: data.user.id,
+              name: userData.name,
+              email: userData.email,
+              phone: userData.phone,
+              hospital_id: userData.hospitalId
+            }
+          ]);
+          
+        if (profileError) {
+          console.error('Error creating profile:', profileError);
+          // We don't throw here because the auth account was already created
+        }
+          
+        toast.success('Signup successful! Please check your email to verify your account.');
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Signup failed. Please try again.';
+      toast.error(message);
       throw error;
     }
   };
 
-  // Update profile
-  const updateProfile = async (profile: Partial<UserProfile>) => {
-    try {
-      const { data, error } = await supabase.auth.updateUser({
-        data: profile
-      });
-      
-      if (error) throw error;
-      
-      setAuth(prev => ({
-        ...prev,
-        userName: profile.name || prev.userName,
-        userEmail: profile.email || prev.userEmail,
-        userPhone: profile.phone || prev.userPhone,
-      }));
-      
-      toast.success("Profile updated successfully!");
-    } catch (error: any) {
-      console.error("Profile update error:", error);
-      throw error;
-    }
+  const value = {
+    auth,
+    login,
+    loginWithOTP,
+    verifyOTP,
+    logout,
+    updateProfile,
+    verifyUser,
+    signup
   };
-  
-  return (
-    <AuthContext.Provider
-      value={{
-        auth,
-        login,
-        loginWithOTP,
-        verifyOTP,
-        logout,
-        signup,
-        updateProfile
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
-  );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
-// Custom hook to use the auth context
 export const useAuth = () => useContext(AuthContext);

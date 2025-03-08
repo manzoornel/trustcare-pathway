@@ -5,12 +5,15 @@ import App from './App.tsx'
 import './index.css'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { ThemeProvider } from '@/contexts/ThemeContext'
+import { FestivalProvider } from '@/contexts/FestivalContext'
 
 createRoot(document.getElementById("root")!).render(
   <BrowserRouter>
     <AuthProvider>
       <ThemeProvider>
-        <App />
+        <FestivalProvider>
+          <App />
+        </FestivalProvider>
       </ThemeProvider>
     </AuthProvider>
   </BrowserRouter>

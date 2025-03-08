@@ -1,21 +1,40 @@
+
 import { doctors } from './DoctorData';
 import DoctorCard from './DoctorCard';
+import { DoctorProfile } from './types';
 
 interface DoctorProfilesProps {
   featuredOnly?: boolean;
 }
 
 const DoctorProfiles = ({ featuredOnly = true }: DoctorProfilesProps) => {
+  // Convert Doctor data to DoctorProfile format
+  const doctorProfiles: DoctorProfile[] = doctors.map(doctor => ({
+    name: doctor.name,
+    title: doctor.qualification,
+    specialty: doctor.specialty,
+    experience: doctor.experience,
+    education: doctor.qualification,
+    description: doctor.bio,
+    image: doctor.image,
+    specializations: doctor.languages || [],
+    highlights: doctor.availableDays || [],
+    clinicInfo: {
+      location: "Doctor Uncle Family Clinic",
+      contact: "+1-234-567-8900",
+    }
+  }));
+
   // Sort doctors to put Dr. Manzoor first
-  const sortedDoctors = [...doctors].sort((a, b) => {
-    if (a.id === "dr-manzoor") return -1;
-    if (b.id === "dr-manzoor") return 1;
+  const sortedDoctors = [...doctorProfiles].sort((a, b) => {
+    if (a.name.includes("Manzoor")) return -1;
+    if (b.name.includes("Manzoor")) return 1;
     return 0;
   });
 
   // Filter doctors if featuredOnly is true
   const displayedDoctors = featuredOnly 
-    ? sortedDoctors.filter(doctor => doctor.featured)
+    ? sortedDoctors.slice(0, 3) // Show only first 3 doctors when featured
     : sortedDoctors;
 
   return (
@@ -29,9 +48,9 @@ const DoctorProfiles = ({ featuredOnly = true }: DoctorProfilesProps) => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {displayedDoctors.map((doctor) => (
+          {displayedDoctors.map((doctor, index) => (
             <DoctorCard 
-              key={doctor.id}
+              key={index}
               doctor={doctor} 
             />
           ))}

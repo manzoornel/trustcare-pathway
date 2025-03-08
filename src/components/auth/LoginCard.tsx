@@ -1,62 +1,58 @@
 
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import React, { useState } from 'react';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import PasswordLoginForm from "./PasswordLoginForm";
-import OTPLoginForm from "./OTPLoginForm";
+import EmailLoginForm from '@/components/login/EmailLoginForm';
+import OTPLoginForm from '@/components/login/PhoneLoginForm';
+import { Link } from 'react-router-dom';
+import DemoAccountsSection from '@/components/login/DemoAccountsSection';
+import { demoPatients } from '@/data/demoPatients';
 
-interface LoginCardProps {
-  authenticatedUsers: Array<{
-    hospitalId: string;
-    phone: string;
-    email: string;
-    name: string;
-    password: string;
-  }>;
-}
+type LoginCardProps = {
+  onSubmit?: (email: string, password: string) => void;
+  onOTPSubmit?: (phone: string) => void;
+  loading?: boolean;
+};
 
-const LoginCard: React.FC<LoginCardProps> = ({ authenticatedUsers }) => {
-  const [activeTab, setActiveTab] = useState("password");
+const LoginCard: React.FC<LoginCardProps> = ({
+  onSubmit,
+  onOTPSubmit,
+  loading = false,
+}) => {
+  const [activeTab, setActiveTab] = useState<string>("email");
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Patient Authentication</CardTitle>
+    <Card className="w-full max-w-md mx-auto">
+      <CardHeader className="space-y-1">
+        <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
         <CardDescription>
-          Log in with your hospital ID, phone number, or email
+          Login to your account to access your medical records and appointments
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <Tabs 
-          defaultValue="password" 
-          value={activeTab} 
-          onValueChange={setActiveTab}
-          className="w-full"
-        >
-          <TabsList className="grid w-full grid-cols-2 mb-6">
-            <TabsTrigger value="password">Password</TabsTrigger>
-            <TabsTrigger value="otp">OTP</TabsTrigger>
+      <CardContent className="space-y-4">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid grid-cols-2 mb-4">
+            <TabsTrigger value="email">Email</TabsTrigger>
+            <TabsTrigger value="phone">Phone</TabsTrigger>
           </TabsList>
-          
-          <TabsContent value="password">
-            <PasswordLoginForm authenticatedUsers={authenticatedUsers} />
+          <TabsContent value="email">
+            <EmailLoginForm onSubmit={onSubmit} loading={loading} />
           </TabsContent>
-          
-          <TabsContent value="otp">
-            <OTPLoginForm authenticatedUsers={authenticatedUsers} />
+          <TabsContent value="phone">
+            <OTPLoginForm onSubmit={onOTPSubmit} loading={loading} />
           </TabsContent>
         </Tabs>
-        
-        <div className="text-center mt-6">
-          <p className="text-sm text-gray-600">
-            Don't have an account?{" "}
-            <Link to="/signup" className="text-primary hover:underline font-medium">
-              Sign up
-            </Link>
-          </p>
-        </div>
+
+        <DemoAccountsSection demoAccounts={demoPatients} />
       </CardContent>
+      <CardFooter className="flex flex-col space-y-4">
+        <div className="text-sm text-center">
+          Don't have an account?{" "}
+          <Link to="/signup" className="text-primary hover:underline">
+            Sign up
+          </Link>
+        </div>
+      </CardFooter>
     </Card>
   );
 };
