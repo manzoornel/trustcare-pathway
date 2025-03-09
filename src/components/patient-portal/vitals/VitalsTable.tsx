@@ -1,7 +1,9 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { VitalRecord, VitalTypeInfo, getStatusColorClass } from "./mockData";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface VitalsTableProps {
   records: VitalRecord[];
@@ -9,10 +11,19 @@ interface VitalsTableProps {
 }
 
 const VitalsTable: React.FC<VitalsTableProps> = ({ records, vitalType }) => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const recordsPerPage = 5;
+  
   // Sort records by date (newest first)
   const sortedRecords = [...records].sort(
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
   );
+  
+  // Calculate pagination
+  const indexOfLastRecord = currentPage * recordsPerPage;
+  const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
+  const currentRecords = sortedRecords.slice(indexOfFirstRecord, indexOfLastRecord);
+  const totalPages = Math.ceil(sortedRecords.length / recordsPerPage);
   
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -30,6 +41,19 @@ const VitalsTable: React.FC<VitalsTableProps> = ({ records, vitalType }) => {
     return value;
   };
   
+  // Pagination handlers
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+  
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+  
   return (
     <div className="w-full overflow-auto">
       <Table>
@@ -43,8 +67,8 @@ const VitalsTable: React.FC<VitalsTableProps> = ({ records, vitalType }) => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {sortedRecords.length > 0 ? (
-            sortedRecords.map((record) => (
+          {currentRecords.length > 0 ? (
+            currentRecords.map((record) => (
               <TableRow key={record.id}>
                 <TableCell>{formatDate(record.date)}</TableCell>
                 <TableCell className="font-medium">{formatValue(record.value, vitalType.type)}</TableCell>
@@ -66,6 +90,35 @@ const VitalsTable: React.FC<VitalsTableProps> = ({ records, vitalType }) => {
           )}
         </TableBody>
       </Table>
+      
+      {sortedRecords.length > recordsPerPage && (
+        <div className="flex items-center justify-between mt-4">
+          <div className="text-sm text-gray-500">
+            Showing {indexOfFirstRecord + 1}-{Math.min(indexOfLastRecord, sortedRecords.length)} of {sortedRecords.length} records
+          </div>
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handlePreviousPage}
+              disabled={currentPage === 1}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <span className="text-sm">
+              Page {currentPage} of {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleNextPage}
+              disabled={currentPage === totalPages}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
