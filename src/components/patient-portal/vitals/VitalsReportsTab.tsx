@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -7,7 +6,7 @@ import VitalsTypeSelector from "./VitalsTypeSelector";
 import VitalChart from "./VitalChart";
 import VitalsTable from "./VitalsTable";
 import VitalsComparisonDialog from "./VitalsComparisonDialog";
-import { VitalType, getVitalsByType, getVitalTypeInfo, vitalTypes } from "./mockData";
+import { VitalType, getVitalsByType, getVitalTypeInfo, vitalTypes } from "./index";
 
 const VitalsReportsTab: React.FC = () => {
   const [selectedVitalType, setSelectedVitalType] = useState<VitalType>("blood_pressure");

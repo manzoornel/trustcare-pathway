@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import { VitalRecord, VitalTypeInfo, getStatusColorClass } from "./mockData";
+import { VitalRecord, VitalTypeInfo, getStatusColorClass } from "./index";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";

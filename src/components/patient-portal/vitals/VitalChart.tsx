@@ -1,4 +1,3 @@
-
 import React from "react";
 import { 
   LineChart, 
@@ -10,7 +9,7 @@ import {
   ResponsiveContainer,
   ReferenceLine
 } from "recharts";
-import { VitalRecord, VitalTypeInfo } from "./mockData";
+import { VitalRecord, VitalTypeInfo } from "./index";
 
 interface VitalChartProps {
   records: VitalRecord[];

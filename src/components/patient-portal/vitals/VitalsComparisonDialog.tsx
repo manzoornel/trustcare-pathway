@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { VitalType, VitalTypeInfo, getVitalsByType, vitalTypes, getVitalTypeInfo } from "./mockData";
+import { VitalType, VitalTypeInfo, getVitalsByType, vitalTypes, getVitalTypeInfo } from "./index";
 import VitalChart from "./VitalChart";
 import { 
   LineChart, 

@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Activity, Heart, Thermometer, Minus } from "lucide-react";
-import { VitalType, VitalTypeInfo } from "./mockData";
+import { VitalType, VitalTypeInfo } from "./index";
 import { Button } from "@/components/ui/button";
 
 interface VitalsTypeSelectorProps {
