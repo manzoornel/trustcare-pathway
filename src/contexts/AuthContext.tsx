@@ -215,7 +215,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       // Check if email already exists
       const { data: existingUsers, error: searchError } = await supabase
-        .from('profiles')
+        .from('patient_profiles')
         .select('email')
         .eq('email', userData.email)
         .limit(1);
@@ -262,10 +262,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           
         // Create profile record in our database
         const { error: profileError } = await supabase
-          .from('profiles')
+          .from('patient_profiles')
           .insert([
             { 
-              user_id: data.user.id,
+              id: data.user.id,
               name: userData.name,
               email: userData.email,
               phone: userData.phone,

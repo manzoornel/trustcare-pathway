@@ -11,6 +11,7 @@ import PatientInfoCard from "@/components/patient-portal/PatientInfoCard";
 import RewardsCard from "@/components/patient-portal/RewardsCard";
 import PortalTabsSection from "@/components/patient-portal/PortalTabsSection";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from 'react-toastify';
 
 const PatientPortal = () => {
   const navigate = useNavigate();
@@ -22,14 +23,22 @@ const PatientPortal = () => {
     // Check if user is authenticated
     const checkAuth = async () => {
       try {
+        console.log("Checking auth session in PatientPortal");
         const { data: { session } } = await supabase.auth.getSession();
-        if (!session) {
+        const storedAuth = localStorage.getItem('authState');
+        
+        // Either Supabase session or localStorage auth is valid
+        if (!session && (!storedAuth || !JSON.parse(storedAuth).isAuthenticated)) {
+          console.log("No valid session found, redirecting to login");
+          toast.error("Please log in to access the patient portal");
           navigate("/login");
         } else {
+          console.log("Valid session found in PatientPortal");
           setIsLoading(false);
         }
       } catch (error) {
         console.error("Error checking authentication:", error);
+        toast.error("Authentication error. Please try logging in again.");
         navigate("/login");
       }
     };
@@ -38,8 +47,9 @@ const PatientPortal = () => {
   }, [navigate]);
 
   useEffect(() => {
-    // If needs profile, redirect to profile creation
-    if (auth.needsProfile) {
+    // If we have auth data and needs profile, redirect to profile creation
+    if (auth.isAuthenticated && auth.needsProfile) {
+      console.log("User needs to complete profile, redirecting");
       navigate("/create-profile");
     }
   }, [auth, navigate]);
@@ -47,9 +57,11 @@ const PatientPortal = () => {
   const handleLogout = async () => {
     try {
       await logout();
+      toast.success("You have been logged out successfully");
       navigate("/login");
     } catch (error) {
       console.error("Error logging out:", error);
+      toast.error("Failed to log out. Please try again.");
     }
   };
 
@@ -62,6 +74,13 @@ const PatientPortal = () => {
         </div>
       </div>
     );
+  }
+
+  // Also verify authentication from the auth context
+  if (!auth.isAuthenticated) {
+    console.log("Not authenticated in render block, redirecting to login");
+    navigate("/login");
+    return null;
   }
 
   return (
