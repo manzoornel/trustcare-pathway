@@ -21,6 +21,14 @@ const VitalsTable: React.FC<VitalsTableProps> = ({ records, vitalType }) => {
       day: 'numeric'
     });
   };
+
+  // Format value based on type
+  const formatValue = (value: number | string, type: string) => {
+    if (typeof value === 'number') {
+      return value.toFixed(1); // Show one decimal place for numbers
+    }
+    return value;
+  };
   
   return (
     <div className="w-full overflow-auto">
@@ -39,7 +47,7 @@ const VitalsTable: React.FC<VitalsTableProps> = ({ records, vitalType }) => {
             sortedRecords.map((record) => (
               <TableRow key={record.id}>
                 <TableCell>{formatDate(record.date)}</TableCell>
-                <TableCell className="font-medium">{record.value}</TableCell>
+                <TableCell className="font-medium">{formatValue(record.value, vitalType.type)}</TableCell>
                 <TableCell>
                   <span className={`font-medium ${getStatusColorClass(record.status)}`}>
                     {record.status.charAt(0).toUpperCase() + record.status.slice(1)}

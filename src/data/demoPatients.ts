@@ -16,5 +16,19 @@ export const demoPatients: DemoPatient[] = [
     email: "sarah.johnson@example.com",
     password: "password123",
     phone: "9876543210"
+  },
+  {
+    name: "Raj Patel",
+    hospitalId: "H24680",
+    email: "raj.patel@example.com",
+    password: "password123",
+    phone: "5551234567"
+  },
+  {
+    name: "Maria Garcia",
+    hospitalId: "H13579",
+    email: "maria.garcia@example.com",
+    password: "password123",
+    phone: "5559876543"
   }
 ];

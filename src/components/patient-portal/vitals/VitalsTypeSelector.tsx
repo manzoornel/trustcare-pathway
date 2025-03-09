@@ -23,8 +23,9 @@ const VitalsTypeSelector: React.FC<VitalsTypeSelectorProps> = ({
       case "thermometer":
         return <Thermometer className="h-4 w-4" />;
       case "activity":
-      default:
         return <Activity className="h-4 w-4" />;
+      default:
+        return <Minus className="h-4 w-4" />;
     }
   };
 
