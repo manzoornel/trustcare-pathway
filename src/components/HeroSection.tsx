@@ -1,4 +1,3 @@
-
 import { Calendar, LogIn } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
@@ -80,6 +79,25 @@ const HeroSection = () => {
 
   const themeContent = getThemeContent();
 
+  const renderFestivalContent = () => {
+    const currentFestival = theme;
+
+    if (currentFestival && currentFestival !== "default") {
+      return (
+        <div className={`p-4 rounded-lg bg-white/80 backdrop-blur-sm border ${theme !== 'default' ? 'border-festival-primary/30' : 'border-primary/30'} shadow-sm mt-6 animate-fade-in`}>
+          <p className="text-sm font-medium text-gray-800">
+            {theme === 'eid' && "Special Eid consultation hours: 9AM-8PM during the festival week"}
+            {theme === 'ramzan' && "Ramzan Special: Extended evening hours from 8PM-11PM throughout the holy month"}
+            {theme === 'onam' && "Onam Special: 20% off on family health packages until September 30th"}
+            {theme === 'deepavali' && "Deepavali Special: Free post-festival detox consultation until November 15th"}
+            {theme === 'health' && "World Health Day: Free basic health check-ups on April 7th"}
+            {theme === 'xmas' && "Holiday Hours: Dec 24th: 9AM-1PM, Dec 25th: Closed, Dec 26th: 10AM-4PM"}
+          </p>
+        </div>
+      );
+    }
+  };
+
   return (
     <div className={`min-h-screen flex items-center ${themeContent.bgClass} pt-16 transition-all duration-500`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -125,19 +143,7 @@ const HeroSection = () => {
               </Link>
             </div>
 
-            {/* Festival-specific callout */}
-            {theme !== 'default' && (
-              <div className={`p-4 rounded-lg bg-white/80 backdrop-blur-sm border ${theme !== 'default' ? 'border-festival-primary/30' : 'border-primary/30'} shadow-sm mt-6 animate-fade-in`}>
-                <p className="text-sm font-medium text-gray-800">
-                  {theme === 'eid' && "Special Eid consultation hours: 9AM-8PM during the festival week"}
-                  {theme === 'ramzan' && "Ramzan Special: Extended evening hours from 8PM-11PM throughout the holy month"}
-                  {theme === 'onam' && "Onam Special: 20% off on family health packages until September 30th"}
-                  {theme === 'deepavali' && "Deepavali Special: Free post-festival detox consultation until November 15th"}
-                  {theme === 'health' && "World Health Day: Free basic health check-ups on April 7th"}
-                  {theme === 'xmas' && "Holiday Hours: Dec 24th: 9AM-1PM, Dec 25th: Closed, Dec 26th: 10AM-4PM"}
-                </p>
-              </div>
-            )}
+            {renderFestivalContent()}
           </div>
           <div className="relative animate-fade-up" style={{
             animationDelay: '200ms'

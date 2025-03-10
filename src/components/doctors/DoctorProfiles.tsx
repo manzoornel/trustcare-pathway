@@ -1,5 +1,6 @@
 
-import { doctors } from './DoctorData';
+import { useEffect, useState } from 'react';
+import { doctors as initialDoctors } from './DoctorData';
 import DoctorCard from './DoctorCard';
 import { DoctorProfile } from './types';
 import { Link } from 'react-router-dom';
@@ -9,6 +10,21 @@ interface DoctorProfilesProps {
 }
 
 const DoctorProfiles = ({ featuredOnly = true }: DoctorProfilesProps) => {
+  const [doctors, setDoctors] = useState(initialDoctors);
+
+  // Check for updated doctors data in localStorage
+  useEffect(() => {
+    const savedDoctors = window.localStorage.getItem('doctorsData');
+    if (savedDoctors) {
+      try {
+        const parsedDoctors = JSON.parse(savedDoctors);
+        setDoctors(parsedDoctors);
+      } catch (error) {
+        console.error('Error parsing doctors data:', error);
+      }
+    }
+  }, []);
+
   // Convert Doctor data to DoctorProfile format
   const doctorProfiles: DoctorProfile[] = doctors.map(doctor => ({
     name: doctor.name,
@@ -35,7 +51,7 @@ const DoctorProfiles = ({ featuredOnly = true }: DoctorProfilesProps) => {
 
   // Filter doctors if featuredOnly is true
   const displayedDoctors = featuredOnly 
-    ? sortedDoctors.slice(0, 3) // Show only first 3 doctors when featured
+    ? sortedDoctors.filter((_, index) => index < 3) // Show only first 3 doctors when featured
     : sortedDoctors;
 
   return (

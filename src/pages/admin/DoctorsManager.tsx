@@ -1,14 +1,15 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash, Plus } from "lucide-react";
+import { Edit, Trash, Plus, Upload } from "lucide-react";
 import { doctors } from "@/components/doctors/DoctorData";
 import AddDoctorDialog from "@/components/admin/doctors/AddDoctorDialog";
 import EditDoctorDialog from "@/components/admin/doctors/EditDoctorDialog";
 import DeleteDoctorDialog from "@/components/admin/doctors/DeleteDoctorDialog";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 const DoctorsManager = () => {
   const [allDoctors, setAllDoctors] = useState(doctors);
@@ -16,6 +17,14 @@ const DoctorsManager = () => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedDoctor, setSelectedDoctor] = useState<any>(null);
+  const [isUploading, setIsUploading] = useState(false);
+
+  // When doctors are updated, update the imported data as well
+  useEffect(() => {
+    // This is a workaround since we're directly modifying the imported data
+    // In a real application, this would be stored in a database
+    window.localStorage.setItem('doctorsData', JSON.stringify(allDoctors));
+  }, [allDoctors]);
 
   const handleAddDoctor = (newDoctor: any) => {
     setAllDoctors((prev) => [...prev, { ...newDoctor, id: `dr-${Date.now()}` }]);
@@ -49,6 +58,57 @@ const DoctorsManager = () => {
     setIsDeleteDialogOpen(true);
   };
 
+  const handleImageUpload = async (doctor: any) => {
+    setIsUploading(true);
+    
+    // Create a file input element
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*';
+    
+    fileInput.onchange = async (e: any) => {
+      try {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        // Generate a unique filename
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}.${fileExt}`;
+        const filePath = `doctors/${fileName}`;
+        
+        // Upload the file
+        const { error: uploadError } = await supabase.storage
+          .from('lovable-uploads')
+          .upload(filePath, file);
+          
+        if (uploadError) {
+          throw uploadError;
+        }
+        
+        // Get the public URL
+        const { data } = supabase.storage
+          .from('lovable-uploads')
+          .getPublicUrl(filePath);
+          
+        // Update the doctor's image URL
+        const updatedDoctor = { ...doctor, image: data.publicUrl };
+        setAllDoctors((prev) =>
+          prev.map((d) => (d.id === doctor.id ? updatedDoctor : d))
+        );
+        
+        toast.success("Doctor image uploaded successfully!");
+      } catch (error) {
+        console.error('Error uploading image:', error);
+        toast.error("Failed to upload image. Please try again.");
+      } finally {
+        setIsUploading(false);
+      }
+    };
+    
+    // Trigger the file input click
+    fileInput.click();
+  };
+
   return (
     <AdminLayout title="Manage Doctors" requiredRole="admin">
       <div className="space-y-6">
@@ -67,6 +127,7 @@ const DoctorsManager = () => {
                 <TableHead>Name</TableHead>
                 <TableHead>Specialty</TableHead>
                 <TableHead>Experience</TableHead>
+                <TableHead>Featured</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -76,7 +137,11 @@ const DoctorsManager = () => {
                   <TableCell className="font-medium">{doctor.name}</TableCell>
                   <TableCell>{doctor.specialty}</TableCell>
                   <TableCell>{doctor.experience}</TableCell>
-                  <TableCell className="text-right">
+                  <TableCell>{doctor.featured ? "Yes" : "No"}</TableCell>
+                  <TableCell className="text-right flex justify-end space-x-1">
+                    <Button variant="ghost" size="icon" onClick={() => handleImageUpload(doctor)} disabled={isUploading}>
+                      <Upload className="h-4 w-4" />
+                    </Button>
                     <Button variant="ghost" size="icon" onClick={() => openEditDialog(doctor)}>
                       <Edit className="h-4 w-4" />
                     </Button>
