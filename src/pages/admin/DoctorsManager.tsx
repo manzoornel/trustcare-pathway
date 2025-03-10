@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
@@ -10,19 +9,17 @@ import EditDoctorDialog from "@/components/admin/doctors/EditDoctorDialog";
 import DeleteDoctorDialog from "@/components/admin/doctors/DeleteDoctorDialog";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { DoctorFormData } from "@/components/admin/doctors/types";
 
 const DoctorsManager = () => {
-  const [allDoctors, setAllDoctors] = useState(doctors);
+  const [allDoctors, setAllDoctors] = useState<DoctorFormData[]>(doctors);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [selectedDoctor, setSelectedDoctor] = useState<any>(null);
+  const [selectedDoctor, setSelectedDoctor] = useState<DoctorFormData | null>(null);
   const [isUploading, setIsUploading] = useState(false);
 
-  // When doctors are updated, update the imported data as well
   useEffect(() => {
-    // This is a workaround since we're directly modifying the imported data
-    // In a real application, this would be stored in a database
     window.localStorage.setItem('doctorsData', JSON.stringify(allDoctors));
   }, [allDoctors]);
 
@@ -58,10 +55,9 @@ const DoctorsManager = () => {
     setIsDeleteDialogOpen(true);
   };
 
-  const handleImageUpload = async (doctor: any) => {
+  const handleImageUpload = async (doctor: DoctorFormData) => {
     setIsUploading(true);
     
-    // Create a file input element
     const fileInput = document.createElement('input');
     fileInput.type = 'file';
     fileInput.accept = 'image/*';
@@ -71,12 +67,10 @@ const DoctorsManager = () => {
         const file = e.target.files[0];
         if (!file) return;
         
-        // Generate a unique filename
         const fileExt = file.name.split('.').pop();
         const fileName = `${Date.now()}.${fileExt}`;
         const filePath = `doctors/${fileName}`;
         
-        // Upload the file
         const { error: uploadError } = await supabase.storage
           .from('lovable-uploads')
           .upload(filePath, file);
@@ -85,12 +79,10 @@ const DoctorsManager = () => {
           throw uploadError;
         }
         
-        // Get the public URL
         const { data } = supabase.storage
           .from('lovable-uploads')
           .getPublicUrl(filePath);
           
-        // Update the doctor's image URL
         const updatedDoctor = { ...doctor, image: data.publicUrl };
         setAllDoctors((prev) =>
           prev.map((d) => (d.id === doctor.id ? updatedDoctor : d))
@@ -105,7 +97,6 @@ const DoctorsManager = () => {
       }
     };
     
-    // Trigger the file input click
     fileInput.click();
   };
 
