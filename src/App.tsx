@@ -12,6 +12,7 @@ import SignUp from '@/pages/SignUp';
 import Verify from '@/pages/VerifyOTP';
 import PatientPortal from '@/pages/PatientPortal';
 import Login from '@/pages/Login';
+import Doctors from '@/pages/Doctors';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import PrivateRoute from '@/components/PrivateRoute';
@@ -48,6 +49,7 @@ function App() {
         <Route path="/" element={<Index />} />
         <Route path="/about" element={<About />} />
         <Route path="/services" element={<Services />} />
+        <Route path="/doctors" element={<Doctors />} />
         <Route path="/ai-chat" element={<AIChat />} />
         <Route path="/blog" element={<Blog />} />
         <Route path="/appointments" element={<Appointments />} />
