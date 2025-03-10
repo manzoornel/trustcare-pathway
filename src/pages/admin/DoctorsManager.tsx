@@ -4,26 +4,26 @@ import AdminLayout from "@/components/admin/AdminLayout";
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Edit, Trash, Plus } from "lucide-react";
-import { doctors, getAllDoctors } from "@/components/doctors/DoctorData";
+import { doctors } from "@/components/doctors/DoctorData";
 import AddDoctorDialog from "@/components/admin/doctors/AddDoctorDialog";
 import EditDoctorDialog from "@/components/admin/doctors/EditDoctorDialog";
 import DeleteDoctorDialog from "@/components/admin/doctors/DeleteDoctorDialog";
 import { toast } from "sonner";
 
 const DoctorsManager = () => {
-  const [allDoctors, setAllDoctors] = useState(getAllDoctors());
+  const [allDoctors, setAllDoctors] = useState(doctors);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [selectedDoctor, setSelectedDoctor] = useState(null);
+  const [selectedDoctor, setSelectedDoctor] = useState<any>(null);
 
-  const handleAddDoctor = (newDoctor) => {
+  const handleAddDoctor = (newDoctor: any) => {
     setAllDoctors((prev) => [...prev, { ...newDoctor, id: `dr-${Date.now()}` }]);
     toast.success("Doctor added successfully!");
     setIsAddDialogOpen(false);
   };
 
-  const handleEditDoctor = (updatedDoctor) => {
+  const handleEditDoctor = (updatedDoctor: any) => {
     setAllDoctors((prev) =>
       prev.map((doctor) => (doctor.id === updatedDoctor.id ? updatedDoctor : doctor))
     );
@@ -32,17 +32,19 @@ const DoctorsManager = () => {
   };
 
   const handleDeleteDoctor = () => {
-    setAllDoctors((prev) => prev.filter((doctor) => doctor.id !== selectedDoctor.id));
-    toast.success("Doctor deleted successfully!");
-    setIsDeleteDialogOpen(false);
+    if (selectedDoctor) {
+      setAllDoctors((prev) => prev.filter((doctor) => doctor.id !== selectedDoctor.id));
+      toast.success("Doctor deleted successfully!");
+      setIsDeleteDialogOpen(false);
+    }
   };
 
-  const openEditDialog = (doctor) => {
+  const openEditDialog = (doctor: any) => {
     setSelectedDoctor(doctor);
     setIsEditDialogOpen(true);
   };
 
-  const openDeleteDialog = (doctor) => {
+  const openDeleteDialog = (doctor: any) => {
     setSelectedDoctor(doctor);
     setIsDeleteDialogOpen(true);
   };
@@ -65,7 +67,6 @@ const DoctorsManager = () => {
                 <TableHead>Name</TableHead>
                 <TableHead>Specialty</TableHead>
                 <TableHead>Experience</TableHead>
-                <TableHead>Featured</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -75,7 +76,6 @@ const DoctorsManager = () => {
                   <TableCell className="font-medium">{doctor.name}</TableCell>
                   <TableCell>{doctor.specialty}</TableCell>
                   <TableCell>{doctor.experience}</TableCell>
-                  <TableCell>{doctor.featured ? "Yes" : "No"}</TableCell>
                   <TableCell className="text-right">
                     <Button variant="ghost" size="icon" onClick={() => openEditDialog(doctor)}>
                       <Edit className="h-4 w-4" />

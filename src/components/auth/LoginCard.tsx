@@ -3,23 +3,45 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import EmailLoginForm from '@/components/login/EmailLoginForm';
-import OTPLoginForm from '@/components/login/PhoneLoginForm';
+import PhoneLoginForm from '@/components/login/PhoneLoginForm';
 import { Link } from 'react-router-dom';
 import DemoAccountsSection from '@/components/login/DemoAccountsSection';
 import { demoPatients } from '@/data/demoPatients';
 
 type LoginCardProps = {
-  onSubmit?: (email: string, password: string) => void;
-  onOTPSubmit?: (phone: string) => void;
+  onEmailLogin?: (values: { email: string; password: string }) => Promise<void>;
+  onPhoneLogin?: (values: { phone: string }) => Promise<void>;
+  onDemoLogin?: (email: string, password: string) => Promise<void>;
   loading?: boolean;
+  error?: string | null;
 };
 
 const LoginCard: React.FC<LoginCardProps> = ({
-  onSubmit,
-  onOTPSubmit,
+  onEmailLogin,
+  onPhoneLogin,
+  onDemoLogin,
   loading = false,
+  error = null,
 }) => {
   const [activeTab, setActiveTab] = useState<string>("email");
+
+  const handleEmailLogin = async (values: { email: string; password: string }) => {
+    if (onEmailLogin) {
+      await onEmailLogin(values);
+    }
+  };
+
+  const handlePhoneLogin = async (values: { phone: string }) => {
+    if (onPhoneLogin) {
+      await onPhoneLogin(values);
+    }
+  };
+
+  const loginWithDemoAccount = async (email: string, password: string) => {
+    if (onDemoLogin) {
+      await onDemoLogin(email, password);
+    }
+  };
 
   return (
     <Card className="w-full max-w-md mx-auto">
@@ -36,14 +58,25 @@ const LoginCard: React.FC<LoginCardProps> = ({
             <TabsTrigger value="phone">Phone</TabsTrigger>
           </TabsList>
           <TabsContent value="email">
-            <EmailLoginForm onSubmit={onSubmit} loading={loading} />
+            <EmailLoginForm 
+              handleEmailLogin={handleEmailLogin} 
+              loading={loading}
+              error={error}
+            />
           </TabsContent>
           <TabsContent value="phone">
-            <OTPLoginForm onSubmit={onOTPSubmit} loading={loading} />
+            <PhoneLoginForm 
+              handlePhoneLogin={handlePhoneLogin} 
+              loading={loading}
+              error={error}
+            />
           </TabsContent>
         </Tabs>
 
-        <DemoAccountsSection demoAccounts={demoPatients} />
+        <DemoAccountsSection 
+          loginWithDemoAccount={loginWithDemoAccount}
+          loading={loading}
+        />
       </CardContent>
       <CardFooter className="flex flex-col space-y-4">
         <div className="text-sm text-center">

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Route, Routes } from 'react-router-dom';
 import Index from '@/pages/Index';
@@ -23,6 +24,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 // Admin components
 import Admin from "@/pages/Admin";
 import AdminDashboard from "@/pages/admin/Dashboard";
+import DoctorsManager from "@/pages/admin/DoctorsManager";
 import BlogManager from "@/pages/admin/BlogManager";
 import CareersManager from "@/pages/admin/CareersManager";
 import ApplicationsManager from "@/pages/admin/ApplicationsManager";

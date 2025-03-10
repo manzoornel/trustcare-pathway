@@ -51,8 +51,18 @@ const Verify = () => {
   };
 
   if (verified) {
-    return <VerificationSuccess />;
+    return (
+      <VerificationSuccess 
+        phone={phone} 
+        redirectUrl="/patient-portal" 
+        redirectLabel="Go to Patient Portal" 
+      />
+    );
   }
+
+  const handleOtpChange = (otpValue: string) => {
+    setOtp(otpValue);
+  };
 
   return (
     <>
@@ -72,10 +82,8 @@ const Verify = () => {
           <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
             <div className="rounded-md shadow-sm -space-y-px">
               <OTPInput
-                value={otp}
-                onChange={setOtp}
                 length={6}
-                disabled={loading}
+                onComplete={handleOtpChange}
               />
             </div>
 
