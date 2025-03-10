@@ -1,6 +1,6 @@
 
 import { useNavigate, useLocation } from "react-router-dom";
-import { LayoutDashboard, FileText, Briefcase, LogOut, Users, Settings } from "lucide-react";
+import { LayoutDashboard, FileText, Briefcase, LogOut, Users, Settings, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
@@ -27,6 +27,7 @@ const AdminSidebar = () => {
 
   const menuItems = [
     { icon: LayoutDashboard, label: "Dashboard", path: "/admin/dashboard" },
+    { icon: UserRound, label: "Doctors", path: "/admin/doctors" },
     { icon: FileText, label: "Blog Posts", path: "/admin/blog" },
     { icon: Briefcase, label: "Careers", path: "/admin/careers" },
     { icon: Users, label: "Staff Applications", path: "/admin/applications" },
@@ -60,7 +61,7 @@ const AdminSidebar = () => {
           className="w-full justify-start text-red-500 hover:text-red-700 hover:bg-red-50"
           onClick={handleLogout}
         >
-          <LogOut className="mr-2 h-5 w-5" />
+          <LogOut className="mr-2 h-5 w-4" />
           Logout
         </Button>
       </div>

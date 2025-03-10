@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Route, Routes } from 'react-router-dom';
 import Index from '@/pages/Index';
@@ -70,6 +69,7 @@ function App() {
         {/* Admin Routes */}
         <Route path="/admin" element={<Admin />} />
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
+        <Route path="/admin/doctors" element={<DoctorsManager />} />
         <Route path="/admin/blog" element={<BlogManager />} />
         <Route path="/admin/careers" element={<CareersManager />} />
         <Route path="/admin/applications" element={<ApplicationsManager />} />
