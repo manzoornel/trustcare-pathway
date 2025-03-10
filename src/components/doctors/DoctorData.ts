@@ -100,6 +100,7 @@ export const doctors: Doctor[] = [
   }
 ];
 
+// Helper functions to access doctor data
 export const getFeaturedDoctors = (): Doctor[] => {
   return doctors.filter(doctor => doctor.featured);
 };
