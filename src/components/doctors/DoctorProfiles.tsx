@@ -57,14 +57,16 @@ const DoctorProfiles = ({ featuredOnly = true }: DoctorProfilesProps) => {
   return (
     <div className="py-20 bg-gray-50">
       <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-10">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold text-gray-900 mb-4">Our Medical Experts</h2>
-          <p className="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">
-            Meet the experienced physicians behind Doctor Uncle Family Clinic, committed to providing you with the best care.
-          </p>
-        </div>
+        {featuredOnly && (
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">Our Medical Experts</h2>
+            <p className="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">
+              Meet the experienced physicians behind Doctor Uncle Family Clinic, committed to providing you with the best care.
+            </p>
+          </div>
+        )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
           {displayedDoctors.map((doctor, index) => (
             <div key={index} className="flex justify-center">
               <DoctorCard 

@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Menu, X, LogIn } from 'lucide-react';
+import { Menu, X, LogIn, UserRound } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -18,6 +18,10 @@ const Navbar = () => {
   }, {
     name: 'Services',
     href: '/services'
+  }, {
+    name: 'Our Doctors',
+    href: '/doctors',
+    icon: UserRound
   }, {
     name: 'AI Chat',
     href: '/ai-chat'
@@ -58,7 +62,7 @@ const Navbar = () => {
           {/* Desktop menu */}
           <div className="hidden md:flex items-center space-x-8">
             {menuItems.map(item => <Link key={item.name} to={item.href} className={`${isActive(item.href) ? "text-primary font-semibold" : "text-gray-600 hover:text-primary"} transition-colors duration-200 font-display`}>
-                {item.name}
+                {item.icon && <item.icon className="inline-block mr-1 h-4 w-4" />} {item.name}
               </Link>)}
               
             {auth.isAuthenticated ? (
@@ -91,7 +95,7 @@ const Navbar = () => {
       {isOpen && <div className="md:hidden animate-fade-in">
           <div className="px-2 pt-2 pb-3 space-y-1 bg-white">
             {menuItems.map(item => <Link key={item.name} to={item.href} className={`block px-3 py-2 text-base font-medium ${isActive(item.href) ? "text-primary" : "text-gray-600 hover:text-primary"} font-display`} onClick={() => setIsOpen(false)}>
-                {item.name}
+                {item.icon && <item.icon className="inline-block mr-1 h-4 w-4" />} {item.name}
               </Link>)}
               
             {auth.isAuthenticated ? (
