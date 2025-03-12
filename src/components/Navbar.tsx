@@ -26,9 +26,6 @@ const Navbar = () => {
     name: 'AI Chat',
     href: '/ai-chat'
   }, {
-    name: 'Appointments',
-    href: '/appointments'
-  }, {
     name: 'Blog',
     href: '/blog'
   }, {
