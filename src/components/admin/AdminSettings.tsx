@@ -4,6 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PasswordChange from "./settings/PasswordChange";
 import UserManagement from "./settings/UserManagement";
 import ThemeManagement from "./settings/ThemeManagement";
+import EHRIntegrationSettings from "./EHRIntegrationSettings";
 import { THEME_CHANGE_EVENT } from '@/contexts/ThemeContext';
 
 const AdminSettings = () => {
@@ -32,6 +33,7 @@ const AdminSettings = () => {
           <TabsTrigger value="password">Change Password</TabsTrigger>
           <TabsTrigger value="users">User Management</TabsTrigger>
           <TabsTrigger value="theme">Theme Management</TabsTrigger>
+          <TabsTrigger value="ehr">EHR Integration</TabsTrigger>
         </TabsList>
         
         <TabsContent value="password">
@@ -44,6 +46,10 @@ const AdminSettings = () => {
         
         <TabsContent value="theme">
           <ThemeManagement />
+        </TabsContent>
+        
+        <TabsContent value="ehr">
+          <EHRIntegrationSettings />
         </TabsContent>
       </Tabs>
     </div>

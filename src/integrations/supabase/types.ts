@@ -14,6 +14,7 @@ export type Database = {
           created_at: string | null
           date: string
           doctor: string
+          ehr_reference_id: string | null
           id: string
           location: string
           patient_id: string | null
@@ -25,6 +26,7 @@ export type Database = {
           created_at?: string | null
           date: string
           doctor: string
+          ehr_reference_id?: string | null
           id?: string
           location: string
           patient_id?: string | null
@@ -36,6 +38,7 @@ export type Database = {
           created_at?: string | null
           date?: string
           doctor?: string
+          ehr_reference_id?: string | null
           id?: string
           location?: string
           patient_id?: string | null
@@ -53,11 +56,39 @@ export type Database = {
           },
         ]
       }
+      ehr_integration: {
+        Row: {
+          api_endpoint: string
+          api_key: string
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          last_sync_time: string | null
+        }
+        Insert: {
+          api_endpoint: string
+          api_key: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_sync_time?: string | null
+        }
+        Update: {
+          api_endpoint?: string
+          api_key?: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_sync_time?: string | null
+        }
+        Relationships: []
+      }
       lab_reports: {
         Row: {
           created_at: string | null
           date: string
           doctor: string
+          ehr_reference_id: string | null
           id: string
           patient_id: string | null
           results: Json
@@ -68,6 +99,7 @@ export type Database = {
           created_at?: string | null
           date: string
           doctor: string
+          ehr_reference_id?: string | null
           id?: string
           patient_id?: string | null
           results: Json
@@ -78,6 +110,7 @@ export type Database = {
           created_at?: string | null
           date?: string
           doctor?: string
+          ehr_reference_id?: string | null
           id?: string
           patient_id?: string | null
           results?: Json
@@ -99,6 +132,7 @@ export type Database = {
           created_at: string | null
           date: string
           doctor: string
+          ehr_reference_id: string | null
           id: string
           notes: string
           patient_id: string | null
@@ -108,6 +142,7 @@ export type Database = {
           created_at?: string | null
           date: string
           doctor: string
+          ehr_reference_id?: string | null
           id?: string
           notes: string
           patient_id?: string | null
@@ -117,6 +152,7 @@ export type Database = {
           created_at?: string | null
           date?: string
           doctor?: string
+          ehr_reference_id?: string | null
           id?: string
           notes?: string
           patient_id?: string | null
@@ -137,6 +173,7 @@ export type Database = {
           created_at: string | null
           doctor: string
           dosage: string
+          ehr_reference_id: string | null
           frequency: string
           id: string
           name: string
@@ -147,6 +184,7 @@ export type Database = {
           created_at?: string | null
           doctor: string
           dosage: string
+          ehr_reference_id?: string | null
           frequency: string
           id?: string
           name: string
@@ -157,6 +195,7 @@ export type Database = {
           created_at?: string | null
           doctor?: string
           dosage?: string
+          ehr_reference_id?: string | null
           frequency?: string
           id?: string
           name?: string

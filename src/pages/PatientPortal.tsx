@@ -6,7 +6,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { LogOut } from "lucide-react";
+import { LogOut, RefreshCw } from "lucide-react";
 import PatientInfoCard from "@/components/patient-portal/PatientInfoCard";
 import RewardsCard from "@/components/patient-portal/RewardsCard";
 import PortalTabsSection from "@/components/patient-portal/PortalTabsSection";
@@ -18,6 +18,8 @@ const PatientPortal = () => {
   const { auth, logout } = useAuth();
   const [activeTab, setActiveTab] = useState("labReports");
   const [isLoading, setIsLoading] = useState(true);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [lastSyncTime, setLastSyncTime] = useState<string | null>(null);
 
   useEffect(() => {
     // Check if user is authenticated
@@ -35,6 +37,9 @@ const PatientPortal = () => {
         } else {
           console.log("Valid session found in PatientPortal");
           setIsLoading(false);
+          
+          // Check for last sync time
+          fetchLastSyncTime();
         }
       } catch (error) {
         console.error("Error checking authentication:", error);
@@ -53,6 +58,53 @@ const PatientPortal = () => {
       navigate("/create-profile");
     }
   }, [auth, navigate]);
+
+  const fetchLastSyncTime = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('ehr_integration')
+        .select('last_sync_time')
+        .eq('is_active', true)
+        .limit(1)
+        .single();
+      
+      if (!error && data) {
+        setLastSyncTime(data.last_sync_time);
+      }
+    } catch (error) {
+      console.error("Error fetching last sync time:", error);
+    }
+  };
+
+  const handleSyncWithEHR = async () => {
+    if (!auth.userId) {
+      toast.error("User ID not found. Please log in again.");
+      return;
+    }
+
+    setIsSyncing(true);
+    try {
+      const response = await supabase.functions.invoke('ehr-sync', {
+        body: { patientId: auth.userId }
+      });
+      
+      if (response.error) {
+        throw new Error(response.error);
+      }
+      
+      if (response.data.success) {
+        toast.success("Successfully synced with EHR system");
+        setLastSyncTime(response.data.syncTime);
+      } else {
+        toast.error(response.data.message || "Failed to sync with EHR system");
+      }
+    } catch (error) {
+      console.error("Error syncing with EHR:", error);
+      toast.error("Error connecting to EHR system. Please try again later.");
+    } finally {
+      setIsSyncing(false);
+    }
+  };
 
   const handleLogout = async () => {
     try {
@@ -104,11 +156,28 @@ const PatientPortal = () => {
                   Welcome back, {auth.name || "Patient"}
                 </p>
               </div>
-              <Button variant="outline" onClick={handleLogout} className="flex items-center gap-2">
-                <LogOut className="h-4 w-4" />
-                Logout
-              </Button>
+              <div className="flex items-center gap-3">
+                <Button 
+                  variant="outline" 
+                  onClick={handleSyncWithEHR} 
+                  disabled={isSyncing}
+                  className="flex items-center gap-2"
+                >
+                  <RefreshCw className={`h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
+                  {isSyncing ? 'Syncing...' : 'Sync with EHR'}
+                </Button>
+                <Button variant="outline" onClick={handleLogout} className="flex items-center gap-2">
+                  <LogOut className="h-4 w-4" />
+                  Logout
+                </Button>
+              </div>
             </div>
+            
+            {lastSyncTime && (
+              <div className="mb-4 text-sm text-gray-500">
+                Last synchronized with EHR: {new Date(lastSyncTime).toLocaleString()}
+              </div>
+            )}
             
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-2">
