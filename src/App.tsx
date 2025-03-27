@@ -20,6 +20,7 @@ import AIChat from '@/pages/AIChat';
 import ThemeSwitcher from '@/components/ThemeSwitcher';
 import FestivalDecorations from '@/components/FestivalDecorations';
 import { useTheme } from '@/contexts/ThemeContext';
+import GoogleAnalytics from '@/components/GoogleAnalytics';
 
 // Admin components
 import Admin from "@/pages/Admin";
@@ -36,6 +37,7 @@ function App() {
 
   return (
     <>
+      <GoogleAnalytics />
       <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} newestOnTop closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />
       
       {/* Theme fade transition */}
