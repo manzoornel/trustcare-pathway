@@ -1,16 +1,11 @@
 
-export type EHRConfig = {
+export interface EHRConfig {
   id: string;
   api_endpoint: string;
   api_key: string;
   is_active: boolean;
   last_sync_time: string | null;
-};
-
-export type TestResult = {
-  success: boolean;
-  message: string;
-} | null;
+}
 
 export interface EHRLabReport {
   ehrReferenceId: string;
@@ -55,9 +50,18 @@ export interface EHRMedicalSummary {
   notes: string;
 }
 
+export interface EHRVisit {
+  id: string;
+  type: string;
+  date: string;
+  doctor: string;
+  notes: string;
+}
+
 export interface EHRData {
   labReports: EHRLabReport[];
   medications: EHRMedication[];
   appointments: EHRAppointment[];
   medicalSummaries: EHRMedicalSummary[];
+  visits?: EHRVisit[];
 }
