@@ -12,6 +12,15 @@ export type TestResult = {
   message: string;
 } | null;
 
+export interface EHRSyncHistory {
+  id: string;
+  timestamp: string;
+  status: 'success' | 'failed' | 'in_progress';
+  message: string;
+  patient_id?: string;
+  details?: string;
+}
+
 export interface EHRLabReport {
   ehrReferenceId: string;
   date: string;
