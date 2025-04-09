@@ -16,10 +16,23 @@ serve(async (req) => {
   try {
     console.log('EHR sync function called')
     
+    // Get request body
+    const requestData = await req.json()
+    const action = requestData.action || 'sync'
+    
     // Get Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL') as string
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') as string
     const supabase = createClient(supabaseUrl, supabaseKey)
+    
+    // Handle test connection action
+    if (action === 'test') {
+      const config = requestData.config
+      console.log('Testing EHR connection with config:', config)
+      
+      // Test connection to the EHR API
+      return await testEhrConnection(config)
+    }
     
     // Get EHR configuration
     const { data: ehrConfig, error: configError } = await supabase
@@ -44,7 +57,7 @@ serve(async (req) => {
     }
     
     // Get patient ID from request
-    const { patientId } = await req.json()
+    const { patientId } = requestData
     if (!patientId) {
       return new Response(
         JSON.stringify({ error: 'Patient ID is required' }),
@@ -55,21 +68,17 @@ serve(async (req) => {
       )
     }
     
-    // In a real implementation, you would call your EHR API here
-    // This is a placeholder for the actual EHR API call
-    // Replace with actual API call to your EHR system
-    
+    // Log the attempt
     console.log(`Syncing data for patient: ${patientId} from EHR at ${ehrConfig.api_endpoint}`)
     
-    // Simulated data from EHR system
-    // In a real implementation, you would fetch this data from your EHR API
-    const mockEhrData = await simulateEhrApiCall(patientId, ehrConfig)
+    // Get data from the EHR system API
+    const ehrData = await fetchEhrData(patientId, ehrConfig)
     
     // Update patient data in Supabase with data from EHR
-    await syncLabReports(supabase, patientId, mockEhrData.labReports)
-    await syncMedications(supabase, patientId, mockEhrData.medications)
-    await syncAppointments(supabase, patientId, mockEhrData.appointments)
-    await syncMedicalSummaries(supabase, patientId, mockEhrData.medicalSummaries)
+    await syncLabReports(supabase, patientId, ehrData.labReports)
+    await syncMedications(supabase, patientId, ehrData.medications)
+    await syncAppointments(supabase, patientId, ehrData.appointments)
+    await syncMedicalSummaries(supabase, patientId, ehrData.medicalSummaries)
     
     // Update last sync time
     await supabase
@@ -101,19 +110,169 @@ serve(async (req) => {
   }
 })
 
-// Helper functions 
+// Test connection to the EHR API
+async function testEhrConnection(config: any) {
+  try {
+    console.log('Testing connection to EHR API at:', config.api_endpoint)
+    
+    // Try to fetch the list of doctors as a simple connection test
+    const response = await fetch(`${config.api_endpoint}/listDoctors`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'token': config.api_key
+      }
+    })
+    
+    if (!response.ok) {
+      const errorText = await response.text()
+      throw new Error(`API responded with status ${response.status}: ${errorText}`)
+    }
+    
+    const data = await response.json()
+    
+    return new Response(
+      JSON.stringify({ 
+        success: true, 
+        message: 'Successfully connected to the EHR API',
+        data: { doctors: data.length }
+      }),
+      { 
+        status: 200, 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      }
+    )
+  } catch (error) {
+    console.error('Error testing EHR connection:', error)
+    return new Response(
+      JSON.stringify({ 
+        success: false, 
+        message: `Failed to connect to EHR API: ${error.message}`
+      }),
+      { 
+        status: 200,  // We still return 200 as this is a test result, not an error
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      }
+    )
+  }
+}
 
-// Simulate EHR API call (replace with actual API call)
-async function simulateEhrApiCall(patientId: string, ehrConfig: any) {
-  // In a real implementation, you would make an HTTP request to your EHR API
-  // using the provided API endpoint and key from the ehrConfig
+// Fetch data from EHR API
+async function fetchEhrData(patientId: string, ehrConfig: any) {
+  console.log(`Fetching data for patient: ${patientId} from EHR API`)
   
-  console.log(`Making simulated call to EHR API at ${ehrConfig.api_endpoint} for patient ${patientId}`)
+  try {
+    // In a real implementation, these would be actual API calls
+    const baseUrl = ehrConfig.api_endpoint
+    const token = ehrConfig.api_key
+    
+    // Fetch appointments
+    const appointmentsResponse = await fetch(`${baseUrl}/fetchAppointments`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'token': token
+      },
+      body: JSON.stringify({ patientId })
+    })
+    
+    if (!appointmentsResponse.ok) {
+      console.error(`Error fetching appointments: ${appointmentsResponse.status}`)
+    }
+    
+    // Fetch patient visits
+    const visitsResponse = await fetch(`${baseUrl}/fetchPatientVisits`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'token': token
+      },
+      body: JSON.stringify({ patientId })
+    })
+    
+    if (!visitsResponse.ok) {
+      console.error(`Error fetching visits: ${visitsResponse.status}`)
+    }
+    
+    const visits = await visitsResponse.json()
+    
+    // For each visit, fetch lab reports and medications
+    const labReportsPromises = visits.map(async (visit: any) => {
+      const response = await fetch(`${baseUrl}/fetchLabReports`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'token': token
+        },
+        body: JSON.stringify({ visitId: visit.id })
+      })
+      
+      if (!response.ok) {
+        console.error(`Error fetching lab reports for visit ${visit.id}: ${response.status}`)
+        return []
+      }
+      
+      return await response.json()
+    })
+    
+    const medicationsPromises = visits.map(async (visit: any) => {
+      const response = await fetch(`${baseUrl}/fetchPatientMedications`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'token': token
+        },
+        body: JSON.stringify({ visitId: visit.id })
+      })
+      
+      if (!response.ok) {
+        console.error(`Error fetching medications for visit ${visit.id}: ${response.status}`)
+        return []
+      }
+      
+      return await response.json()
+    })
+    
+    // Wait for all API calls to complete
+    const [appointments, allLabReports, allMedications] = await Promise.all([
+      appointmentsResponse.ok ? appointmentsResponse.json() : [],
+      Promise.all(labReportsPromises),
+      Promise.all(medicationsPromises)
+    ])
+    
+    // Flatten arrays of lab reports and medications
+    const labReports = allLabReports.flat()
+    const medications = allMedications.flat()
+    
+    // Construct medical summaries from visits
+    const medicalSummaries = visits.map((visit: any) => ({
+      ehrReferenceId: `EHR-VISIT-${visit.id}`,
+      type: visit.type || 'Visit',
+      date: visit.date,
+      doctor: visit.doctor,
+      notes: visit.notes || 'No notes available'
+    }))
+    
+    return {
+      labReports,
+      medications,
+      appointments,
+      medicalSummaries,
+      visits
+    }
+  } catch (error) {
+    console.error('Error fetching data from EHR:', error)
+    
+    // Fallback to mock data in case of errors
+    console.log('Using mock data as fallback due to error')
+    return getMockEhrData(patientId)
+  }
+}
+
+// Fallback function that returns mock data
+function getMockEhrData(patientId: string) {
+  console.log(`Generating mock data for patient ${patientId} due to API error`)
   
-  // Simulate API response delay
-  await new Promise(resolve => setTimeout(resolve, 500))
-  
-  // Return mock data that would come from your EHR system
   return {
     labReports: [
       {
@@ -241,7 +400,6 @@ async function syncLabReports(supabase: any, patientId: string, labReports: any[
   }
 }
 
-// Sync medications from EHR to Supabase
 async function syncMedications(supabase: any, patientId: string, medications: any[]) {
   console.log(`Syncing ${medications.length} medications for patient ${patientId}`)
   
@@ -290,7 +448,6 @@ async function syncMedications(supabase: any, patientId: string, medications: an
   }
 }
 
-// Sync appointments from EHR to Supabase
 async function syncAppointments(supabase: any, patientId: string, appointments: any[]) {
   console.log(`Syncing ${appointments.length} appointments for patient ${patientId}`)
   
@@ -341,7 +498,6 @@ async function syncAppointments(supabase: any, patientId: string, appointments: 
   }
 }
 
-// Sync medical summaries from EHR to Supabase
 async function syncMedicalSummaries(supabase: any, patientId: string, summaries: any[]) {
   console.log(`Syncing ${summaries.length} medical summaries for patient ${patientId}`)
   

@@ -6,9 +6,31 @@ import UserManagement from "./settings/UserManagement";
 import ThemeManagement from "./settings/ThemeManagement";
 import EHRIntegrationSettings from "./EHRIntegrationSettings";
 import { THEME_CHANGE_EVENT } from '@/contexts/ThemeContext';
+import { Badge } from '@/components/ui/badge';
 
 const AdminSettings = () => {
   const [activeTab, setActiveTab] = useState("password");
+  const [ehrConfigured, setEhrConfigured] = useState(false);
+
+  // Check EHR configuration status
+  useEffect(() => {
+    const checkEhrConfig = async () => {
+      try {
+        const { supabase } = await import('@/integrations/supabase/client');
+        const { data } = await supabase
+          .from('ehr_integration')
+          .select('is_active')
+          .eq('is_active', true)
+          .limit(1);
+          
+        setEhrConfigured(data && data.length > 0);
+      } catch (error) {
+        console.error('Error checking EHR configuration:', error);
+      }
+    };
+    
+    checkEhrConfig();
+  }, [activeTab]);
 
   // Listen for theme changes
   useEffect(() => {
@@ -33,7 +55,12 @@ const AdminSettings = () => {
           <TabsTrigger value="password">Change Password</TabsTrigger>
           <TabsTrigger value="users">User Management</TabsTrigger>
           <TabsTrigger value="theme">Theme Management</TabsTrigger>
-          <TabsTrigger value="ehr">EHR Integration</TabsTrigger>
+          <TabsTrigger value="ehr" className="relative">
+            EHR Integration
+            {ehrConfigured && (
+              <Badge className="ml-2 bg-green-500 text-white">Active</Badge>
+            )}
+          </TabsTrigger>
         </TabsList>
         
         <TabsContent value="password">
