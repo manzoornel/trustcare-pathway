@@ -115,71 +115,45 @@ export const useEHRIntegration = () => {
     try {
       console.log('Activating EHR integration');
       
-      // Check if there's already a config
-      const { data: existingConfig, error: configError } = await supabase
-        .from('ehr_integration')
-        .select('id')
-        .limit(1);
-        
-      if (configError) {
-        console.error('Error checking existing EHR config:', configError);
-        throw new Error('Failed to check existing configuration');
-      }
-      
-      console.log('Existing config check result:', existingConfig);
-      
-      let result;
-      if (existingConfig && existingConfig.length > 0) {
-        // Update existing config
-        console.log('Updating existing EHR config with ID:', existingConfig[0].id);
-        
-        const { error: updateError } = await supabase
-          .from('ehr_integration')
-          .update({ is_active: true })
-          .eq('id', existingConfig[0].id);
-          
-        if (updateError) {
-          console.error('Error updating EHR config:', updateError);
-          throw new Error('Failed to update configuration');
+      // Instead of directly updating the database table, call an edge function
+      // or use RPC to activate the EHR integration with proper permissions
+      const { data: activationResult, error: activationError } = await supabase.functions.invoke(
+        'ehr-sync',
+        {
+          body: {
+            action: 'activateEHRIntegration',
+            userId: auth.userId
+          }
         }
-        
-        result = { success: true };
-      } else {
-        // Create new config with default values
-        console.log('Creating new EHR config');
-        
-        const { data, error: insertError } = await supabase
-          .from('ehr_integration')
-          .insert({
-            api_endpoint: 'http://103.99.205.192:8008/mirrors/Dr_Mirror/public',
-            api_key: 'default-key', 
-            is_active: true
-          })
-          .select()
-          .single();
-          
-        if (insertError) {
-          console.error('Error creating EHR config:', insertError);
-          throw new Error('Failed to create configuration');
-        }
-        
-        console.log('New EHR config created:', data);
-        result = { success: true, data };
+      );
+      
+      if (activationError) {
+        console.error('Error invoking activation function:', activationError);
+        throw new Error(activationError.message || 'Failed to activate EHR integration');
       }
       
-      if (result.success) {
-        setEhrActive(true);
-        toast.success('EHR integration successfully activated');
-        
-        // Refresh config after activation
-        await checkEhrConfig();
-      } else {
-        throw new Error('Unknown error during activation');
+      if (!activationResult?.success) {
+        throw new Error(activationResult?.message || 'Unknown error during activation');
       }
+      
+      setEhrActive(true);
+      toast.success('EHR integration successfully activated');
+      
+      // Refresh config after activation
+      await checkEhrConfig();
     } catch (error: any) {
       console.error('Error activating EHR integration:', error);
-      setActivationError(error.message || 'Failed to activate EHR integration');
-      toast.error('Failed to activate EHR integration: ' + (error.message || 'Unknown error'));
+      // Provide a more user-friendly error message
+      let errorMessage = "Failed to activate EHR integration";
+      
+      if (error.message?.includes("violates row-level security policy")) {
+        errorMessage = "Permission denied. Please contact an administrator to activate EHR integration.";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      setActivationError(errorMessage);
+      toast.error(errorMessage);
       setEhrActive(false);
     } finally {
       setIsActivating(false);

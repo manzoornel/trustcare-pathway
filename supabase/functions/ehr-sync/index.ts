@@ -1,3 +1,4 @@
+
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4'
 import { corsHeaders, handleCORS } from '../_shared/cors-helpers.ts'
@@ -18,6 +19,7 @@ import {
 import { createSyncRecord } from './sync-history.ts'
 import { syncPatientData } from './sync-patient.ts'
 import { createSuccessResponse, createErrorResponse } from './response-handlers.ts'
+import { activateEHRIntegration } from './api/data-services/integration-service.ts'
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -49,6 +51,30 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL') as string
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') as string
     const supabase = createClient(supabaseUrl, supabaseKey)
+
+    // Handle activating EHR integration
+    if (action === 'activateEHRIntegration') {
+      const { userId } = requestData
+      
+      if (!userId) {
+        return createErrorResponse('User ID is required for activation')
+      }
+      
+      try {
+        await activateEHRIntegration(userId, supabase)
+        return createSuccessResponse({
+          success: true,
+          message: 'EHR integration activated successfully'
+        })
+      } catch (error: any) {
+        console.error('Error activating EHR integration:', error)
+        return createErrorResponse(
+          'Failed to activate EHR integration',
+          error.message,
+          500
+        )
+      }
+    }
     
     // Get EHR configuration
     const { data: ehrConfig, error: configError } = await supabase
