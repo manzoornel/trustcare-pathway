@@ -9,12 +9,14 @@ import {
   CardFooter
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, XCircle, AlertCircle, Clock } from 'lucide-react';
+import { AlertCircle, CheckCircle, XCircle, Clock, ExternalLink } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/auth';
 import EHRLoginButton from './EHRLoginButton';
 import EHRDataSyncButton from './EHRDataSyncButton';
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 const EHRConnectionPanel = () => {
   const { auth } = useAuth();
@@ -179,9 +181,22 @@ const EHRConnectionPanel = () => {
         
         {!ehrActive ? (
           <div className="p-4 rounded-md bg-amber-50 border border-amber-200">
-            <p className="text-sm text-amber-700">
-              The EHR integration is currently not active. Please contact the administrator.
-            </p>
+            <div className="flex items-start">
+              <AlertCircle className="h-5 w-5 text-amber-500 mr-2 mt-0.5 flex-shrink-0" />
+              <div className="space-y-2">
+                <p className="text-sm text-amber-700">
+                  The EHR integration is currently not active. Please contact the administrator to enable this feature.
+                </p>
+                {auth.role === 'admin' && (
+                  <Button variant="outline" size="sm" asChild>
+                    <Link to="/admin/settings" className="inline-flex items-center">
+                      <span>Go to Admin Settings</span>
+                      <ExternalLink className="ml-1 h-3 w-3" />
+                    </Link>
+                  </Button>
+                )}
+              </div>
+            </div>
           </div>
         ) : !ehrPatientId ? (
           <div>
