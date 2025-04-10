@@ -25,22 +25,27 @@ const EHRConnectionPanel = () => {
   const [lastSyncTime, setLastSyncTime] = useState<string | null>(null);
   const [ehrActive, setEhrActive] = useState(false);
   const [isActivating, setIsActivating] = useState(false);
+  const [activationError, setActivationError] = useState<string | null>(null);
+  const [activationAttempted, setActivationAttempted] = useState(false);
 
   // Check if EHR integration is active
   useEffect(() => {
     const checkEhrConfig = async () => {
       try {
+        console.log('Checking EHR integration status');
         const { data, error } = await supabase
           .from('ehr_integration')
           .select('is_active')
           .eq('is_active', true)
           .limit(1);
           
-        setEhrActive(data && data.length > 0);
-        
         if (error) {
           console.error('Error checking EHR integration status:', error);
+          return;
         }
+        
+        console.log('EHR integration status:', data);
+        setEhrActive(data && data.length > 0);
       } catch (error) {
         console.error('Error checking EHR configuration:', error);
       }
@@ -93,44 +98,73 @@ const EHRConnectionPanel = () => {
     fetchEhrConnection();
   }, [auth.userId]);
   
+  const activateEHRIntegration = async () => {
+    if (ehrActive || isActivating) return;
+    
+    setIsActivating(true);
+    setActivationError(null);
+    setActivationAttempted(true);
+    
+    try {
+      console.log('Activating EHR integration');
+      
+      // Check if there's already a config
+      const { data: existingConfig, error: configError } = await supabase
+        .from('ehr_integration')
+        .select('id')
+        .limit(1);
+        
+      if (configError) {
+        console.error('Error checking existing EHR config:', configError);
+        throw new Error('Failed to check existing configuration');
+      }
+      
+      console.log('Existing config:', existingConfig);
+      
+      if (existingConfig && existingConfig.length > 0) {
+        // Update existing config
+        const { error: updateError } = await supabase
+          .from('ehr_integration')
+          .update({ is_active: true })
+          .eq('id', existingConfig[0].id);
+          
+        if (updateError) {
+          console.error('Error updating EHR config:', updateError);
+          throw new Error('Failed to update configuration');
+        }
+      } else {
+        // Create new config with default values
+        const { error: insertError } = await supabase
+          .from('ehr_integration')
+          .insert({
+            api_endpoint: 'http://103.99.205.192:8008/mirrors/Dr_Mirror/public',
+            api_key: 'default-key', // This would need to be replaced with a proper key
+            is_active: true
+          });
+          
+        if (insertError) {
+          console.error('Error creating EHR config:', insertError);
+          throw new Error('Failed to create configuration');
+        }
+      }
+      
+      setEhrActive(true);
+      toast.success('EHR integration successfully activated');
+    } catch (error: any) {
+      console.error('Error activating EHR integration:', error);
+      setActivationError(error.message || 'Failed to activate EHR integration');
+      toast.error('Failed to activate EHR integration');
+    } finally {
+      setIsActivating(false);
+    }
+  };
+  
   const handleLoginSuccess = async (patientId: string) => {
     setEhrPatientId(patientId);
     
     // If EHR integration isn't active, automatically activate it
     if (!ehrActive) {
-      setIsActivating(true);
-      try {
-        // Check if there's already a config
-        const { data: existingConfig } = await supabase
-          .from('ehr_integration')
-          .select('id')
-          .limit(1);
-          
-        if (existingConfig && existingConfig.length > 0) {
-          // Update existing config
-          await supabase
-            .from('ehr_integration')
-            .update({ is_active: true })
-            .eq('id', existingConfig[0].id);
-        } else {
-          // Create new config with default values
-          await supabase
-            .from('ehr_integration')
-            .insert({
-              api_endpoint: 'http://103.99.205.192:8008/mirrors/Dr_Mirror/public',
-              api_key: 'default-key', // This would need to be replaced with a proper key
-              is_active: true
-            });
-        }
-        
-        setEhrActive(true);
-        toast.success('EHR integration successfully activated');
-      } catch (error) {
-        console.error('Error activating EHR integration:', error);
-        toast.error('Failed to activate EHR integration');
-      } finally {
-        setIsActivating(false);
-      }
+      await activateEHRIntegration();
     }
     
     toast.success('Successfully connected to EHR system');
@@ -139,6 +173,11 @@ const EHRConnectionPanel = () => {
   const handleSyncComplete = () => {
     setLastSyncTime(new Date().toISOString());
     toast.success('Successfully synced data from EHR');
+  };
+
+  // Manually activate integration button handler
+  const handleManualActivation = async () => {
+    await activateEHRIntegration();
   };
 
   const renderConnectionStatus = () => {
@@ -235,6 +274,16 @@ const EHRConnectionPanel = () => {
                 <p className="text-sm text-amber-700">
                   The EHR integration needs to be activated. Simply connect with your phone number below to automatically activate it.
                 </p>
+                {activationError && (
+                  <div className="text-sm text-red-600">
+                    Activation failed: {activationError}
+                  </div>
+                )}
+                {activationAttempted && (
+                  <Button onClick={handleManualActivation} className="mt-2" variant="secondary" size="sm">
+                    Retry Activation
+                  </Button>
+                )}
                 {auth.role && auth.role === 'admin' && (
                   <Button variant="outline" size="sm" asChild>
                     <Link to="/admin/settings" className="inline-flex items-center">
