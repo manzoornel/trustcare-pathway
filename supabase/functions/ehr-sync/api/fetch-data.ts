@@ -1,118 +1,50 @@
 
+import { EhrData, EhrApiConfig } from "./types.ts";
+import { fetchLabReports, getMockLabReports } from "./data-services/lab-service.ts";
+import { fetchMedications, getMockMedications } from "./data-services/medication-service.ts";
+import { fetchAppointments, getMockAppointments } from "./data-services/appointment-service.ts";
+import { fetchVisits, visitsToMedicalSummaries, getMockMedicalSummaries } from "./data-services/visit-service.ts";
+import { fetchPatientDemographics } from "./data-services/patient-service.ts";
+
 /**
  * Fetch data from EHR API
  * @param patientId The patient ID to fetch data for
  * @param ehrConfig The EHR API configuration
  */
-export async function fetchEhrData(patientId: string, ehrConfig: any) {
+export async function fetchEhrData(patientId: string, ehrConfig: EhrApiConfig): Promise<EhrData> {
   console.log(`Fetching data for patient: ${patientId} from EHR API at: ${ehrConfig.api_endpoint}`);
   
   try {
-    // In a real implementation, these would be actual API calls
-    const baseUrl = ehrConfig.api_endpoint;
-    const token = ehrConfig.api_key;
+    // First verify that the patient exists in the EHR system
+    const patientExists = await fetchPatientDemographics(patientId, ehrConfig);
     
-    // Fetch patient demographics first to ensure the patient exists
-    const patientDemographicsResponse = await fetch(`${baseUrl}/fetchPatientDemographics`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'token': token
-      },
-      body: JSON.stringify({ patientId })
-    });
-    
-    if (!patientDemographicsResponse.ok) {
-      console.error(`Error fetching patient demographics: ${patientDemographicsResponse.status}`);
+    if (!patientExists) {
       throw new Error(`Patient with ID ${patientId} not found in EHR system or access denied`);
     }
     
-    // Fetch appointments
-    const appointmentsResponse = await fetch(`${baseUrl}/fetchAppointments`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'token': token
-      },
-      body: JSON.stringify({ patientId })
-    });
+    // Fetch visits first as we'll need them for lab reports and medications
+    const visits = await fetchVisits(patientId, ehrConfig);
     
-    if (!appointmentsResponse.ok) {
-      console.error(`Error fetching appointments: ${appointmentsResponse.status}`);
-    }
+    // For each visit, fetch lab reports and medications in parallel
+    const labReportsPromises = visits.map(visit => fetchLabReports(visit.id, ehrConfig));
+    const medicationsPromises = visits.map(visit => fetchMedications(visit.id, ehrConfig));
     
-    // Fetch patient visits
-    const visitsResponse = await fetch(`${baseUrl}/fetchPatientVisits`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'token': token
-      },
-      body: JSON.stringify({ patientId })
-    });
-    
-    if (!visitsResponse.ok) {
-      console.error(`Error fetching visits: ${visitsResponse.status}`);
-    }
-    
-    const visits = await visitsResponse.json();
-    
-    // For each visit, fetch lab reports and medications
-    const labReportsPromises = visits.map(async (visit: any) => {
-      const response = await fetch(`${baseUrl}/fetchLabReports`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'token': token
-        },
-        body: JSON.stringify({ visitId: visit.id })
-      });
-      
-      if (!response.ok) {
-        console.error(`Error fetching lab reports for visit ${visit.id}: ${response.status}`);
-        return [];
-      }
-      
-      return await response.json();
-    });
-    
-    const medicationsPromises = visits.map(async (visit: any) => {
-      const response = await fetch(`${baseUrl}/fetchPatientMedications`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'token': token
-        },
-        body: JSON.stringify({ visitId: visit.id })
-      });
-      
-      if (!response.ok) {
-        console.error(`Error fetching medications for visit ${visit.id}: ${response.status}`);
-        return [];
-      }
-      
-      return await response.json();
-    });
+    // Fetch appointments directly for the patient
+    const appointmentsPromise = fetchAppointments(patientId, ehrConfig);
     
     // Wait for all API calls to complete
-    const [appointments, allLabReports, allMedications] = await Promise.all([
-      appointmentsResponse.ok ? appointmentsResponse.json() : [],
+    const [allLabReports, allMedications, appointments] = await Promise.all([
       Promise.all(labReportsPromises),
-      Promise.all(medicationsPromises)
+      Promise.all(medicationsPromises),
+      appointmentsPromise
     ]);
     
     // Flatten arrays of lab reports and medications
     const labReports = allLabReports.flat();
     const medications = allMedications.flat();
     
-    // Construct medical summaries from visits
-    const medicalSummaries = visits.map((visit: any) => ({
-      ehrReferenceId: `EHR-VISIT-${visit.id}`,
-      type: visit.type || 'Visit',
-      date: visit.date,
-      doctor: visit.doctor,
-      notes: visit.notes || 'No notes available'
-    }));
+    // Convert visits to medical summaries
+    const medicalSummaries = visitsToMedicalSummaries(visits);
     
     return {
       labReports,
@@ -124,8 +56,22 @@ export async function fetchEhrData(patientId: string, ehrConfig: any) {
   } catch (error) {
     console.error('Error fetching data from EHR:', error);
     
-    // Fallback to mock data in case of errors
+    // Return mock data in case of errors
     console.log('Using mock data as fallback due to error');
-    return getMockEhrData(patientId);
+    return getMockEhrData();
   }
+}
+
+/**
+ * Get mock EHR data when the API is unavailable
+ */
+export function getMockEhrData(): EhrData {
+  console.log('Generating mock EHR data due to API error');
+  
+  return {
+    labReports: getMockLabReports(),
+    medications: getMockMedications(),
+    appointments: getMockAppointments(),
+    medicalSummaries: getMockMedicalSummaries()
+  };
 }
