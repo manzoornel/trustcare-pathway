@@ -115,8 +115,7 @@ export const useEHRIntegration = () => {
     try {
       console.log('Activating EHR integration');
       
-      // Instead of directly updating the database table, call an edge function
-      // or use RPC to activate the EHR integration with proper permissions
+      // Call the edge function to activate EHR integration securely
       const { data: activationResult, error: activationError } = await supabase.functions.invoke(
         'ehr-sync',
         {
@@ -141,13 +140,17 @@ export const useEHRIntegration = () => {
       
       // Refresh config after activation
       await checkEhrConfig();
+      await fetchEhrConnection();
     } catch (error: any) {
       console.error('Error activating EHR integration:', error);
+      
       // Provide a more user-friendly error message
       let errorMessage = "Failed to activate EHR integration";
       
       if (error.message?.includes("violates row-level security policy")) {
         errorMessage = "Permission denied. Please contact an administrator to activate EHR integration.";
+      } else if (error.message?.includes("function") && error.message?.includes("does not exist")) {
+        errorMessage = "System setup incomplete. Please contact an administrator.";
       } else if (error.message) {
         errorMessage = error.message;
       }
@@ -178,13 +181,15 @@ export const useEHRIntegration = () => {
           
         if (updateError) {
           console.error('Error updating hospital_id:', updateError);
+          toast.error('Failed to update patient profile');
+        } else {
+          toast.success('Successfully connected to EHR system');
         }
       } catch (updateErr) {
         console.error('Error in hospital_id update:', updateErr);
+        toast.error('Failed to update patient profile');
       }
     }
-    
-    toast.success('Successfully connected to EHR system');
     
     // Refresh connection status
     await fetchEhrConnection();

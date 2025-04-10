@@ -344,7 +344,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      activate_ehr_integration: {
+        Args: { config_id: string; user_id: string }
+        Returns: boolean
+      }
+      create_ehr_integration: {
+        Args: {
+          api_endpoint_param: string
+          api_key_param: string
+          user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
