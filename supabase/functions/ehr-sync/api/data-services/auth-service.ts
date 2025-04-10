@@ -6,23 +6,46 @@ import { EhrApiConfig } from "../types.ts";
  */
 export async function getLoginOTP(phone: string, countryCode: string = "+91", config: EhrApiConfig): Promise<any> {
   console.log(`Generating OTP for patient login: ${phone} (${countryCode})`);
+  console.log(`Using API endpoint: ${config.api_endpoint}`);
   
   try {
+    // Validate API configuration
+    if (!config.api_endpoint || !config.api_key) {
+      console.error('Invalid API configuration:', { 
+        hasEndpoint: !!config.api_endpoint, 
+        hasApiKey: !!config.api_key 
+      });
+      throw new Error('Invalid API configuration. Missing endpoint or API key.');
+    }
+
     const response = await fetch(`${config.api_endpoint}/getLoginOTP`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'token': config.api_key
       },
-      body: JSON.stringify({ mobile: phone }) // Using 'mobile' parameter as expected by API
+      body: JSON.stringify({ 
+        mobile: phone,
+        countryCode: countryCode
+      })
     });
     
+    const responseText = await response.text();
+    console.log('Raw API response:', responseText);
+    
     if (!response.ok) {
-      console.error(`Error generating OTP: ${response.status}`);
-      throw new Error(`API responded with status ${response.status}`);
+      console.error(`Error generating OTP: ${response.status}, Response: ${responseText}`);
+      throw new Error(`API responded with status ${response.status}: ${responseText}`);
     }
     
-    const data = await response.json();
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch (parseError) {
+      console.error('Failed to parse API response:', parseError);
+      throw new Error(`Invalid response format: ${responseText}`);
+    }
+    
     console.log('OTP generation success response:', JSON.stringify(data).substring(0, 100) + '...');
     return data;
   } catch (error) {
@@ -37,27 +60,51 @@ export async function getLoginOTP(phone: string, countryCode: string = "+91", co
  */
 export async function patientLogin(phone: string, otp: string, otpReference: string, config: EhrApiConfig): Promise<any> {
   console.log(`Authenticating patient login: ${phone}`);
+  console.log(`Using API endpoint: ${config.api_endpoint}`);
   
   try {
+    // Validate API configuration
+    if (!config.api_endpoint || !config.api_key) {
+      console.error('Invalid API configuration:', { 
+        hasEndpoint: !!config.api_endpoint, 
+        hasApiKey: !!config.api_key 
+      });
+      throw new Error('Invalid API configuration. Missing endpoint or API key.');
+    }
+    
+    const payload = { 
+      mobile: phone,
+      otp,
+      otpReference: otpReference  // Include otpReference in case the API needs it
+    };
+    
+    console.log('Sending login payload:', JSON.stringify(payload));
+    
     const response = await fetch(`${config.api_endpoint}/patientLogin`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'token': config.api_key
       },
-      body: JSON.stringify({ 
-        mobile: phone,  // Using 'mobile' parameter as expected by API
-        otp
-        // otpReference not needed according to API spec
-      })
+      body: JSON.stringify(payload)
     });
     
+    const responseText = await response.text();
+    console.log('Raw API response:', responseText);
+    
     if (!response.ok) {
-      console.error(`Error authenticating patient: ${response.status}`);
-      throw new Error(`API responded with status ${response.status}`);
+      console.error(`Error authenticating patient: ${response.status}, Response: ${responseText}`);
+      throw new Error(`API responded with status ${response.status}: ${responseText}`);
     }
     
-    const data = await response.json();
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch (parseError) {
+      console.error('Failed to parse API response:', parseError);
+      throw new Error(`Invalid response format: ${responseText}`);
+    }
+    
     console.log('Patient login success response:', JSON.stringify(data).substring(0, 100) + '...');
     return data;
   } catch (error) {

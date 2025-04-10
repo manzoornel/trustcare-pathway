@@ -96,9 +96,11 @@ export const useEHRConfig = () => {
       // Use the ehr-sync edge function to test the connection
       const { data, error } = await supabase.functions.invoke('ehr-sync', {
         body: { 
-          action: 'testConnection',
-          apiEndpoint,
-          apiKey
+          action: 'test',
+          config: {
+            api_endpoint: apiEndpoint,
+            api_key: apiKey
+          }
         }
       });
       
@@ -106,7 +108,9 @@ export const useEHRConfig = () => {
       
       return {
         success: data.success,
-        message: data.message || 'Connection successful'
+        message: data.message || 'Connection successful',
+        statusCode: data.statusCode,
+        responseBody: data.responseBody
       };
     } catch (error: any) {
       console.error('Error testing EHR connection:', error);

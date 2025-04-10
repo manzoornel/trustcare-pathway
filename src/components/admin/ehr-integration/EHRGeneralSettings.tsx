@@ -7,6 +7,8 @@ import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { useEHRConfig } from './useEHRConfig';
 import EHRTestResult from './EHRTestResult';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle, Check, XCircle } from "lucide-react";
 
 const EHRGeneralSettings = () => {
   const { config, isLoading, updateConfig, testConnection } = useEHRConfig();
@@ -14,7 +16,12 @@ const EHRGeneralSettings = () => {
   const [apiKey, setApiKey] = useState('');
   const [isActive, setIsActive] = useState(false);
   const [isTesting, setIsTesting] = useState(false);
-  const [testResult, setTestResult] = useState<null | { success: boolean; message: string }>(null);
+  const [testResult, setTestResult] = useState<null | { 
+    success: boolean; 
+    message: string;
+    statusCode?: number;
+    responseBody?: string;
+  }>(null);
 
   // Initialize form with config data
   useEffect(() => {
@@ -78,6 +85,16 @@ const EHRGeneralSettings = () => {
         </p>
       </div>
       
+      {!apiEndpoint && (
+        <Alert variant="warning" className="bg-yellow-50 border-yellow-200">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>API Endpoint Missing</AlertTitle>
+          <AlertDescription>
+            Please enter the API endpoint URL of your EHR system.
+          </AlertDescription>
+        </Alert>
+      )}
+      
       <div className="grid gap-4">
         <div className="space-y-2">
           <Label htmlFor="api-endpoint">API Endpoint URL</Label>
@@ -117,12 +134,59 @@ const EHRGeneralSettings = () => {
       </div>
       
       <div className="flex flex-col space-y-4">
-        <Button onClick={handleTestConnection} disabled={isTesting} variant="outline">
-          {isTesting ? 'Testing...' : 'Test Connection'}
+        <Button 
+          onClick={handleTestConnection} 
+          disabled={isTesting || !apiEndpoint || !apiKey} 
+          variant="outline"
+          className="flex items-center gap-2"
+        >
+          {isTesting ? (
+            <>
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+              Testing...
+            </>
+          ) : (
+            <>
+              {testResult?.success ? (
+                <Check className="w-4 h-4 text-green-500" />
+              ) : testResult ? (
+                <XCircle className="w-4 h-4 text-red-500" />
+              ) : null}
+              Test Connection
+            </>
+          )}
         </Button>
         
         {testResult && (
-          <EHRTestResult testResult={testResult} />
+          <div className="border rounded-md p-4 mt-4">
+            <h4 className="font-medium mb-2 flex items-center gap-2">
+              {testResult.success ? (
+                <>
+                  <Check className="w-4 h-4 text-green-500" />
+                  <span className="text-green-700">Connection Successful</span>
+                </>
+              ) : (
+                <>
+                  <XCircle className="w-4 h-4 text-red-500" />
+                  <span className="text-red-700">Connection Failed</span>
+                </>
+              )}
+            </h4>
+            <p className="text-sm text-gray-600 mb-2">{testResult.message}</p>
+            
+            {testResult.statusCode && (
+              <p className="text-xs text-gray-500">Status Code: {testResult.statusCode}</p>
+            )}
+            
+            {testResult.responseBody && (
+              <div className="mt-2">
+                <p className="text-xs font-medium mb-1">Response:</p>
+                <pre className="text-xs bg-gray-100 p-2 rounded overflow-x-auto max-h-32">
+                  {testResult.responseBody}
+                </pre>
+              </div>
+            )}
+          </div>
         )}
         
         <Button onClick={handleSaveSettings} className="mt-4">

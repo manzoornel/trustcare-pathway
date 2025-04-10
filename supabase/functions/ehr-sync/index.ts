@@ -1,3 +1,4 @@
+
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4'
 import { corsHeaders, handleCORS } from '../_shared/cors-helpers.ts'
@@ -33,6 +34,8 @@ serve(async (req) => {
     // Get request body
     const requestData = await req.json()
     const action = requestData.action || 'sync'
+    
+    console.log(`EHR sync action requested: ${action}`, requestData)
     
     // Handle test connection action
     if (action === 'test') {
@@ -98,6 +101,12 @@ serve(async (req) => {
         configError
       )
     }
+    
+    console.log('Using EHR configuration:', {
+      endpoint: ehrConfig.api_endpoint,
+      hasApiKey: !!ehrConfig.api_key,
+      isActive: ehrConfig.is_active
+    })
 
     // Handle different API actions based on the request
     switch (action) {
