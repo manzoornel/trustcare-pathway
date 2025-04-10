@@ -1,5 +1,5 @@
 
-import { corsHeaders } from '../_shared/cors-helpers.ts';
+import { corsHeaders } from '../../_shared/cors-helpers.ts';
 
 /**
  * Test connection to the EHR API
