@@ -46,58 +46,116 @@ export async function testEhrConnection(config: EhrApiConfig) {
     console.log(`Testing connection to: ${config.api_endpoint}`);
     
     // Try to call a simple endpoint on the EHR API to test the connection
-    // Most APIs have a health or ping endpoint
-    // If your API doesn't have one, we'll use the first API endpoint we know
     const testUrl = `${config.api_endpoint}/health`;
     
     console.log(`Sending test request to: ${testUrl}`);
     
-    const response = await fetch(testUrl, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'token': config.api_key
-      },
-      // Add a timeout to prevent hanging for too long
-      signal: AbortSignal.timeout(10000)
-    })
-    .catch(error => {
-      console.error('Network error testing connection:', error);
-      throw new Error('Network error: API server may be unreachable');
-    });
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
     
-    console.log(`Test response status: ${response.status}`);
-    
-    // Even if the API returns an error response, the connection is working
-    // if we get any response
-    let responseBody = "";
     try {
-      responseBody = await response.text();
-      console.log('API response body:', responseBody.substring(0, 200));
-    } catch (e) {
-      console.error('Error reading response body:', e);
-    }
-
-    const success = response.status < 500; // Consider anything but server error as "connected"
-    
-    return new Response(
-      JSON.stringify({
-        success: success,
-        message: success 
-          ? 'Successfully connected to EHR API' 
-          : `Connection failed with status ${response.status}`,
-        statusCode: response.status,
-        responseBody: responseBody ? responseBody.substring(0, 500) : null
-      }),
-      {
+      const response = await fetch(testUrl, {
+        method: 'GET',
         headers: {
-          "Content-Type": "application/json",
-          ...corsHeaders
+          'Content-Type': 'application/json',
+          'token': config.api_key
         },
-        status: success ? 200 : 400
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
+      
+      console.log(`Test response status: ${response.status}`);
+      
+      // Even if the API returns an error response, the connection is working
+      // if we get any response
+      let responseBody = "";
+      try {
+        responseBody = await response.text();
+        console.log('API response body:', responseBody.substring(0, 200));
+      } catch (e) {
+        console.error('Error reading response body:', e);
       }
-    );
 
+      // Let's also test the getLoginOTP endpoint which is critical for patient login
+      console.log(`Testing OTP endpoint: ${config.api_endpoint}/getLoginOTP`);
+      
+      let otpEndpointStatus = "Not tested";
+      let otpResponseBody = "";
+      
+      try {
+        const otpTestResponse = await fetch(`${config.api_endpoint}/getLoginOTP`, {
+          method: 'OPTIONS',
+          headers: {
+            'Content-Type': 'application/json',
+            'token': config.api_key
+          },
+          signal: AbortSignal.timeout(5000)
+        });
+        
+        otpEndpointStatus = `${otpTestResponse.status} ${otpTestResponse.statusText}`;
+        otpResponseBody = await otpTestResponse.text();
+      } catch (e) {
+        console.error('Error testing OTP endpoint:', e);
+        otpEndpointStatus = `Error: ${e instanceof Error ? e.message : String(e)}`;
+      }
+
+      const success = response.status < 500; // Consider anything but server error as "connected"
+      
+      return new Response(
+        JSON.stringify({
+          success: success,
+          message: success 
+            ? 'Successfully connected to EHR API' 
+            : `Connection failed with status ${response.status}`,
+          statusCode: response.status,
+          responseBody: responseBody ? responseBody.substring(0, 500) : null,
+          endpoints: {
+            health: {
+              url: testUrl,
+              status: `${response.status} ${response.statusText}`,
+              responseBody: responseBody.substring(0, 200)
+            },
+            getLoginOTP: {
+              url: `${config.api_endpoint}/getLoginOTP`,
+              status: otpEndpointStatus,
+              responseBody: otpResponseBody.substring(0, 200)
+            }
+          },
+          apiEndpoint: config.api_endpoint,
+          apiKeyProvided: !!config.api_key
+        }),
+        {
+          headers: {
+            "Content-Type": "application/json",
+            ...corsHeaders
+          },
+          status: success ? 200 : 400
+        }
+      );
+
+    } catch (fetchError: any) {
+      clearTimeout(timeoutId);
+      console.error('Network error testing connection:', fetchError);
+      
+      return new Response(
+        JSON.stringify({
+          success: false,
+          message: `Connection failed: ${fetchError.message || 'Network error'}`,
+          error: fetchError.message || 'Network error',
+          details: 'API server may be unreachable or blocking requests',
+          apiEndpoint: config.api_endpoint,
+          apiKeyProvided: !!config.api_key
+        }),
+        {
+          headers: {
+            "Content-Type": "application/json",
+            ...corsHeaders
+          },
+          status: 400
+        }
+      );
+    }
   } catch (error: any) {
     console.error('Error testing EHR connection:', error);
     
@@ -105,7 +163,9 @@ export async function testEhrConnection(config: EhrApiConfig) {
       JSON.stringify({
         success: false,
         message: `Connection failed: ${error.message || 'Unknown error'}`,
-        error: error.message || 'Unknown error'
+        error: error.message || 'Unknown error',
+        apiEndpoint: config.api_endpoint,
+        apiKeyProvided: !!config.api_key
       }),
       {
         headers: {

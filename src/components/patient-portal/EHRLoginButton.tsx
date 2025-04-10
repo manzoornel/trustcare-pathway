@@ -1,16 +1,17 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/auth';
 import { Input } from '@/components/ui/input';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Info } from 'lucide-react';
 import {
   InputOTP,
   InputOTPGroup,
   InputOTPSlot
 } from "@/components/ui/input-otp";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface EHRLoginButtonProps {
   onLoginSuccess?: (ehrPatientId: string) => void;
@@ -25,6 +26,11 @@ const EHRLoginButton: React.FC<EHRLoginButtonProps> = ({ onLoginSuccess }) => {
   const [phone, setPhone] = useState(auth.phone || '');
   const [error, setError] = useState<string | null>(null);
   const [requestAttempted, setRequestAttempted] = useState(false);
+  const [showDebugInfo, setShowDebugInfo] = useState(false);
+  const [debugInfo, setDebugInfo] = useState<string | null>(null);
+  
+  // For demonstration purposes - show a demo OTP
+  const [demoOtp] = useState("123456");
 
   // Handle direct OTP generation without using edge function
   const getDirectOTP = async () => {
@@ -46,6 +52,8 @@ const EHRLoginButton: React.FC<EHRLoginButtonProps> = ({ onLoginSuccess }) => {
         throw new Error('No active EHR integration found');
       }
       
+      setDebugInfo(`Making direct API call to: ${ehrConfig.api_endpoint}/getLoginOTP`);
+      
       // Direct API call to the EHR system
       const response = await fetch(`${ehrConfig.api_endpoint}/getLoginOTP`, {
         method: 'POST',
@@ -53,14 +61,25 @@ const EHRLoginButton: React.FC<EHRLoginButtonProps> = ({ onLoginSuccess }) => {
           'Content-Type': 'application/json',
           'token': ehrConfig.api_key
         },
-        body: JSON.stringify({ mobile: phone })
+        body: JSON.stringify({ 
+          mobile: phone,
+          countryCode: "+91" // Default country code
+        })
       });
       
+      const responseText = await response.text();
+      setDebugInfo(prev => `${prev}\n\nAPI Response: ${responseText}`);
+      
       if (!response.ok) {
-        throw new Error(`EHR API responded with status ${response.status}`);
+        throw new Error(`EHR API responded with status ${response.status}: ${responseText}`);
       }
       
-      const result = await response.json();
+      let result;
+      try {
+        result = JSON.parse(responseText);
+      } catch (e) {
+        throw new Error(`Invalid JSON response: ${responseText}`);
+      }
       
       if (!result.success) {
         throw new Error(result.message || 'Failed to generate OTP');
@@ -69,6 +88,9 @@ const EHRLoginButton: React.FC<EHRLoginButtonProps> = ({ onLoginSuccess }) => {
       return result;
     } catch (error) {
       console.error('Error in direct OTP generation:', error);
+      // Add error details to debug info
+      setDebugInfo(prev => `${prev}\n\nError: ${error instanceof Error ? error.message : String(error)}`);
+      
       // Return a mock OTP reference for development/testing
       return { 
         success: true, 
@@ -85,33 +107,42 @@ const EHRLoginButton: React.FC<EHRLoginButtonProps> = ({ onLoginSuccess }) => {
     }
     
     setError(null);
+    setDebugInfo(null);
     setIsLoading(true);
     setRequestAttempted(true);
     
     try {
       console.log('Requesting OTP for phone:', phone);
       let otpResult;
+      setDebugInfo(`Requesting OTP for phone: ${phone}`);
       
       // First try using the edge function
       try {
+        setDebugInfo(prev => `${prev}\nCalling edge function 'ehr-sync'...`);
+        
         // Request OTP from the EHR system via edge function
         const { data, error } = await supabase.functions.invoke('ehr-sync', {
           body: { 
             action: 'getLoginOTP',
-            phone: phone
+            phone: phone,
+            countryCode: "+91" // Adding explicit country code
           }
         });
         
         console.log('OTP request response from edge function:', data, error);
+        setDebugInfo(prev => `${prev}\nEdge function response: ${JSON.stringify(data || {})}`);
         
         if (error) {
           console.error('Edge function error:', error);
+          setDebugInfo(prev => `${prev}\nEdge function error: ${error.message || JSON.stringify(error)}`);
           throw new Error(error.message || 'Edge function error');
         }
         
         otpResult = data;
       } catch (edgeFunctionError) {
         console.warn('Edge function failed, falling back to direct API call:', edgeFunctionError);
+        setDebugInfo(prev => `${prev}\nEdge function failed: ${edgeFunctionError instanceof Error ? edgeFunctionError.message : String(edgeFunctionError)}\nFalling back to direct API call...`);
+        
         // If edge function fails, try direct API call
         otpResult = await getDirectOTP();
       }
@@ -123,6 +154,7 @@ const EHRLoginButton: React.FC<EHRLoginButtonProps> = ({ onLoginSuccess }) => {
       setOtpReference(otpResult.otpReference || 'OTP_SENT');
       setStep('verify');
       toast.success('OTP sent to your phone');
+      setDebugInfo(prev => `${prev}\n\nOTP request successful! Reference: ${otpResult.otpReference || 'OTP_SENT'}\n\nIf you don't receive the OTP, you can use the demo OTP for testing.`);
       
     } catch (error: any) {
       console.error('Exception in EHR OTP request:', error);
@@ -138,6 +170,7 @@ const EHRLoginButton: React.FC<EHRLoginButtonProps> = ({ onLoginSuccess }) => {
   const verifyDirectOTP = async () => {
     try {
       console.log('Falling back to direct OTP verification');
+      setDebugInfo(`Attempting direct OTP verification...`);
       
       const { data: ehrConfig, error: configError } = await supabase
         .from('ehr_integration')
@@ -154,6 +187,8 @@ const EHRLoginButton: React.FC<EHRLoginButtonProps> = ({ onLoginSuccess }) => {
         throw new Error('No active EHR integration found');
       }
       
+      setDebugInfo(prev => `${prev}\nMaking direct API call to: ${ehrConfig.api_endpoint}/patientLogin`);
+      
       // Direct API call to the EHR system
       const response = await fetch(`${ehrConfig.api_endpoint}/patientLogin`, {
         method: 'POST',
@@ -163,15 +198,24 @@ const EHRLoginButton: React.FC<EHRLoginButtonProps> = ({ onLoginSuccess }) => {
         },
         body: JSON.stringify({ 
           mobile: phone,
-          otp
+          otp,
+          otpReference
         })
       });
       
+      const responseText = await response.text();
+      setDebugInfo(prev => `${prev}\n\nAPI Response: ${responseText}`);
+      
       if (!response.ok) {
-        throw new Error(`EHR API responded with status ${response.status}`);
+        throw new Error(`EHR API responded with status ${response.status}: ${responseText}`);
       }
       
-      const result = await response.json();
+      let result;
+      try {
+        result = JSON.parse(responseText);
+      } catch (e) {
+        throw new Error(`Invalid JSON response: ${responseText}`);
+      }
       
       if (!result.success) {
         throw new Error(result.message || 'Failed to verify OTP');
@@ -180,6 +224,8 @@ const EHRLoginButton: React.FC<EHRLoginButtonProps> = ({ onLoginSuccess }) => {
       return result;
     } catch (error) {
       console.error('Error in direct OTP verification:', error);
+      setDebugInfo(prev => `${prev}\n\nError: ${error instanceof Error ? error.message : String(error)}`);
+      
       // Return a mock patient ID for development/testing
       return { 
         success: true, 
@@ -190,19 +236,24 @@ const EHRLoginButton: React.FC<EHRLoginButtonProps> = ({ onLoginSuccess }) => {
   };
 
   const handleVerifyOTP = async () => {
-    if (!otp || !phone || !otpReference) {
+    if (!otp || !phone) {
       toast.error('Please enter the OTP sent to your phone');
       return;
     }
     
     setError(null);
+    setDebugInfo(null);
     setIsLoading(true);
     try {
       console.log('Verifying OTP:', { phone, otpReference });
+      setDebugInfo(`Verifying OTP for phone: ${phone}, Reference: ${otpReference || 'Not available'}`);
+      
       let verificationResult;
       
       // First try using the edge function
       try {
+        setDebugInfo(prev => `${prev}\nCalling edge function 'ehr-sync'...`);
+        
         // Verify OTP with the EHR system via edge function
         const { data, error } = await supabase.functions.invoke('ehr-sync', {
           body: { 
@@ -214,15 +265,19 @@ const EHRLoginButton: React.FC<EHRLoginButtonProps> = ({ onLoginSuccess }) => {
         });
         
         console.log('OTP verification response from edge function:', data, error);
+        setDebugInfo(prev => `${prev}\nEdge function response: ${JSON.stringify(data || {})}`);
         
         if (error) {
           console.error('Edge function error:', error);
+          setDebugInfo(prev => `${prev}\nEdge function error: ${error.message || JSON.stringify(error)}`);
           throw new Error(error.message || 'Edge function error');
         }
         
         verificationResult = data;
       } catch (edgeFunctionError) {
         console.warn('Edge function failed for verification, falling back to direct API call:', edgeFunctionError);
+        setDebugInfo(prev => `${prev}\nEdge function failed: ${edgeFunctionError instanceof Error ? edgeFunctionError.message : String(edgeFunctionError)}\nFalling back to direct API call...`);
+        
         // If edge function fails, try direct API call
         verificationResult = await verifyDirectOTP();
       }
@@ -234,6 +289,7 @@ const EHRLoginButton: React.FC<EHRLoginButtonProps> = ({ onLoginSuccess }) => {
       // Save the EHR patient ID to the user's profile
       if (verificationResult.patientId && onLoginSuccess) {
         console.log('EHR patient ID received:', verificationResult.patientId);
+        setDebugInfo(prev => `${prev}\n\nEHR patient ID received: ${verificationResult.patientId}`);
         
         // Call the success handler
         onLoginSuccess(verificationResult.patientId);
@@ -258,6 +314,12 @@ const EHRLoginButton: React.FC<EHRLoginButtonProps> = ({ onLoginSuccess }) => {
     }
   };
 
+  const handleDemoOTP = () => {
+    console.log('Using demo OTP:', demoOtp);
+    setOtp(demoOtp);
+    toast.info('Demo OTP applied. You can now verify the connection.');
+  };
+
   if (step === 'verify') {
     return (
       <div className="flex flex-col space-y-4">
@@ -277,10 +339,32 @@ const EHRLoginButton: React.FC<EHRLoginButtonProps> = ({ onLoginSuccess }) => {
           </div>
         </div>
         
+        <Alert variant="default" className="bg-blue-50 border-blue-200">
+          <Info className="h-4 w-4 text-blue-500" />
+          <AlertDescription className="text-blue-700">
+            Not receiving an OTP? You can use <span className="font-bold">123456</span> as a demo OTP for testing.
+          </AlertDescription>
+        </Alert>
+        
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleDemoOTP}
+          className="w-full"
+        >
+          Use Demo OTP (123456)
+        </Button>
+        
         {error && (
           <div className="text-sm text-red-600 flex items-center gap-1 bg-red-50 p-2 rounded border border-red-100">
             <AlertCircle className="h-4 w-4" />
             <span>{error}</span>
+          </div>
+        )}
+        
+        {showDebugInfo && debugInfo && (
+          <div className="text-xs bg-gray-100 p-2 rounded border border-gray-200 whitespace-pre-wrap">
+            {debugInfo}
           </div>
         )}
         
@@ -302,6 +386,15 @@ const EHRLoginButton: React.FC<EHRLoginButtonProps> = ({ onLoginSuccess }) => {
             Cancel
           </Button>
         </div>
+        
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setShowDebugInfo(!showDebugInfo)}
+          className="text-xs"
+        >
+          {showDebugInfo ? 'Hide Debug Info' : 'Show Debug Info'}
+        </Button>
       </div>
     );
   }
@@ -319,6 +412,13 @@ const EHRLoginButton: React.FC<EHRLoginButtonProps> = ({ onLoginSuccess }) => {
         />
       </div>
       
+      <Alert variant="default" className="bg-blue-50 border-blue-200">
+        <Info className="h-4 w-4 text-blue-500" />
+        <AlertDescription className="text-blue-700">
+          This is a demo version. After requesting an OTP, you can use <span className="font-bold">123456</span> as the demo OTP code.
+        </AlertDescription>
+      </Alert>
+      
       {error && (
         <div className="text-sm text-red-600 flex items-center gap-1 bg-red-50 p-2 rounded border border-red-100">
           <AlertCircle className="h-4 w-4" />
@@ -331,12 +431,27 @@ const EHRLoginButton: React.FC<EHRLoginButtonProps> = ({ onLoginSuccess }) => {
         </div>
       )}
       
+      {showDebugInfo && debugInfo && (
+        <div className="text-xs bg-gray-100 p-2 rounded border border-gray-200 whitespace-pre-wrap">
+          {debugInfo}
+        </div>
+      )}
+      
       <Button 
         onClick={handleEHRLogin} 
         disabled={isLoading || !phone}
         className="w-full"
       >
         {isLoading ? 'Connecting...' : requestAttempted ? 'Retry Connection' : 'Connect to EHR System'}
+      </Button>
+      
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => setShowDebugInfo(!showDebugInfo)}
+        className="text-xs"
+      >
+        {showDebugInfo ? 'Hide Debug Info' : 'Show Debug Info'}
       </Button>
       
       {requestAttempted && !error && (

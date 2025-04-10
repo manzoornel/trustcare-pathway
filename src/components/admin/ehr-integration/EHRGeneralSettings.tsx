@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,6 +21,16 @@ const EHRGeneralSettings = () => {
     message: string;
     statusCode?: number;
     responseBody?: string;
+    endpoints?: {
+      health?: {
+        status: string;
+        responseBody?: string;
+      };
+      getLoginOTP?: {
+        status: string;
+        responseBody?: string;
+      };
+    };
   }>(null);
 
   useEffect(() => {
@@ -182,6 +193,36 @@ const EHRGeneralSettings = () => {
                 <pre className="text-xs bg-gray-100 p-2 rounded overflow-x-auto max-h-32">
                   {testResult.responseBody}
                 </pre>
+              </div>
+            )}
+            
+            {testResult.endpoints && (
+              <div className="mt-4 space-y-3">
+                <h5 className="text-sm font-medium">Endpoint Status:</h5>
+                
+                {testResult.endpoints.health && (
+                  <div className="border-t pt-2">
+                    <p className="text-xs font-medium">Health Endpoint:</p>
+                    <p className="text-xs text-gray-600">Status: {testResult.endpoints.health.status}</p>
+                    {testResult.endpoints.health.responseBody && (
+                      <pre className="text-xs bg-gray-100 p-2 rounded overflow-x-auto max-h-24 mt-1">
+                        {testResult.endpoints.health.responseBody}
+                      </pre>
+                    )}
+                  </div>
+                )}
+                
+                {testResult.endpoints.getLoginOTP && (
+                  <div className="border-t pt-2">
+                    <p className="text-xs font-medium">OTP Endpoint:</p>
+                    <p className="text-xs text-gray-600">Status: {testResult.endpoints.getLoginOTP.status}</p>
+                    {testResult.endpoints.getLoginOTP.responseBody && (
+                      <pre className="text-xs bg-gray-100 p-2 rounded overflow-x-auto max-h-24 mt-1">
+                        {testResult.endpoints.getLoginOTP.responseBody}
+                      </pre>
+                    )}
+                  </div>
+                )}
               </div>
             )}
           </div>
