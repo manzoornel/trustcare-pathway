@@ -25,7 +25,8 @@ const EHRConnectionPanel = () => {
     activationAttempted,
     activateEHRIntegration,
     handleLoginSuccess,
-    handleSyncComplete
+    handleSyncComplete,
+    refreshConnection
   } = useEHRIntegration();
 
   return (
@@ -48,6 +49,7 @@ const EHRConnectionPanel = () => {
             ehrActive={ehrActive}
             ehrPatientId={ehrPatientId}
             lastSyncTime={lastSyncTime}
+            onRefresh={refreshConnection}
           />
         </div>
         
@@ -55,6 +57,7 @@ const EHRConnectionPanel = () => {
           <ActivationPanel
             activationError={activationError}
             activationAttempted={activationAttempted}
+            isActivating={isActivating}
             onActivate={activateEHRIntegration}
           />
         ) : (
@@ -68,6 +71,11 @@ const EHRConnectionPanel = () => {
       <CardFooter className="flex justify-start border-t pt-4">
         <div className="text-xs text-gray-500">
           Your health records are synchronized securely from the hospital's EHR system.
+          {activationError && (
+            <strong className="block mt-1">
+              If you're having trouble connecting, please contact hospital support.
+            </strong>
+          )}
         </div>
       </CardFooter>
     </Card>
