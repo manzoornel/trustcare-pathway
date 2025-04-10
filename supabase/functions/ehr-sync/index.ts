@@ -1,4 +1,3 @@
-
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4'
 import { corsHeaders, handleCORS } from '../_shared/cors-helpers.ts'
@@ -25,6 +24,18 @@ serve(async (req) => {
     const requestData = await req.json()
     const action = requestData.action || 'sync'
     
+    // Handle test connection action
+    if (action === 'test') {
+      const config = requestData.config
+      console.log('Testing EHR connection with config:', {
+        api_endpoint: config.api_endpoint,
+        api_key: config.api_key ? '**hidden**' : 'not provided'
+      })
+      
+      // Test connection to the EHR API
+      return await testEhrConnection(config)
+    }
+    
     // Get Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL') as string
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') as string
@@ -47,15 +58,6 @@ serve(async (req) => {
       if (error) {
         console.error('Error creating sync record:', error)
       }
-    }
-    
-    // Handle test connection action
-    if (action === 'test') {
-      const config = requestData.config
-      console.log('Testing EHR connection with config:', config)
-      
-      // Test connection to the EHR API
-      return await testEhrConnection(config)
     }
     
     // Get EHR configuration

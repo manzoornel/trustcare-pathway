@@ -93,7 +93,22 @@ export const useEHRConfig = () => {
       setIsTesting(true);
       setTestResult(null);
       
-      // Call the ehr-test edge function
+      // Validate API endpoint and key
+      if (!ehrConfig.api_endpoint || !ehrConfig.api_key) {
+        toast.error('API Endpoint and API Key are required');
+        setTestResult({
+          success: false,
+          message: 'API Endpoint and API Key are required to test connection'
+        });
+        return;
+      }
+      
+      console.log('Testing connection with config:', {
+        api_endpoint: ehrConfig.api_endpoint,
+        api_key: ehrConfig.api_key ? '**hidden**' : 'not provided'
+      });
+      
+      // Call the ehr-sync edge function with the test action
       const { data, error } = await supabase.functions.invoke('ehr-sync', {
         body: { 
           action: 'test',
@@ -104,25 +119,35 @@ export const useEHRConfig = () => {
         }
       });
       
-      if (error) throw error;
+      console.log('Test connection response:', data);
       
-      if (data.success) {
-        setTestResult({
-          success: true,
-          message: 'Connection successful! API responded correctly.'
-        });
-      } else {
-        setTestResult({
-          success: false,
-          message: data.message || 'Connection failed. Please check your API credentials.'
-        });
+      if (error) {
+        console.error('Error from edge function:', error);
+        throw error;
       }
-    } catch (error) {
+      
+      if (data && typeof data === 'object') {
+        setTestResult({
+          success: !!data.success,
+          message: data.message || 'Unknown response from API test'
+        });
+        
+        if (data.success) {
+          toast.success('Connection test successful!');
+        } else {
+          toast.error('Connection test failed');
+        }
+      } else {
+        console.error('Unexpected response format:', data);
+        throw new Error('Unexpected response format from API test');
+      }
+    } catch (error: any) {
       console.error('Error testing EHR connection:', error);
       setTestResult({
         success: false,
         message: 'Connection test failed: ' + (error.message || 'Unknown error')
       });
+      toast.error('Connection test failed');
     } finally {
       setIsTesting(false);
     }

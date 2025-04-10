@@ -20,10 +20,12 @@ export async function testEhrConnection(config: any): Promise<Response> {
     
     if (!response.ok) {
       const errorText = await response.text();
+      console.error(`API responded with status ${response.status}:`, errorText);
       throw new Error(`API responded with status ${response.status}: ${errorText}`);
     }
     
     const data = await response.json();
+    console.log('Successfully connected to EHR API. Found', data.length, 'doctors');
     
     return new Response(
       JSON.stringify({ 
@@ -38,6 +40,7 @@ export async function testEhrConnection(config: any): Promise<Response> {
     );
   } catch (error) {
     console.error('Error testing EHR connection:', error);
+    
     return new Response(
       JSON.stringify({ 
         success: false, 
