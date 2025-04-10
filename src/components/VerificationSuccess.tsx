@@ -9,13 +9,15 @@ interface VerificationSuccessProps {
   email?: string;
   redirectUrl: string;
   redirectLabel: string;
+  onRedirect?: () => void;
 }
 
 const VerificationSuccess = ({ 
   phone, 
   email, 
   redirectUrl, 
-  redirectLabel 
+  redirectLabel,
+  onRedirect 
 }: VerificationSuccessProps) => {
   return (
     <div className="text-center space-y-6">
@@ -31,11 +33,17 @@ const VerificationSuccess = ({
         {email && <p>Email: <span className="font-medium">{email}</span></p>}
       </div>
       
-      <Button asChild className="mt-6">
-        <Link to={redirectUrl}>
+      {onRedirect ? (
+        <Button onClick={onRedirect} className="mt-6">
           {redirectLabel}
-        </Link>
-      </Button>
+        </Button>
+      ) : (
+        <Button asChild className="mt-6">
+          <Link to={redirectUrl}>
+            {redirectLabel}
+          </Link>
+        </Button>
+      )}
     </div>
   );
 };

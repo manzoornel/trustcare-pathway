@@ -205,10 +205,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // This function is used after signup to mark the user as verified
   const verifyUser = () => {
-    setAuth(prevAuth => ({
-      ...prevAuth,
-      isVerified: true
-    }));
+    console.log("Marking user as verified in auth context");
+    setAuth(prevAuth => {
+      const newAuth = {
+        ...prevAuth,
+        isVerified: true
+      };
+      
+      // Save to localStorage immediately for persistence
+      localStorage.setItem('authState', JSON.stringify(newAuth));
+      
+      return newAuth;
+    });
   };
 
   const signup = async (userData: Credentials) => {

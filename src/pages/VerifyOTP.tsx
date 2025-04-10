@@ -14,7 +14,7 @@ const Verify = () => {
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
   const [verified, setVerified] = useState(false);
-  const { verifyOTP, auth } = useAuth();
+  const { verifyOTP, verifyUser, auth } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -43,21 +43,39 @@ const Verify = () => {
 
     setLoading(true);
     try {
-      // For demo purposes, allow the demo OTP or any 6-digit OTP to work
-      if (otp === demoOtp || process.env.NODE_ENV === 'development') {
-        // Set authenticated state directly without going through Supabase
-        // This bypasses the token expiration issue
+      console.log("Attempting to verify OTP:", otp, "for phone:", phone);
+      
+      // For demo purposes, allow the demo OTP to work
+      if (otp === demoOtp) {
+        // Update auth context first to mark the user as verified
+        verifyUser();
+        
+        // Set local state to show success message
         setVerified(true);
         toast.success("Phone number verified successfully!");
         
-        // Update the auth context to mark the user as verified
-        await verifyOTP(phone, otp);
+        // No need to call Supabase verifyOTP if we're in demo mode
+        // This avoids the token expiration issues
+        console.log("Demo OTP verified successfully");
         
+        // Allow success page to show for 2 seconds before redirecting
         setTimeout(() => {
-          navigate("/patient-portal");
+          console.log("Redirecting to patient portal after successful verification");
+          navigate("/patient-portal", { replace: true });
         }, 2000);
       } else {
-        throw new Error("Invalid OTP");
+        try {
+          // For non-demo OTP, try to verify with Supabase
+          await verifyOTP(phone, otp);
+          setVerified(true);
+          toast.success("Phone number verified successfully!");
+          
+          setTimeout(() => {
+            navigate("/patient-portal", { replace: true });
+          }, 2000);
+        } catch (error) {
+          throw error;
+        }
       }
     } catch (error: any) {
       console.error("Verification error:", error);
@@ -76,12 +94,18 @@ const Verify = () => {
     toast.info(`Demo OTP resent: ${demoOtp}`);
   };
 
+  const handleGoToPatientPortal = () => {
+    console.log("Manually navigating to patient portal");
+    navigate("/patient-portal", { replace: true });
+  };
+
   if (verified) {
     return (
       <VerificationSuccess 
         phone={phone} 
         redirectUrl="/patient-portal" 
         redirectLabel="Go to Patient Portal" 
+        onRedirect={handleGoToPatientPortal}
       />
     );
   }

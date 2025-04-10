@@ -1,6 +1,6 @@
 
-import React, { ReactNode } from "react";
-import { Navigate } from "react-router-dom";
+import React, { ReactNode, useEffect } from "react";
+import { Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 
 type PrivateRouteProps = {
@@ -15,9 +15,21 @@ const PrivateRoute = ({
   needsVerification = true 
 }: PrivateRouteProps) => {
   const { auth } = useAuth();
+  const navigate = useNavigate();
 
   // For debugging
-  console.log("Auth state in PrivateRoute:", auth);
+  useEffect(() => {
+    console.log("Auth state in PrivateRoute:", auth);
+    
+    // To help debug persistence issues, check localStorage too
+    const savedAuth = localStorage.getItem('authState');
+    if (savedAuth) {
+      const parsedAuth = JSON.parse(savedAuth);
+      if (parsedAuth.isVerified !== auth.isVerified) {
+        console.log("Warning: localStorage auth state differs from context state:", parsedAuth);
+      }
+    }
+  }, [auth]);
 
   if (!auth.isAuthenticated) {
     console.log("Not authenticated, redirecting to login");
