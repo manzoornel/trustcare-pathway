@@ -122,7 +122,7 @@ const EHRGeneralSettings = () => {
         </Button>
         
         {testResult && (
-          <EHRTestResult result={testResult} />
+          <EHRTestResult testResult={testResult} />
         )}
         
         <Button onClick={handleSaveSettings} className="mt-4">

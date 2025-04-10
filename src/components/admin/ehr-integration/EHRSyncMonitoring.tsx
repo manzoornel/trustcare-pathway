@@ -35,7 +35,7 @@ const EHRSyncMonitoring = () => {
         </div>
       )}
       
-      <EHRSyncStatus history={syncHistory} isLoading={isLoading} />
+      <EHRSyncStatus onManualSync={handleSyncNow} />
       
       <div className="flex justify-end">
         <Button 
@@ -50,7 +50,11 @@ const EHRSyncMonitoring = () => {
       
       <div className="mt-8">
         <h4 className="text-md font-medium mb-4">Recent Sync History</h4>
-        <EHRSyncHistory history={syncHistory} isLoading={isLoading} />
+        <EHRSyncHistory 
+          syncHistory={syncHistory} 
+          isLoading={isLoading} 
+          onRefresh={refreshHistory}
+        />
       </div>
     </div>
   );

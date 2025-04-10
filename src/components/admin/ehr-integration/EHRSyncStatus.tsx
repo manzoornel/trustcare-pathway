@@ -11,8 +11,12 @@ import {
 import { useEHRConfig } from './useEHRConfig';
 import { Progress } from "@/components/ui/progress";
 
-const EHRSyncStatus = ({ onManualSync }: { onManualSync: () => Promise<void> }) => {
-  const { ehrConfig, isLoading } = useEHRConfig();
+type EHRSyncStatusProps = {
+  onManualSync: () => Promise<void>;
+};
+
+const EHRSyncStatus = ({ onManualSync }: EHRSyncStatusProps) => {
+  const { config, isLoading } = useEHRConfig();
   const [isSyncing, setIsSyncing] = useState(false);
 
   const handleSync = async () => {
@@ -35,7 +39,7 @@ const EHRSyncStatus = ({ onManualSync }: { onManualSync: () => Promise<void> }) 
       );
     }
 
-    if (!ehrConfig.is_active) {
+    if (!config?.isActive) {
       return (
         <div className="flex items-center text-amber-500">
           <AlertTriangle className="w-5 h-5 mr-2" />
@@ -44,7 +48,7 @@ const EHRSyncStatus = ({ onManualSync }: { onManualSync: () => Promise<void> }) 
       );
     }
 
-    if (!ehrConfig.last_sync_time) {
+    if (!config?.lastSyncTime) {
       return (
         <div className="flex items-center text-amber-500">
           <Clock className="w-5 h-5 mr-2" />
@@ -54,7 +58,7 @@ const EHRSyncStatus = ({ onManualSync }: { onManualSync: () => Promise<void> }) 
     }
 
     // Check if last sync was within the last 24 hours
-    const lastSync = new Date(ehrConfig.last_sync_time);
+    const lastSync = new Date(config.lastSyncTime);
     const now = new Date();
     const timeDiff = now.getTime() - lastSync.getTime();
     const isRecent = timeDiff < 24 * 60 * 60 * 1000; // 24 hours
@@ -82,8 +86,8 @@ const EHRSyncStatus = ({ onManualSync }: { onManualSync: () => Promise<void> }) 
         <div className="flex flex-col">
           <h3 className="text-lg font-medium">EHR Synchronization</h3>
           <p className="text-sm text-muted-foreground">
-            {ehrConfig.last_sync_time ? (
-              <>Last synchronized: {new Date(ehrConfig.last_sync_time).toLocaleString()}</>
+            {config?.lastSyncTime ? (
+              <>Last synchronized: {new Date(config.lastSyncTime).toLocaleString()}</>
             ) : (
               <>Never synchronized</>
             )}
@@ -101,7 +105,7 @@ const EHRSyncStatus = ({ onManualSync }: { onManualSync: () => Promise<void> }) 
       
       <Button 
         onClick={handleSync}
-        disabled={isSyncing || isLoading || !ehrConfig.is_active}
+        disabled={isSyncing || isLoading || !config?.isActive}
         className="w-full"
       >
         <RefreshCw className={`mr-2 h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />

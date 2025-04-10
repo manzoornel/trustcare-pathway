@@ -22,7 +22,7 @@ import { EHRSyncHistory as EHRSyncHistoryType } from './types';
 type EHRSyncHistoryProps = {
   syncHistory: EHRSyncHistoryType[];
   isLoading: boolean;
-  onRefresh: () => void;
+  onRefresh?: () => void;
 };
 
 const EHRSyncHistory = ({ syncHistory, isLoading, onRefresh }: EHRSyncHistoryProps) => {
@@ -30,10 +30,12 @@ const EHRSyncHistory = ({ syncHistory, isLoading, onRefresh }: EHRSyncHistoryPro
     <div className="border rounded-lg shadow-sm bg-card">
       <div className="p-4 border-b flex justify-between items-center">
         <h3 className="text-lg font-medium">Synchronization History</h3>
-        <Button variant="outline" size="sm" onClick={onRefresh}>
-          <RefreshCw className="h-4 w-4 mr-2" />
-          Refresh
-        </Button>
+        {onRefresh && (
+          <Button variant="outline" size="sm" onClick={onRefresh}>
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Refresh
+          </Button>
+        )}
       </div>
       
       {isLoading ? (
