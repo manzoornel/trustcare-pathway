@@ -1,4 +1,3 @@
-
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4'
 import { corsHeaders, handleCORS } from '../_shared/cors-helpers.ts'
@@ -111,11 +110,16 @@ serve(async (req) => {
         console.log(`Requesting OTP for phone: ${phone}`)
         try {
           const result = await getLoginOTP(phone, countryCode, ehrConfig)
+          if (!result.success) {
+            return createErrorResponse(result.message || 'Failed to generate OTP', null, 400)
+          }
           return createSuccessResponse(result)
-        } catch (error) {
+        } catch (error: any) {
           console.error('Error generating OTP:', error)
           // Fallback to mock data in case of error
-          return createSuccessResponse(getMockOTPResponse())
+          const mockResult = getMockOTPResponse()
+          console.log('Falling back to mock OTP response')
+          return createSuccessResponse(mockResult)
         }
       }
 
@@ -128,11 +132,16 @@ serve(async (req) => {
         console.log(`Verifying OTP for phone: ${phone}`)
         try {
           const result = await patientLogin(phone, otp, otpReference, ehrConfig)
+          if (!result.success) {
+            return createErrorResponse(result.message || 'Failed to verify OTP', null, 400)
+          }
           return createSuccessResponse(result)
-        } catch (error) {
+        } catch (error: any) {
           console.error('Error authenticating patient:', error)
           // Fallback to mock data in case of error
-          return createSuccessResponse(getMockLoginResponse())
+          const mockResult = getMockLoginResponse()
+          console.log('Falling back to mock login response')
+          return createSuccessResponse(mockResult)
         }
       }
 

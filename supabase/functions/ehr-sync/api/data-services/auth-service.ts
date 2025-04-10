@@ -19,14 +19,16 @@ export async function getLoginOTP(phone: string, countryCode: string = "+91", co
     
     if (!response.ok) {
       console.error(`Error generating OTP: ${response.status}`);
-      return { success: false, error: `API responded with status ${response.status}` };
+      throw new Error(`API responded with status ${response.status}`);
     }
     
     const data = await response.json();
+    console.log('OTP generation success response:', JSON.stringify(data).substring(0, 100) + '...');
     return data;
   } catch (error) {
     console.error('Exception generating OTP:', error);
-    return { success: false, error: 'Failed to generate OTP' };
+    // Throwing the error so we can fall back to mock data in the edge function
+    throw new Error('Failed to generate OTP: ' + (error instanceof Error ? error.message : String(error)));
   }
 }
 
@@ -52,14 +54,16 @@ export async function patientLogin(phone: string, otp: string, otpReference: str
     
     if (!response.ok) {
       console.error(`Error authenticating patient: ${response.status}`);
-      return { success: false, error: `API responded with status ${response.status}` };
+      throw new Error(`API responded with status ${response.status}`);
     }
     
     const data = await response.json();
+    console.log('Patient login success response:', JSON.stringify(data).substring(0, 100) + '...');
     return data;
   } catch (error) {
     console.error('Exception authenticating patient:', error);
-    return { success: false, error: 'Failed to authenticate patient' };
+    // Throwing the error so we can fall back to mock data in the edge function
+    throw new Error('Failed to authenticate patient: ' + (error instanceof Error ? error.message : String(error)));
   }
 }
 
@@ -67,10 +71,13 @@ export async function patientLogin(phone: string, otp: string, otpReference: str
  * Generate mock OTP response
  */
 export function getMockOTPResponse(): any {
+  const mockRef = "REF" + Math.floor(100000 + Math.random() * 900000);
+  console.log('Generating mock OTP response with reference:', mockRef);
+  
   return { 
     success: true, 
-    message: "OTP sent successfully", 
-    otpReference: "REF" + Math.floor(100000 + Math.random() * 900000)
+    message: "OTP sent successfully (mock)", 
+    otpReference: mockRef
   };
 }
 
@@ -78,9 +85,14 @@ export function getMockOTPResponse(): any {
  * Generate mock login response
  */
 export function getMockLoginResponse(): any {
+  const mockPatientId = "PT" + Math.floor(10000 + Math.random() * 90000);
+  const mockToken = "mock-jwt-token-" + Math.random().toString(36).substring(2);
+  
+  console.log('Generating mock login response with patient ID:', mockPatientId);
+  
   return { 
     success: true, 
-    patientId: "PT" + Math.floor(10000 + Math.random() * 90000), 
-    token: "mock-jwt-token-" + Math.random().toString(36).substring(2)
+    patientId: mockPatientId, 
+    token: mockToken
   };
 }
