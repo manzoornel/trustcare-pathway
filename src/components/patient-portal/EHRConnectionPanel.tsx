@@ -24,6 +24,7 @@ const EHRConnectionPanel = () => {
   const [ehrPatientId, setEhrPatientId] = useState<string | null>(null);
   const [lastSyncTime, setLastSyncTime] = useState<string | null>(null);
   const [ehrActive, setEhrActive] = useState(false);
+  const [isActivating, setIsActivating] = useState(false);
 
   // Check if EHR integration is active
   useEffect(() => {
@@ -92,8 +93,46 @@ const EHRConnectionPanel = () => {
     fetchEhrConnection();
   }, [auth.userId]);
   
-  const handleLoginSuccess = (patientId: string) => {
+  const handleLoginSuccess = async (patientId: string) => {
     setEhrPatientId(patientId);
+    
+    // If EHR integration isn't active, automatically activate it
+    if (!ehrActive) {
+      setIsActivating(true);
+      try {
+        // Check if there's already a config
+        const { data: existingConfig } = await supabase
+          .from('ehr_integration')
+          .select('id')
+          .limit(1);
+          
+        if (existingConfig && existingConfig.length > 0) {
+          // Update existing config
+          await supabase
+            .from('ehr_integration')
+            .update({ is_active: true })
+            .eq('id', existingConfig[0].id);
+        } else {
+          // Create new config with default values
+          await supabase
+            .from('ehr_integration')
+            .insert({
+              api_endpoint: 'http://103.99.205.192:8008/mirrors/Dr_Mirror/public',
+              api_key: 'default-key', // This would need to be replaced with a proper key
+              is_active: true
+            });
+        }
+        
+        setEhrActive(true);
+        toast.success('EHR integration successfully activated');
+      } catch (error) {
+        console.error('Error activating EHR integration:', error);
+        toast.error('Failed to activate EHR integration');
+      } finally {
+        setIsActivating(false);
+      }
+    }
+    
     toast.success('Successfully connected to EHR system');
   };
   
@@ -103,11 +142,20 @@ const EHRConnectionPanel = () => {
   };
 
   const renderConnectionStatus = () => {
+    if (isActivating) {
+      return (
+        <div className="flex items-center">
+          <Clock className="h-5 w-5 text-blue-500 mr-2" />
+          <span className="text-blue-700">Activating EHR integration...</span>
+        </div>
+      );
+    }
+    
     if (!ehrActive) {
       return (
         <div className="flex items-center">
           <AlertCircle className="h-5 w-5 text-amber-500 mr-2" />
-          <span className="text-amber-700">EHR integration is not active</span>
+          <span className="text-amber-700">EHR integration needs activation</span>
         </div>
       );
     }
@@ -179,13 +227,13 @@ const EHRConnectionPanel = () => {
           {renderSyncStatus()}
         </div>
         
-        {!ehrActive ? (
+        {!ehrActive && !isActivating ? (
           <div className="p-4 rounded-md bg-amber-50 border border-amber-200">
             <div className="flex items-start">
               <AlertCircle className="h-5 w-5 text-amber-500 mr-2 mt-0.5 flex-shrink-0" />
               <div className="space-y-2">
                 <p className="text-sm text-amber-700">
-                  The EHR integration is currently not active. Please contact the administrator to enable this feature.
+                  The EHR integration needs to be activated. Simply connect with your phone number below to automatically activate it.
                 </p>
                 {auth.role && auth.role === 'admin' && (
                   <Button variant="outline" size="sm" asChild>
