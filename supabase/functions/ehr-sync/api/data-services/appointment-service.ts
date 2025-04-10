@@ -30,6 +30,42 @@ export async function fetchAppointments(patientId: string, config: EhrApiConfig)
 }
 
 /**
+ * Create a new appointment
+ */
+export async function createAppointment(patientId: string, doctorId: string, date: string, time: string, reason: string | null, config: EhrApiConfig): Promise<any> {
+  console.log(`Creating appointment for patient ${patientId} with doctor ${doctorId} on ${date} at ${time}`);
+  
+  try {
+    const appointmentData = {
+      patientId,
+      doctorId,
+      date,
+      time,
+      reason: reason || undefined
+    };
+    
+    const response = await fetch(`${config.api_endpoint}/createAppointment`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'token': config.api_key
+      },
+      body: JSON.stringify(appointmentData)
+    });
+    
+    if (!response.ok) {
+      console.error(`Error creating appointment: ${response.status}`);
+      return { success: false, error: `API responded with status ${response.status}` };
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Exception creating appointment:', error);
+    return { success: false, error: 'Failed to create appointment' };
+  }
+}
+
+/**
  * Generate mock appointments for testing
  */
 export function getMockAppointments(): Appointment[] {
@@ -53,4 +89,15 @@ export function getMockAppointments(): Appointment[] {
       location: 'Unniyal Branch'
     }
   ];
+}
+
+/**
+ * Generate mock appointment creation response
+ */
+export function getMockAppointmentCreation(): any {
+  return { 
+    success: true, 
+    appointmentId: "APT" + Math.floor(100 + Math.random() * 900), 
+    message: "Appointment booked successfully" 
+  };
 }
