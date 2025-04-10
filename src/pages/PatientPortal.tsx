@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '@/contexts/auth';
 import PatientInfoCard from '@/components/patient-portal/PatientInfoCard';
 import PortalTabsSection from '@/components/patient-portal/PortalTabsSection';
@@ -8,6 +8,7 @@ import EHRConnectionPanel from '@/components/patient-portal/EHRConnectionPanel';
 
 const PatientPortal: React.FC = () => {
   const { auth } = useAuth();
+  const [activeTab, setActiveTab] = useState('labReports');
 
   return (
     <div className="container mx-auto py-8 px-4">
@@ -17,13 +18,21 @@ const PatientPortal: React.FC = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="space-y-6">
-          <PatientInfoCard />
+          <PatientInfoCard 
+            patientName={auth.name || ""}
+            hospitalId={auth.hospitalId}
+            phone={auth.phone}
+            email={auth.email}
+          />
           <RewardsCard />
           <EHRConnectionPanel />
         </div>
 
         <div className="md:col-span-2">
-          <PortalTabsSection />
+          <PortalTabsSection 
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+          />
         </div>
       </div>
     </div>

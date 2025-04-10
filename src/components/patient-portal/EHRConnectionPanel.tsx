@@ -8,7 +8,6 @@ import {
   CardTitle,
   CardFooter
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, XCircle, AlertCircle, Clock } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -32,14 +31,14 @@ const EHRConnectionPanel = () => {
         // Get the patient's EHR ID
         const { data: profile, error: profileError } = await supabase
           .from('patient_profiles')
-          .select('ehr_patient_id')
+          .select('hospital_id')
           .eq('id', auth.userId)
           .single();
           
         if (profileError) {
           console.error('Error fetching patient profile:', profileError);
         } else if (profile) {
-          setEhrPatientId(profile.ehr_patient_id);
+          setEhrPatientId(profile.hospital_id);
         }
         
         // Get last sync time

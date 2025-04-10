@@ -74,7 +74,7 @@ const EHRLoginButton: React.FC<EHRLoginButtonProps> = ({ onLoginSuccess }) => {
       if (data.patientId && onLoginSuccess) {
         await supabase
           .from('patient_profiles')
-          .update({ ehr_patient_id: data.patientId })
+          .update({ hospital_id: data.patientId })
           .eq('id', auth.userId);
           
         onLoginSuccess(data.patientId);
