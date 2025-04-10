@@ -187,7 +187,7 @@ const EHRConnectionPanel = () => {
                 <p className="text-sm text-amber-700">
                   The EHR integration is currently not active. Please contact the administrator to enable this feature.
                 </p>
-                {auth.role === 'admin' && (
+                {auth.role && auth.role === 'admin' && (
                   <Button variant="outline" size="sm" asChild>
                     <Link to="/admin/settings" className="inline-flex items-center">
                       <span>Go to Admin Settings</span>
