@@ -1,18 +1,18 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { 
   Card, 
   CardContent, 
   CardHeader, 
-  CardTitle, 
-  CardFooter 
+  CardTitle
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Edit } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { Edit, Save, X, RefreshCw } from "lucide-react";
-import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import PatientInfoField from "./PatientInfoField";
+import HospitalIdField from "./HospitalIdField";
+import PatientInfoFooter from "./PatientInfoFooter";
+import { usePatientInfoForm } from "@/hooks/usePatientInfoForm";
 
 type PatientInfoCardProps = {
   patientName: string;
@@ -22,102 +22,18 @@ type PatientInfoCardProps = {
 };
 
 const PatientInfoCard = ({ patientName, hospitalId, phone, email }: PatientInfoCardProps) => {
-  const { updateProfile, auth } = useAuth();
-  const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState({
-    name: patientName || "",
-    phone: phone || "",
-    email: email || "",
-    hospitalId: hospitalId || ""
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSyncing, setIsSyncing] = useState(false);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleSave = async () => {
-    // Validate inputs
-    if (!formData.name.trim()) {
-      toast.error("Name cannot be empty");
-      return;
-    }
-    
-    if (!formData.email.trim()) {
-      toast.error("Email cannot be empty");
-      return;
-    }
-    
-    if (!formData.phone.trim()) {
-      toast.error("Phone number cannot be empty");
-      return;
-    }
-
-    try {
-      setIsSubmitting(true);
-      // Update profile
-      await updateProfile({
-        name: formData.name,
-        phone: formData.phone,
-        email: formData.email,
-        hospitalId: formData.hospitalId
-      });
-      
-      setIsEditing(false);
-    } catch (error) {
-      console.error("Error updating profile:", error);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleCancel = () => {
-    // Reset form data to original values
-    setFormData({
-      name: patientName || "",
-      phone: phone || "",
-      email: email || "",
-      hospitalId: hospitalId || ""
-    });
-    setIsEditing(false);
-  };
-
-  const handleSyncPatientData = async () => {
-    if (!auth.userId) {
-      toast.error("User ID not found. Please log in again.");
-      return;
-    }
-
-    setIsSyncing(true);
-    try {
-      // Call the EHR sync function with your patient ID
-      const response = await supabase.functions.invoke('ehr-sync', {
-        body: { 
-          action: 'sync', 
-          patientId: auth.userId,
-          patientEhrId: formData.hospitalId || hospitalId
-        }
-      });
-      
-      if (response.error) {
-        throw new Error(response.error.message || "Failed to sync with EHR");
-      }
-      
-      if (response.data && response.data.success) {
-        toast.success("Successfully synced with EHR system");
-      } else {
-        const errorMsg = response.data?.message || "Failed to sync with EHR system";
-        toast.error(errorMsg);
-      }
-    } catch (error) {
-      console.error("Error syncing with EHR:", error);
-      toast.error("Error connecting to EHR system. Please try again later.");
-    } finally {
-      setIsSyncing(false);
-    }
-  };
+  const { auth } = useAuth();
+  const { 
+    formData, 
+    isEditing, 
+    isSubmitting, 
+    isSyncing,
+    handleChange,
+    handleSave,
+    handleCancel,
+    handleSyncPatientData,
+    setIsEditing
+  } = usePatientInfoForm({ patientName, hospitalId, phone, email });
 
   const isDemoAccount = auth.userId?.startsWith('demo-');
 
@@ -139,89 +55,46 @@ const PatientInfoCard = ({ patientName, hospitalId, phone, email }: PatientInfoC
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <p className="text-sm font-medium text-gray-500">Name</p>
-            {isEditing ? (
-              <Input 
-                name="name" 
-                value={formData.name}
-                onChange={handleChange}
-                className="mt-1"
-              />
-            ) : (
-              <p>{patientName || "Not available"}</p>
-            )}
-          </div>
-          <div>
-            <p className="text-sm font-medium text-gray-500">Hospital ID (UHID)</p>
-            {isEditing ? (
-              <Input 
-                name="hospitalId" 
-                value={formData.hospitalId}
-                onChange={handleChange}
-                className="mt-1"
-                placeholder="Enter your Hospital ID"
-              />
-            ) : (
-              <div className="flex items-center gap-2">
-                <p>{hospitalId || "Not available"}</p>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={handleSyncPatientData} 
-                  disabled={isSyncing || (!hospitalId && !formData.hospitalId)}
-                  className="ml-2"
-                >
-                  <RefreshCw className={`h-3 w-3 mr-1 ${isSyncing ? 'animate-spin' : ''}`} />
-                  {isSyncing ? 'Syncing...' : 'Sync'}
-                </Button>
-              </div>
-            )}
-          </div>
-          <div>
-            <p className="text-sm font-medium text-gray-500">Phone</p>
-            {isEditing ? (
-              <Input 
-                name="phone" 
-                value={formData.phone}
-                onChange={handleChange}
-                className="mt-1"
-              />
-            ) : (
-              <p>{phone || "Not available"}</p>
-            )}
-          </div>
-          <div>
-            <p className="text-sm font-medium text-gray-500">Email</p>
-            {isEditing ? (
-              <Input 
-                name="email" 
-                value={formData.email}
-                onChange={handleChange}
-                className="mt-1"
-              />
-            ) : (
-              <p>{email || "Not available"}</p>
-            )}
-          </div>
+          <PatientInfoField
+            label="Name"
+            value={formData.name}
+            isEditing={isEditing}
+            name="name"
+            onChange={handleChange}
+          />
+          
+          <HospitalIdField
+            hospitalId={formData.hospitalId}
+            isEditing={isEditing}
+            isSyncing={isSyncing}
+            onChange={handleChange}
+            onSync={handleSyncPatientData}
+          />
+          
+          <PatientInfoField
+            label="Phone"
+            value={formData.phone}
+            isEditing={isEditing}
+            name="phone"
+            onChange={handleChange}
+          />
+          
+          <PatientInfoField
+            label="Email"
+            value={formData.email}
+            isEditing={isEditing}
+            name="email"
+            onChange={handleChange}
+          />
         </div>
       </CardContent>
+      
       {isEditing && (
-        <CardFooter className="flex justify-end gap-2 pt-0">
-          <Button variant="outline" size="sm" onClick={handleCancel} className="flex items-center gap-1">
-            <X className="h-4 w-4" />
-            Cancel
-          </Button>
-          <Button 
-            size="sm" 
-            onClick={handleSave} 
-            className="flex items-center gap-1"
-            disabled={isSubmitting}
-          >
-            <Save className="h-4 w-4" />
-            {isSubmitting ? "Saving..." : "Save Changes"}
-          </Button>
-        </CardFooter>
+        <PatientInfoFooter
+          isSubmitting={isSubmitting}
+          onSave={handleSave}
+          onCancel={handleCancel}
+        />
       )}
     </Card>
   );
