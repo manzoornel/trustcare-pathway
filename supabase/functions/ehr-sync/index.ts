@@ -83,7 +83,8 @@ serve(async (req) => {
     }
     
     // Get patient ID from request
-    const { patientId } = requestData
+    const { patientId, patientEhrId } = requestData
+    
     if (!patientId) {
       await createSyncRecord(null, 'failed', 'Patient ID is required')
       
@@ -96,21 +97,45 @@ serve(async (req) => {
       )
     }
     
-    // Log the sync start
-    await createSyncRecord(patientId, 'in_progress', `Starting sync for patient: ${patientId}`)
+    // Log the sync start with both IDs if available
+    const syncMessage = patientEhrId 
+      ? `Starting sync for patient: ${patientId} with EHR ID: ${patientEhrId}`
+      : `Starting sync for patient: ${patientId}`;
+    
+    await createSyncRecord(patientId, 'in_progress', syncMessage)
     
     // Log the attempt
-    console.log(`Syncing data for patient: ${patientId} from EHR at ${ehrConfig.api_endpoint}`)
+    console.log(`Syncing data for patient: ${patientId}${patientEhrId ? ` with EHR ID: ${patientEhrId}` : ''} from EHR at ${ehrConfig.api_endpoint}`)
     
     try {
-      // Get data from the EHR system API
-      const ehrData = await fetchEhrData(patientId, ehrConfig)
+      // Get data from the EHR system API with the EHR patient ID if available
+      const ehrData = await fetchEhrData(patientEhrId || patientId, ehrConfig)
       
       // Update patient data in Supabase with data from EHR
       await syncLabReports(supabase, patientId, ehrData.labReports)
       await syncMedications(supabase, patientId, ehrData.medications)
       await syncAppointments(supabase, patientId, ehrData.appointments)
       await syncMedicalSummaries(supabase, patientId, ehrData.medicalSummaries)
+      
+      // If we received an EHR ID and it's not already set for this patient, update it
+      if (patientEhrId && patientId) {
+        // Check if the patient profile exists and needs the hospital_id updated
+        const { data: profile } = await supabase
+          .from('patient_profiles')
+          .select('hospital_id')
+          .eq('id', patientId)
+          .single();
+          
+        if (profile && (!profile.hospital_id || profile.hospital_id !== patientEhrId)) {
+          // Update the hospital_id in the patient profile
+          await supabase
+            .from('patient_profiles')
+            .update({ hospital_id: patientEhrId })
+            .eq('id', patientId);
+            
+          console.log(`Updated patient ${patientId} with hospital_id: ${patientEhrId}`);
+        }
+      }
       
       // Update last sync time
       await supabase
@@ -119,23 +144,30 @@ serve(async (req) => {
         .eq('id', ehrConfig.id)
       
       // Log successful sync
+      const syncDetails = {
+        labReports: ehrData.labReports.length,
+        medications: ehrData.medications.length,
+        appointments: ehrData.appointments.length,
+        medicalSummaries: ehrData.medicalSummaries.length
+      };
+
+      const successMsg = patientEhrId 
+        ? `Successfully synchronized data for patient: ${patientId} with EHR ID: ${patientEhrId}`
+        : `Successfully synchronized data for patient: ${patientId}`;
+        
       await createSyncRecord(
         patientId, 
         'success', 
-        `Successfully synchronized data for patient: ${patientId}`,
-        JSON.stringify({
-          labReports: ehrData.labReports.length,
-          medications: ehrData.medications.length,
-          appointments: ehrData.appointments.length,
-          medicalSummaries: ehrData.medicalSummaries.length
-        })
+        successMsg,
+        JSON.stringify(syncDetails)
       )
       
       return new Response(
         JSON.stringify({ 
           success: true, 
           message: 'Patient data synchronized successfully',
-          syncTime: new Date().toISOString()
+          syncTime: new Date().toISOString(),
+          data: syncDetails
         }),
         { 
           status: 200, 

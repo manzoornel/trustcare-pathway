@@ -2,6 +2,7 @@
 import React, { ReactNode, useEffect } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 type PrivateRouteProps = {
   children: ReactNode;
@@ -27,6 +28,12 @@ const PrivateRoute = ({
       const parsedAuth = JSON.parse(savedAuth);
       if (parsedAuth.isVerified !== auth.isVerified) {
         console.log("Warning: localStorage auth state differs from context state:", parsedAuth);
+        // Auto-correct auth state issues if localStorage shows verified but context doesn't
+        if (parsedAuth.isVerified && !auth.isVerified) {
+          console.log("Auto-correcting auth state inconsistency - localStorage says verified but context doesn't");
+          toast.info("Refreshing authentication state...");
+          window.location.reload(); // Force reload to fix the state
+        }
       }
     }
   }, [auth]);

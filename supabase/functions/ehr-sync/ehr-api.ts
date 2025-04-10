@@ -50,12 +50,27 @@ export async function testEhrConnection(config: any): Promise<Response> {
 
 // Fetch data from EHR API
 export async function fetchEhrData(patientId: string, ehrConfig: any) {
-  console.log(`Fetching data for patient: ${patientId} from EHR API`);
+  console.log(`Fetching data for patient: ${patientId} from EHR API at: ${ehrConfig.api_endpoint}`);
   
   try {
     // In a real implementation, these would be actual API calls
     const baseUrl = ehrConfig.api_endpoint;
     const token = ehrConfig.api_key;
+    
+    // Fetch patient demographics first to ensure the patient exists
+    const patientDemographicsResponse = await fetch(`${baseUrl}/fetchPatientDemographics`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'token': token
+      },
+      body: JSON.stringify({ patientId })
+    });
+    
+    if (!patientDemographicsResponse.ok) {
+      console.error(`Error fetching patient demographics: ${patientDemographicsResponse.status}`);
+      throw new Error(`Patient with ID ${patientId} not found in EHR system or access denied`);
+    }
     
     // Fetch appointments
     const appointmentsResponse = await fetch(`${baseUrl}/fetchAppointments`, {
