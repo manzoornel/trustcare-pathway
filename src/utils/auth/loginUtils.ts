@@ -2,12 +2,12 @@
 import { supabase } from "@/integrations/supabase/client";
 import { AuthState } from "@/types/auth.types";
 import { toast } from "sonner";
-import { handleDemoLogin } from "./demoAuth";
+import { handleDemoLogin, verifyDemoOTP, handleDemoOTP } from "./demoAuth";
 
 /**
  * Handle user login with email and password
  */
-export const handleLogin = async (email: string, password: string): Promise<AuthState> => {
+export const handleLogin = async (email: string, password: string): Promise<AuthState | undefined> => {
   // Check if this is a demo account
   const demoAuth = handleDemoLogin(email, password);
   if (demoAuth) {
@@ -23,7 +23,7 @@ export const handleLogin = async (email: string, password: string): Promise<Auth
   if (error) throw error;
 
   toast.success("Login successful!");
-  return {} as AuthState; // Session will be handled by onAuthStateChange
+  return undefined; // Session will be handled by onAuthStateChange
 };
 
 /**
@@ -31,7 +31,7 @@ export const handleLogin = async (email: string, password: string): Promise<Auth
  */
 export const handleLoginWithOTP = async (phone: string): Promise<void> => {
   // Check if this is a demo account
-  const isDemo = await import('./demoAuth').then(({ handleDemoOTP }) => handleDemoOTP(phone));
+  const isDemo = handleDemoOTP(phone);
   
   if (isDemo) {
     return Promise.resolve();
@@ -52,7 +52,7 @@ export const handleLoginWithOTP = async (phone: string): Promise<void> => {
  */
 export const handleVerifyOTP = async (phone: string, otp: string): Promise<AuthState | undefined> => {
   // Check if this is a demo account
-  const demoAuth = await import('./demoAuth').then(({ verifyDemoOTP }) => verifyDemoOTP(phone));
+  const demoAuth = verifyDemoOTP(phone);
   
   if (demoAuth) {
     return demoAuth;

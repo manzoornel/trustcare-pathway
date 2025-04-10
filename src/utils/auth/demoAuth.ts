@@ -1,47 +1,51 @@
 
-import { AuthState } from "@/types/auth.types";
-import { demoPatients } from "@/data/demoPatients";
 import { toast } from "sonner";
+import { demoPatients } from "@/data/demoPatients";
+import { AuthState } from "@/types/auth.types";
 
 /**
- * Handle authentication for demo accounts
+ * Check if a user is a demo user
+ */
+export const isDemoUser = (userId?: string): boolean => {
+  return !!userId?.startsWith('demo-');
+};
+
+/**
+ * Handle demo login
  */
 export const handleDemoLogin = (email: string, password: string): AuthState | null => {
-  const demoPatient = demoPatients.find(patient => patient.email === email);
+  // Check if it's a demo account
+  const demoUser = demoPatients.find(p => p.email === email && p.password === password);
   
-  if (demoPatient && password === demoPatient.password) {
-    // Create a random user ID for the demo account
-    const demoUserId = `demo-${Math.random().toString(36).substring(2, 15)}`;
-    
-    const auth: AuthState = {
+  if (demoUser) {
+    const authState: AuthState = {
       isAuthenticated: true,
       isVerified: true,
       needsProfile: false,
-      userId: demoUserId,
-      name: demoPatient.name,
-      email: demoPatient.email,
-      phone: demoPatient.phone,
-      hospitalId: demoPatient.hospitalId,
-      rewardPoints: 250, // Demo reward points
+      name: demoUser.name,
+      email: demoUser.email,
+      phone: demoUser.phone,
+      hospitalId: demoUser.hospitalId,
+      profileComplete: true,
+      userId: `demo-${Date.now()}`,
+      rewardPoints: 250
     };
     
-    toast.success("Demo login successful!");
-    return auth;
+    toast.success(`Welcome, ${demoUser.name}! You're logged in as a demo user.`);
+    return authState;
   }
   
   return null;
 };
 
 /**
- * Handle OTP login for demo accounts
+ * Handle demo OTP for phone verification
  */
 export const handleDemoOTP = (phone: string): boolean => {
-  const demoPatient = demoPatients.find(patient => patient.phone === phone);
+  const isDemoNumber = demoPatients.some(patient => patient.phone === phone);
   
-  if (demoPatient) {
-    // Store the phone number for verification
-    localStorage.setItem('verifyPhone', phone);
-    toast.info("OTP sent to your phone (simulated for demo account)");
+  if (isDemoNumber) {
+    toast.success("Demo OTP sent to your phone (simulated)");
     return true;
   }
   
@@ -49,37 +53,28 @@ export const handleDemoOTP = (phone: string): boolean => {
 };
 
 /**
- * Verify OTP for demo accounts
+ * Verify demo OTP
  */
 export const verifyDemoOTP = (phone: string): AuthState | null => {
-  const demoPatient = demoPatients.find(patient => patient.phone === phone);
+  const demoUser = demoPatients.find(p => p.phone === phone);
   
-  if (demoPatient) {
-    // Create a random user ID for the demo account
-    const demoUserId = `demo-${Math.random().toString(36).substring(2, 15)}`;
-    
-    const auth: AuthState = {
+  if (demoUser) {
+    const authState: AuthState = {
       isAuthenticated: true,
       isVerified: true,
       needsProfile: false,
-      userId: demoUserId,
-      name: demoPatient.name,
-      email: demoPatient.email,
-      phone: demoPatient.phone,
-      hospitalId: demoPatient.hospitalId,
-      rewardPoints: 250, // Demo reward points
+      name: demoUser.name,
+      email: demoUser.email,
+      phone: demoUser.phone,
+      hospitalId: demoUser.hospitalId,
+      profileComplete: true,
+      userId: `demo-${Date.now()}`,
+      rewardPoints: 250
     };
     
-    toast.success("Demo OTP verified successfully!");
-    return auth;
+    toast.success(`Welcome, ${demoUser.name}! You're logged in as a demo user.`);
+    return authState;
   }
   
   return null;
-};
-
-/**
- * Check if a user is a demo user
- */
-export const isDemoUser = (userId?: string): boolean => {
-  return !!userId?.startsWith('demo-');
 };
