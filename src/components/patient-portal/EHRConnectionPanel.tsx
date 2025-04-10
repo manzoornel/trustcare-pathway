@@ -48,6 +48,8 @@ const EHRConnectionPanel = () => {
         setEhrActive(data && data.length > 0);
       } catch (error) {
         console.error('Error checking EHR configuration:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
     
@@ -99,7 +101,7 @@ const EHRConnectionPanel = () => {
   }, [auth.userId]);
   
   const activateEHRIntegration = async () => {
-    if (ehrActive || isActivating) return;
+    if (isActivating) return;
     
     setIsActivating(true);
     setActivationError(null);
@@ -138,7 +140,7 @@ const EHRConnectionPanel = () => {
           .from('ehr_integration')
           .insert({
             api_endpoint: 'http://103.99.205.192:8008/mirrors/Dr_Mirror/public',
-            api_key: 'default-key', // This would need to be replaced with a proper key
+            api_key: 'default-key', 
             is_active: true
           });
           
@@ -181,10 +183,19 @@ const EHRConnectionPanel = () => {
   };
 
   const renderConnectionStatus = () => {
+    if (isLoading) {
+      return (
+        <div className="flex items-center">
+          <Clock className="h-5 w-5 text-gray-400 mr-2" />
+          <span className="text-gray-500">Checking connection...</span>
+        </div>
+      );
+    }
+    
     if (isActivating) {
       return (
         <div className="flex items-center">
-          <Clock className="h-5 w-5 text-blue-500 mr-2" />
+          <Clock className="h-5 w-5 text-blue-500 mr-2 animate-spin" />
           <span className="text-blue-700">Activating EHR integration...</span>
         </div>
       );
@@ -199,15 +210,6 @@ const EHRConnectionPanel = () => {
       );
     }
 
-    if (isLoading) {
-      return (
-        <div className="flex items-center">
-          <Clock className="h-5 w-5 text-gray-400 mr-2" />
-          <span className="text-gray-500">Checking connection...</span>
-        </div>
-      );
-    }
-    
     if (ehrPatientId) {
       return (
         <div className="flex items-center">
@@ -279,12 +281,15 @@ const EHRConnectionPanel = () => {
                     Activation failed: {activationError}
                   </div>
                 )}
-                {activationAttempted && (
-                  <Button onClick={handleManualActivation} className="mt-2" variant="secondary" size="sm">
-                    Retry Activation
-                  </Button>
-                )}
-                {auth.role && auth.role === 'admin' && (
+                <Button 
+                  onClick={handleManualActivation} 
+                  className="mt-2" 
+                  variant="secondary" 
+                  size="sm"
+                >
+                  {activationAttempted ? "Retry Activation" : "Activate Now"}
+                </Button>
+                {auth.role === 'admin' && (
                   <Button variant="outline" size="sm" asChild>
                     <Link to="/admin/settings" className="inline-flex items-center">
                       <span>Go to Admin Settings</span>
