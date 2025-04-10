@@ -1,50 +1,57 @@
 
-import React, { useState } from 'react';
-import { useEHRSyncHistory } from './useEHRSyncHistory';
-import { Input } from "@/components/ui/input";
+import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Search } from "lucide-react";
-import EHRSyncStatus from './EHRSyncStatus';
+import { RefreshCw } from "lucide-react";
+import { useEHRSyncHistory } from './useEHRSyncHistory';
+import { useEHRConfig } from './useEHRConfig';
 import EHRSyncHistory from './EHRSyncHistory';
+import EHRSyncStatus from './EHRSyncStatus';
 
 const EHRSyncMonitoring = () => {
   const { syncHistory, isLoading, refreshHistory, triggerManualSync } = useEHRSyncHistory();
-  const [patientId, setPatientId] = useState('');
+  const { config, isLoading: configLoading } = useEHRConfig();
   
-  const handleManualSync = async () => {
-    await triggerManualSync(patientId || undefined);
+  const handleSyncNow = async () => {
+    await triggerManualSync();
     refreshHistory();
   };
-  
+
+  const isConfigured = !configLoading && config && config.apiEndpoint && config.apiKey && config.isActive;
+
   return (
     <div className="space-y-6">
-      <EHRSyncStatus onManualSync={handleManualSync} />
-      
-      <div className="border rounded-lg shadow-sm bg-card p-4">
-        <h3 className="text-lg font-medium mb-3">Sync Specific Patient</h3>
-        <div className="flex gap-2">
-          <div className="flex-1">
-            <Input
-              placeholder="Enter patient ID"
-              value={patientId}
-              onChange={(e) => setPatientId(e.target.value)}
-            />
-          </div>
-          <Button 
-            onClick={() => triggerManualSync(patientId)}
-            disabled={!patientId.trim()}
-          >
-            <Search className="h-4 w-4 mr-2" />
-            Sync Patient
-          </Button>
+      <div>
+        <h3 className="text-lg font-medium">EHR Synchronization</h3>
+        <p className="text-sm text-gray-500 mt-1">
+          Monitor and manage data synchronization with your EHR system
+        </p>
+      </div>
+
+      {!isConfigured && (
+        <div className="p-4 bg-amber-50 border border-amber-200 rounded-md">
+          <p className="text-amber-700 text-sm">
+            EHR integration is not fully configured or enabled. Please complete the setup in the General Settings tab.
+          </p>
         </div>
+      )}
+      
+      <EHRSyncStatus history={syncHistory} isLoading={isLoading} />
+      
+      <div className="flex justify-end">
+        <Button 
+          onClick={handleSyncNow} 
+          disabled={isLoading || !isConfigured}
+          className="flex items-center gap-2"
+        >
+          <RefreshCw className="h-4 w-4" />
+          Sync Now
+        </Button>
       </div>
       
-      <EHRSyncHistory 
-        syncHistory={syncHistory} 
-        isLoading={isLoading} 
-        onRefresh={refreshHistory}
-      />
+      <div className="mt-8">
+        <h4 className="text-md font-medium mb-4">Recent Sync History</h4>
+        <EHRSyncHistory history={syncHistory} isLoading={isLoading} />
+      </div>
     </div>
   );
 };

@@ -2,169 +2,130 @@
 import { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { EHRConfig, TestResult } from './types';
+
+export type EHRConfig = {
+  id?: string;
+  apiEndpoint: string;
+  apiKey: string;
+  isActive: boolean;
+  lastSyncTime?: string;
+};
 
 export const useEHRConfig = () => {
   const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-  const [isTesting, setIsTesting] = useState(false);
-  const [testResult, setTestResult] = useState<TestResult>(null);
-  const [ehrConfig, setEhrConfig] = useState<EHRConfig>({
-    id: '',
-    api_endpoint: 'http://103.99.205.192:8008/mirrors/Dr_Mirror/public',
-    api_key: '',
-    is_active: false,
-    last_sync_time: null
-  });
+  const [config, setConfig] = useState<EHRConfig | null>(null);
 
-  const fetchEHRConfig = async () => {
+  const fetchConfig = async () => {
     try {
       setIsLoading(true);
+      
       const { data, error } = await supabase
         .from('ehr_integration')
         .select('*')
-        .limit(1);
+        .limit(1)
+        .single();
       
-      if (error) throw error;
+      if (error && error.code !== 'PGRST116') {
+        // PGRST116 means no rows returned, which is fine for first-time setup
+        console.error('Error fetching EHR config:', error);
+        toast.error('Failed to load EHR configuration');
+        throw error;
+      }
       
-      if (data && data.length > 0) {
-        setEhrConfig(data[0]);
+      if (data) {
+        setConfig({
+          id: data.id,
+          apiEndpoint: data.api_endpoint,
+          apiKey: data.api_key,
+          isActive: data.is_active,
+          lastSyncTime: data.last_sync_time
+        });
+      } else {
+        // Default config for first-time setup
+        setConfig({
+          apiEndpoint: 'http://103.99.205.192:8008/mirrors/Dr_Mirror/public',
+          apiKey: '',
+          isActive: false
+        });
       }
     } catch (error) {
-      console.error('Error fetching EHR configuration:', error);
-      toast.error('Failed to load EHR configuration');
+      console.error('Error in fetchConfig:', error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleSaveConfig = async () => {
+  const updateConfig = async (newConfig: Partial<EHRConfig>) => {
     try {
-      setIsSaving(true);
-      
-      // Validation
-      if (!ehrConfig.api_endpoint || !ehrConfig.api_key) {
-        toast.error('API Endpoint and API Key are required');
-        return;
-      }
-      
-      // Save to database
-      let response;
-      
-      if (ehrConfig.id) {
+      if (config?.id) {
         // Update existing config
-        response = await supabase
+        const { error } = await supabase
           .from('ehr_integration')
           .update({
-            api_endpoint: ehrConfig.api_endpoint,
-            api_key: ehrConfig.api_key,
-            is_active: ehrConfig.is_active
+            api_endpoint: newConfig.apiEndpoint,
+            api_key: newConfig.apiKey,
+            is_active: newConfig.isActive
           })
-          .eq('id', ehrConfig.id);
+          .eq('id', config.id);
+        
+        if (error) throw error;
       } else {
         // Insert new config
-        response = await supabase
+        const { error } = await supabase
           .from('ehr_integration')
           .insert({
-            api_endpoint: ehrConfig.api_endpoint,
-            api_key: ehrConfig.api_key,
-            is_active: ehrConfig.is_active
-          })
-          .select();
+            api_endpoint: newConfig.apiEndpoint,
+            api_key: newConfig.apiKey,
+            is_active: newConfig.isActive
+          });
         
-        if (response.data && response.data.length > 0) {
-          setEhrConfig({...ehrConfig, id: response.data[0].id});
-        }
+        if (error) throw error;
       }
       
-      if (response.error) throw response.error;
-      
-      toast.success('EHR configuration saved successfully');
+      // Update local state
+      setConfig(prev => prev ? { ...prev, ...newConfig } : newConfig as EHRConfig);
+      return true;
     } catch (error) {
-      console.error('Error saving EHR configuration:', error);
-      toast.error('Failed to save EHR configuration');
-    } finally {
-      setIsSaving(false);
+      console.error('Error updating EHR config:', error);
+      throw error;
     }
   };
 
-  const handleTestConnection = async () => {
+  const testConnection = async (apiEndpoint: string, apiKey: string) => {
     try {
-      setIsTesting(true);
-      setTestResult(null);
-      
-      // Validate API endpoint and key
-      if (!ehrConfig.api_endpoint || !ehrConfig.api_key) {
-        toast.error('API Endpoint and API Key are required');
-        setTestResult({
-          success: false,
-          message: 'API Endpoint and API Key are required to test connection'
-        });
-        return;
-      }
-      
-      console.log('Testing connection with config:', {
-        api_endpoint: ehrConfig.api_endpoint,
-        api_key: ehrConfig.api_key ? '**hidden**' : 'not provided'
-      });
-      
-      // Call the ehr-sync edge function with the test action
+      // Use the ehr-sync edge function to test the connection
       const { data, error } = await supabase.functions.invoke('ehr-sync', {
         body: { 
-          action: 'test',
-          config: {
-            api_endpoint: ehrConfig.api_endpoint,
-            api_key: ehrConfig.api_key
-          }
+          action: 'testConnection',
+          apiEndpoint,
+          apiKey
         }
       });
       
-      console.log('Test connection response:', data);
+      if (error) throw error;
       
-      if (error) {
-        console.error('Error from edge function:', error);
-        throw error;
-      }
-      
-      if (data && typeof data === 'object') {
-        setTestResult({
-          success: !!data.success,
-          message: data.message || 'Unknown response from API test'
-        });
-        
-        if (data.success) {
-          toast.success('Connection test successful!');
-        } else {
-          toast.error('Connection test failed');
-        }
-      } else {
-        console.error('Unexpected response format:', data);
-        throw new Error('Unexpected response format from API test');
-      }
+      return {
+        success: data.success,
+        message: data.message || 'Connection successful'
+      };
     } catch (error: any) {
       console.error('Error testing EHR connection:', error);
-      setTestResult({
+      return {
         success: false,
-        message: 'Connection test failed: ' + (error.message || 'Unknown error')
-      });
-      toast.error('Connection test failed');
-    } finally {
-      setIsTesting(false);
+        message: error.message || 'Connection failed'
+      };
     }
   };
 
   useEffect(() => {
-    fetchEHRConfig();
+    fetchConfig();
   }, []);
 
   return {
-    ehrConfig,
-    setEhrConfig,
     isLoading,
-    isSaving,
-    isTesting,
-    testResult,
-    handleSaveConfig,
-    handleTestConnection
+    config,
+    fetchConfig,
+    updateConfig,
+    testConnection
   };
 };

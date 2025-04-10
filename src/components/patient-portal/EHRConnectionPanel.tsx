@@ -14,12 +14,37 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/auth';
 import EHRLoginButton from './EHRLoginButton';
 import EHRDataSyncButton from './EHRDataSyncButton';
+import { toast } from "sonner";
 
 const EHRConnectionPanel = () => {
   const { auth } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
   const [ehrPatientId, setEhrPatientId] = useState<string | null>(null);
   const [lastSyncTime, setLastSyncTime] = useState<string | null>(null);
+  const [ehrActive, setEhrActive] = useState(false);
+
+  // Check if EHR integration is active
+  useEffect(() => {
+    const checkEhrConfig = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('ehr_integration')
+          .select('is_active')
+          .eq('is_active', true)
+          .limit(1);
+          
+        setEhrActive(data && data.length > 0);
+        
+        if (error) {
+          console.error('Error checking EHR integration status:', error);
+        }
+      } catch (error) {
+        console.error('Error checking EHR configuration:', error);
+      }
+    };
+    
+    checkEhrConfig();
+  }, []);
 
   // Fetch EHR connection status
   useEffect(() => {
@@ -67,13 +92,24 @@ const EHRConnectionPanel = () => {
   
   const handleLoginSuccess = (patientId: string) => {
     setEhrPatientId(patientId);
+    toast.success('Successfully connected to EHR system');
   };
   
   const handleSyncComplete = () => {
     setLastSyncTime(new Date().toISOString());
+    toast.success('Successfully synced data from EHR');
   };
 
   const renderConnectionStatus = () => {
+    if (!ehrActive) {
+      return (
+        <div className="flex items-center">
+          <AlertCircle className="h-5 w-5 text-amber-500 mr-2" />
+          <span className="text-amber-700">EHR integration is not active</span>
+        </div>
+      );
+    }
+
     if (isLoading) {
       return (
         <div className="flex items-center">
@@ -102,7 +138,7 @@ const EHRConnectionPanel = () => {
   };
   
   const renderSyncStatus = () => {
-    if (!ehrPatientId) return null;
+    if (!ehrActive || !ehrPatientId) return null;
     
     if (lastSyncTime) {
       // Check if last sync was within 24 hours
@@ -141,7 +177,13 @@ const EHRConnectionPanel = () => {
           {renderSyncStatus()}
         </div>
         
-        {!ehrPatientId ? (
+        {!ehrActive ? (
+          <div className="p-4 rounded-md bg-amber-50 border border-amber-200">
+            <p className="text-sm text-amber-700">
+              The EHR integration is currently not active. Please contact the administrator.
+            </p>
+          </div>
+        ) : !ehrPatientId ? (
           <div>
             <p className="text-sm text-gray-500 mb-4">
               Connect to the hospital's Electronic Health Record system to access your complete medical history.
