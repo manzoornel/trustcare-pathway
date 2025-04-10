@@ -83,6 +83,33 @@ export type Database = {
         }
         Relationships: []
       }
+      ehr_sync_history: {
+        Row: {
+          details: string | null
+          id: string
+          message: string
+          patient_id: string | null
+          status: string
+          timestamp: string
+        }
+        Insert: {
+          details?: string | null
+          id?: string
+          message: string
+          patient_id?: string | null
+          status: string
+          timestamp?: string
+        }
+        Update: {
+          details?: string | null
+          id?: string
+          message?: string
+          patient_id?: string | null
+          status?: string
+          timestamp?: string
+        }
+        Relationships: []
+      }
       lab_reports: {
         Row: {
           created_at: string | null

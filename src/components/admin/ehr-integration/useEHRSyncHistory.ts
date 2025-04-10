@@ -21,7 +21,17 @@ export const useEHRSyncHistory = () => {
       
       if (error) throw error;
       
-      setSyncHistory(data || []);
+      // Ensure data is correctly typed
+      const typedData: EHRSyncHistory[] = data ? data.map(record => ({
+        id: record.id,
+        timestamp: record.timestamp,
+        status: record.status as 'success' | 'failed' | 'in_progress',
+        message: record.message,
+        patient_id: record.patient_id || undefined,
+        details: record.details || undefined
+      })) : [];
+      
+      setSyncHistory(typedData);
     } catch (error) {
       console.error('Error fetching EHR sync history:', error);
       toast.error('Failed to load sync history');

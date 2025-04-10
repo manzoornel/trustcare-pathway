@@ -17,10 +17,10 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { EHRSyncHistory } from './types';
+import type { EHRSyncHistory as EHRSyncHistoryType } from './types';
 
 type EHRSyncHistoryProps = {
-  syncHistory: EHRSyncHistory[];
+  syncHistory: EHRSyncHistoryType[];
   isLoading: boolean;
   onRefresh: () => void;
 };
