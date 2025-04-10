@@ -105,6 +105,58 @@ export const useEHRIntegration = () => {
     }
   };
 
+  // Direct activation method using RPC functions
+  const activateWithRPC = async () => {
+    try {
+      console.log('Attempting direct activation using RPC functions');
+      
+      // First check if there's an existing config
+      const { data: existingConfig, error: configError } = await supabase
+        .from('ehr_integration')
+        .select('id')
+        .limit(1);
+        
+      if (configError) {
+        console.error('Error checking existing config:', configError);
+        throw new Error(`Failed to check existing configuration: ${configError.message}`);
+      }
+      
+      if (existingConfig && existingConfig.length > 0) {
+        // Update existing config using RPC
+        console.log('Updating existing EHR config with ID:', existingConfig[0].id);
+        
+        const { data, error: updateError } = await supabase.rpc('activate_ehr_integration', {
+          config_id: existingConfig[0].id,
+          user_id: auth.userId
+        });
+          
+        if (updateError) {
+          console.error('Error updating EHR config with RPC:', updateError);
+          throw new Error(`RPC activation failed: ${updateError.message}`);
+        }
+      } else {
+        // Create new config with RPC
+        console.log('Creating new EHR config with RPC');
+        
+        const { data, error: createError } = await supabase.rpc('create_ehr_integration', {
+          api_endpoint_param: 'http://103.99.205.192:8008/mirrors/Dr_Mirror/public',
+          api_key_param: 'default-key',
+          user_id: auth.userId
+        });
+          
+        if (createError) {
+          console.error('Error creating EHR config with RPC:', createError);
+          throw new Error(`RPC creation failed: ${createError.message}`);
+        }
+      }
+      
+      return { success: true };
+    } catch (error: any) {
+      console.error('Error in direct RPC activation:', error);
+      throw error;
+    }
+  };
+
   const activateEHRIntegration = async () => {
     if (isActivating) return;
     
@@ -115,20 +167,31 @@ export const useEHRIntegration = () => {
     try {
       console.log('Activating EHR integration');
       
-      // Call the edge function to activate EHR integration securely
-      const { data: activationResult, error: activationError } = await supabase.functions.invoke(
-        'ehr-sync',
-        {
-          body: {
-            action: 'activateEHRIntegration',
-            userId: auth.userId
-          }
-        }
-      );
+      let activationResult;
       
-      if (activationError) {
-        console.error('Error invoking activation function:', activationError);
-        throw new Error(activationError.message || 'Failed to activate EHR integration');
+      // First try using the edge function
+      try {
+        console.log('Attempting to activate via edge function');
+        const response = await supabase.functions.invoke(
+          'ehr-sync',
+          {
+            body: {
+              action: 'activateEHRIntegration',
+              userId: auth.userId
+            }
+          }
+        );
+        
+        if (response.error) {
+          console.error('Edge function error:', response.error);
+          throw new Error(response.error.message || 'Edge function error');
+        }
+        
+        activationResult = response.data;
+      } catch (edgeFunctionError: any) {
+        console.warn('Edge function failed, falling back to RPC:', edgeFunctionError);
+        // If edge function fails, try direct RPC activation
+        activationResult = await activateWithRPC();
       }
       
       if (!activationResult?.success) {
@@ -151,6 +214,8 @@ export const useEHRIntegration = () => {
         errorMessage = "Permission denied. Please contact an administrator to activate EHR integration.";
       } else if (error.message?.includes("function") && error.message?.includes("does not exist")) {
         errorMessage = "System setup incomplete. Please contact an administrator.";
+      } else if (error.message?.includes("Failed to send a request to the Edge Function")) {
+        errorMessage = "Connection to backend failed. Please try again or contact support.";
       } else if (error.message) {
         errorMessage = error.message;
       }

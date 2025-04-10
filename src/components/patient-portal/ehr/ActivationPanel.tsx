@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { AlertCircle, ExternalLink, Loader2 } from 'lucide-react';
+import { AlertCircle, ExternalLink, Loader2, RefreshCw } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useAuth } from '@/contexts/auth';
@@ -26,12 +26,19 @@ const ActivationPanel: React.FC<ActivationPanelProps> = ({
         <AlertCircle className="h-5 w-5 text-amber-500 mr-2 mt-0.5 flex-shrink-0" />
         <div className="space-y-2 w-full">
           <p className="text-sm text-amber-700">
-            The EHR integration needs to be activated. Simply connect with your phone number below to automatically activate it.
+            {activationError && activationError.includes("Connection to backend failed") 
+              ? "We're having trouble connecting to our servers. Please try activating again."
+              : "The EHR integration needs to be activated. Click the button below to activate it."}
           </p>
           
           {activationError && (
             <div className="text-sm text-red-600 bg-red-50 p-2 rounded border border-red-100">
               <strong>Activation failed:</strong> {activationError}
+              {activationError.includes("Connection to backend failed") && (
+                <div className="mt-1 text-xs">
+                  This could be due to a temporary network issue or server maintenance.
+                </div>
+              )}
             </div>
           )}
           
@@ -41,11 +48,11 @@ const ActivationPanel: React.FC<ActivationPanelProps> = ({
             </div>
           )}
           
-          <div className="pt-2">
+          <div className="pt-2 flex flex-wrap gap-2">
             <Button 
               onClick={onActivate} 
               className="w-full md:w-auto" 
-              variant="secondary" 
+              variant={activationError?.includes("Connection to backend failed") ? "secondary" : "default"}
               size="sm"
               disabled={isActivating}
             >
@@ -53,6 +60,11 @@ const ActivationPanel: React.FC<ActivationPanelProps> = ({
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Activating...
+                </>
+              ) : activationError?.includes("Connection to backend failed") ? (
+                <>
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                  Retry Connection
                 </>
               ) : (
                 activationAttempted ? "Retry Activation" : "Activate Now"
