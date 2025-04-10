@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Route, Routes } from 'react-router-dom';
 import Index from '@/pages/Index';
@@ -60,6 +59,7 @@ function App() {
         <Route path="/careers" element={<Careers />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/verify-otp" element={<Verify />} />
         <Route path="/verify" element={<Verify />} />
         <Route
           path="/patient-portal"

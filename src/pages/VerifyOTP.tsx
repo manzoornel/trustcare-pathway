@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import OTPInput from "@/components/OTPInput";
 import VerificationSuccess from "@/components/VerificationSuccess";
 import { Button } from "@/components/ui/button";
@@ -12,15 +12,20 @@ const Verify = () => {
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
   const [verified, setVerified] = useState(false);
-  const { verifyOTP } = useAuth();
+  const { verifyOTP, auth } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const phone = location.state?.phone || "";
+  
+  // Get phone from location state or from auth context
+  const phone = location.state?.phone || auth.phone || "";
 
   useEffect(() => {
     if (!phone) {
+      console.log("No phone number found for verification");
       toast.error("Phone number is required for verification");
       navigate("/login");
+    } else {
+      console.log("Phone number for verification:", phone);
     }
   }, [phone, navigate]);
 
@@ -40,6 +45,7 @@ const Verify = () => {
       }, 2000);
     } catch (error) {
       console.error("Verification error:", error);
+      toast.error("Failed to verify OTP. Please try again.");
     } finally {
       setLoading(false);
     }

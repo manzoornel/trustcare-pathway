@@ -60,7 +60,9 @@ export const useSignUp = () => {
       
       console.log("Signup successful, redirecting to verification");
       toast.success("Account created successfully! Redirecting to verification...");
-      navigate("/verify-otp");
+      
+      // Update the navigation path to match the route defined in App.tsx (/verify instead of /verify-otp)
+      navigate("/verify");
     } catch (error: any) {
       console.error("Signup error:", error);
       toast.error(error.message || "Failed to create account");
