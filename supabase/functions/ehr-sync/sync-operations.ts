@@ -1,53 +1,80 @@
-
 import { corsHeaders } from '../_shared/cors-helpers.ts';
 
 // Sync lab reports from EHR to Supabase
 export async function syncLabReports(supabase: any, patientId: string, labReports: any[]) {
   console.log(`Syncing ${labReports.length} lab reports for patient ${patientId}`);
   
+  // Track IDs of reports that were updated/inserted
+  const syncedReportIds = [];
+  
   for (const report of labReports) {
-    // Check if this report already exists
-    const { data: existing } = await supabase
-      .from('lab_reports')
-      .select('id')
-      .eq('ehr_reference_id', report.ehrReferenceId)
-      .eq('patient_id', patientId);
+    // Make sure we have a valid report with at least some essential fields
+    if (!report || !report.type || !report.date) {
+      console.warn('Skipping invalid lab report:', report);
+      continue;
+    }
     
-    if (existing && existing.length > 0) {
-      // Update existing report
-      await supabase
+    // Ensure the report has an ID - use ehrReferenceId or generate one if missing
+    const reportRefId = report.ehrReferenceId || report.id || `gen-${Date.now()}-${Math.random().toString(36).substring(2, 10)}`;
+    
+    try {
+      // Check if this report already exists
+      const { data: existing } = await supabase
         .from('lab_reports')
-        .update({
-          date: report.date,
-          type: report.type,
-          doctor: report.doctor,
-          status: report.status,
-          results: report.results
-        })
-        .eq('id', existing[0].id);
+        .select('id')
+        .eq('ehr_reference_id', reportRefId)
+        .eq('patient_id', patientId);
       
-      console.log(`Updated lab report: ${existing[0].id}`);
-    } else {
-      // Insert new report
-      const { data, error } = await supabase
-        .from('lab_reports')
-        .insert({
-          patient_id: patientId,
-          date: report.date,
-          type: report.type,
-          doctor: report.doctor,
-          status: report.status,
-          results: report.results,
-          ehr_reference_id: report.ehrReferenceId
-        });
-      
-      if (error) {
-        console.error('Error inserting lab report:', error);
+      if (existing && existing.length > 0) {
+        // Update existing report
+        const { error: updateError } = await supabase
+          .from('lab_reports')
+          .update({
+            date: report.date,
+            type: report.type,
+            doctor: report.doctor,
+            status: report.status,
+            results: report.results || []
+          })
+          .eq('id', existing[0].id);
+        
+        if (updateError) {
+          console.error('Error updating lab report:', updateError);
+        } else {
+          console.log(`Updated lab report: ${existing[0].id}`);
+          syncedReportIds.push(existing[0].id);
+        }
       } else {
-        console.log('Inserted new lab report');
+        // Insert new report
+        const { data, error } = await supabase
+          .from('lab_reports')
+          .insert({
+            patient_id: patientId,
+            date: report.date,
+            type: report.type,
+            doctor: report.doctor || "Unknown",
+            status: report.status || "Completed",
+            results: report.results || [],
+            ehr_reference_id: reportRefId
+          })
+          .select('id');
+        
+        if (error) {
+          console.error('Error inserting lab report:', error);
+        } else if (data && data.length > 0) {
+          console.log(`Inserted new lab report: ${data[0].id}`);
+          syncedReportIds.push(data[0].id);
+        } else {
+          console.log('Inserted new lab report but could not retrieve ID');
+        }
       }
+    } catch (error) {
+      console.error(`Error processing lab report with reference ${reportRefId}:`, error);
     }
   }
+  
+  console.log(`Successfully synced ${syncedReportIds.length} out of ${labReports.length} lab reports`);
+  return syncedReportIds;
 }
 
 export async function syncMedications(supabase: any, patientId: string, medications: any[]) {

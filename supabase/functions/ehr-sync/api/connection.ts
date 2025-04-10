@@ -77,6 +77,29 @@ export async function testEhrConnection(config: EhrApiConfig) {
         console.error('Error reading response body:', e);
       }
 
+      // Let's also test the patient lab reports endpoint which is critical for reports
+      console.log(`Testing lab reports endpoint: ${config.api_endpoint}/fetchPatientLabReports`);
+      
+      let reportsEndpointStatus = "Not tested";
+      let reportsResponseBody = "";
+      
+      try {
+        const reportsTestResponse = await fetch(`${config.api_endpoint}/fetchPatientLabReports`, {
+          method: 'OPTIONS',
+          headers: {
+            'Content-Type': 'application/json',
+            'token': config.api_key
+          },
+          signal: AbortSignal.timeout(5000)
+        });
+        
+        reportsEndpointStatus = `${reportsTestResponse.status} ${reportsTestResponse.statusText}`;
+        reportsResponseBody = await reportsTestResponse.text();
+      } catch (e) {
+        console.error('Error testing reports endpoint:', e);
+        reportsEndpointStatus = `Error: ${e instanceof Error ? e.message : String(e)}`;
+      }
+
       // Let's also test the getLoginOTP endpoint which is critical for patient login
       console.log(`Testing OTP endpoint: ${config.api_endpoint}/getLoginOTP`);
       
@@ -115,6 +138,11 @@ export async function testEhrConnection(config: EhrApiConfig) {
               url: testUrl,
               status: `${response.status} ${response.statusText}`,
               responseBody: responseBody.substring(0, 200)
+            },
+            fetchPatientLabReports: {
+              url: `${config.api_endpoint}/fetchPatientLabReports`,
+              status: reportsEndpointStatus,
+              responseBody: reportsResponseBody.substring(0, 200)
             },
             getLoginOTP: {
               url: `${config.api_endpoint}/getLoginOTP`,

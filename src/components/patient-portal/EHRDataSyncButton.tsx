@@ -31,6 +31,9 @@ const EHRDataSyncButton: React.FC<EHRDataSyncButtonProps> = ({
     try {
       console.log('Syncing EHR data', { patientId: auth.userId, patientEhrId: ehrPatientId });
       
+      // Show a toast that we're syncing data (this will be replaced by the success/error toast)
+      toast.loading('Synchronizing with EHR system...', { id: 'ehr-sync' });
+      
       const { data, error } = await supabase.functions.invoke('ehr-sync', {
         body: { 
           action: 'sync',
@@ -49,7 +52,12 @@ const EHRDataSyncButton: React.FC<EHRDataSyncButtonProps> = ({
         throw new Error(data?.message || 'Sync failed');
       }
       
-      toast.success('Successfully synchronized data from EHR');
+      // Check if we got mock data or real data
+      if (data.data?._meta?.usingMockData) {
+        toast.warning('Could not connect to EHR system - using demo data', { id: 'ehr-sync' });
+      } else {
+        toast.success('Successfully synchronized data from EHR', { id: 'ehr-sync' });
+      }
       
       if (onSyncComplete) {
         onSyncComplete();
@@ -58,7 +66,7 @@ const EHRDataSyncButton: React.FC<EHRDataSyncButtonProps> = ({
       console.error('Error syncing EHR data:', error);
       const errorMessage = error?.message || 'Unknown error during sync';
       setSyncError(errorMessage);
-      toast.error(`Failed to sync data: ${errorMessage}`);
+      toast.error(`Failed to sync data: ${errorMessage}`, { id: 'ehr-sync' });
     } finally {
       setIsSyncing(false);
     }
@@ -70,6 +78,7 @@ const EHRDataSyncButton: React.FC<EHRDataSyncButtonProps> = ({
         onClick={handleSyncData} 
         disabled={isSyncing || !ehrPatientId}
         className="w-full"
+        variant="default"
       >
         <RefreshCw className={`mr-2 h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
         {isSyncing ? 'Synchronizing data...' : 'Sync EHR Data'}

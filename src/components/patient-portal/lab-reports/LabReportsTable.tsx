@@ -27,6 +27,7 @@ interface LabReportsTableProps {
   selectedReports: string[];
   onReportSelect: (reportId: string) => void;
   onViewReport: (report: LabReport) => void;
+  isLoading?: boolean;
 }
 
 const LabReportsTable: React.FC<LabReportsTableProps> = ({
@@ -35,6 +36,7 @@ const LabReportsTable: React.FC<LabReportsTableProps> = ({
   selectedReports,
   onReportSelect,
   onViewReport,
+  isLoading = false
 }) => {
   return (
     <div className="bg-white rounded-lg border overflow-hidden">
@@ -50,7 +52,16 @@ const LabReportsTable: React.FC<LabReportsTableProps> = ({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {reports.length === 0 ? (
+          {isLoading ? (
+            <TableRow>
+              <TableCell colSpan={isComparing ? 6 : 5} className="text-center py-8">
+                <div className="flex justify-center">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                </div>
+                <div className="mt-2 text-sm text-gray-500">Loading lab reports...</div>
+              </TableCell>
+            </TableRow>
+          ) : reports.length === 0 ? (
             <TableRow>
               <TableCell colSpan={isComparing ? 6 : 5} className="text-center py-8">
                 No lab reports found.
