@@ -8,7 +8,7 @@ import VerificationSuccess from "@/components/VerificationSuccess";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { InfoCircle } from "lucide-react";
+import { Info } from "lucide-react";
 
 const Verify = () => {
   const [otp, setOtp] = useState("");
@@ -102,7 +102,7 @@ const Verify = () => {
           </div>
           
           <Alert className="bg-blue-50 border-blue-200">
-            <InfoCircle className="h-4 w-4 text-blue-500" />
+            <Info className="h-4 w-4 text-blue-500" />
             <AlertDescription className="text-blue-700">
               This is a demo version. Use code <span className="font-bold">{demoOtp}</span> for testing purposes or click "Use Demo OTP".
             </AlertDescription>
