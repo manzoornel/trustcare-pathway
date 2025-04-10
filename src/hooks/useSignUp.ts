@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { SignUpFormData } from "@/utils/signupValidation";
+import { SignUpFormData, validateSignUpForm } from "@/utils/signupValidation";
 
 export const useSignUp = () => {
   const navigate = useNavigate();
@@ -12,6 +12,11 @@ export const useSignUp = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSignUp = async (formData: SignUpFormData) => {
+    // Validate form data one more time to be safe
+    if (!validateSignUpForm(formData)) {
+      return;
+    }
+    
     setIsLoading(true);
     
     try {
@@ -42,6 +47,7 @@ export const useSignUp = () => {
         hospitalId: formData.hospitalId,
       });
       
+      toast.success("Account created successfully! Redirecting to verification...");
       navigate("/verify-otp");
     } catch (error: any) {
       console.error("Signup error:", error);

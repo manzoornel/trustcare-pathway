@@ -32,7 +32,11 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onSubmit, isLoading }) => {
       return;
     }
     
-    await onSubmit(formData);
+    try {
+      await onSubmit(formData);
+    } catch (error) {
+      console.error("Signup submission error:", error);
+    }
   };
 
   return (

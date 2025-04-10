@@ -11,6 +11,18 @@ export interface SignUpFormData {
 }
 
 export const validateSignUpForm = (formData: SignUpFormData): boolean => {
+  // Verify if name is provided
+  if (!formData.name.trim()) {
+    toast.error("Please enter your name");
+    return false;
+  }
+  
+  // Verify if email is in the correct format
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+    toast.error("Please enter a valid email address");
+    return false;
+  }
+
   // Verify if hospital ID is in the correct format
   if (!/^H\d{5}$/.test(formData.hospitalId)) {
     toast.error("Hospital ID must be in format H12345");
