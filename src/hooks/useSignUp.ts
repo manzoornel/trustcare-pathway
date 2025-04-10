@@ -20,6 +20,12 @@ export const useSignUp = () => {
     setIsLoading(true);
     
     try {
+      console.log("Starting signup process with data:", { 
+        email: formData.email, 
+        phone: formData.phone, 
+        hospitalId: formData.hospitalId 
+      });
+      
       // Check if hospital ID or phone already exists
       const { data: existingProfile, error: checkError } = await supabase
         .from('patient_profiles')
@@ -27,7 +33,10 @@ export const useSignUp = () => {
         .or(`hospital_id.eq.${formData.hospitalId},phone.eq.${formData.phone}`)
         .maybeSingle();
         
-      if (checkError) throw checkError;
+      if (checkError) {
+        console.error("Error checking for existing profiles:", checkError);
+        throw checkError;
+      }
       
       if (existingProfile) {
         if (existingProfile.hospital_id === formData.hospitalId) {
@@ -38,6 +47,8 @@ export const useSignUp = () => {
         return;
       }
       
+      console.log("No existing profile found, proceeding with signup");
+      
       // Sign up the user
       await signup({
         name: formData.name,
@@ -47,6 +58,7 @@ export const useSignUp = () => {
         hospitalId: formData.hospitalId,
       });
       
+      console.log("Signup successful, redirecting to verification");
       toast.success("Account created successfully! Redirecting to verification...");
       navigate("/verify-otp");
     } catch (error: any) {

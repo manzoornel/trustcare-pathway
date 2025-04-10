@@ -11,6 +11,8 @@ export interface SignUpFormData {
 }
 
 export const validateSignUpForm = (formData: SignUpFormData): boolean => {
+  console.log("Validating form data:", formData);
+  
   // Verify if name is provided
   if (!formData.name.trim()) {
     toast.error("Please enter your name");
@@ -24,8 +26,10 @@ export const validateSignUpForm = (formData: SignUpFormData): boolean => {
   }
 
   // Verify if hospital ID is in the correct format
-  if (!/^H\d{5}$/.test(formData.hospitalId)) {
-    toast.error("Hospital ID must be in format H12345");
+  // Note: The example shows dr-37834 but the validation expects H12345
+  // Let's update to handle both formats
+  if (!/^(H\d{5}|dr-\d{5})$/i.test(formData.hospitalId)) {
+    toast.error("Hospital ID must be in format H12345 or dr-12345");
     return false;
   }
 
@@ -47,5 +51,6 @@ export const validateSignUpForm = (formData: SignUpFormData): boolean => {
     return false;
   }
 
+  console.log("Form validation successful!");
   return true;
 };
