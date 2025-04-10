@@ -1,5 +1,6 @@
 
 import { corsHeaders } from '../../_shared/cors-helpers.ts';
+import { createSuccessResponse, createErrorResponse } from '../response-handlers.ts';
 
 /**
  * Test connection to the EHR API
@@ -27,29 +28,18 @@ export async function testEhrConnection(config: any): Promise<Response> {
     const data = await response.json();
     console.log('Successfully connected to EHR API. Found', data.length, 'doctors');
     
-    return new Response(
-      JSON.stringify({ 
-        success: true, 
-        message: 'Successfully connected to the EHR API',
-        data: { doctors: data.length }
-      }),
-      { 
-        status: 200, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      }
-    );
+    return createSuccessResponse({ 
+      success: true, 
+      message: 'Successfully connected to the EHR API',
+      data: { doctors: data.length }
+    });
   } catch (error) {
     console.error('Error testing EHR connection:', error);
     
-    return new Response(
-      JSON.stringify({ 
-        success: false, 
-        message: `Failed to connect to EHR API: ${error.message}`
-      }),
-      { 
-        status: 200,  // We still return 200 as this is a test result, not an error
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      }
-    );
+    // We still return 200 as this is a test result, not an error
+    return createSuccessResponse({ 
+      success: false, 
+      message: `Failed to connect to EHR API: ${error.message}`
+    });
   }
 }
