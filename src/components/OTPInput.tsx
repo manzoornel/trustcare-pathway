@@ -1,14 +1,30 @@
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 
 interface OTPInputProps {
   length?: number;
   onComplete: (otp: string) => void;
+  value?: string;
 }
 
-const OTPInput: React.FC<OTPInputProps> = ({ length = 6, onComplete }) => {
+const OTPInput: React.FC<OTPInputProps> = ({ length = 6, onComplete, value = "" }) => {
   const [otp, setOtp] = useState<string[]>(Array(length).fill(""));
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  // Handle value updates from parent
+  useEffect(() => {
+    if (value) {
+      const digits = value.split("").slice(0, length);
+      const newOtp = [...Array(length).fill("")];
+      digits.forEach((digit, idx) => {
+        if (idx < length) {
+          newOtp[idx] = digit;
+        }
+      });
+      setOtp(newOtp);
+      onComplete(value);
+    }
+  }, [value, length, onComplete]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
     const value = e.target.value;
@@ -78,7 +94,7 @@ const OTPInput: React.FC<OTPInputProps> = ({ length = 6, onComplete }) => {
           onPaste={index === 0 ? handlePaste : undefined}
           maxLength={1}
           className="w-12 h-12 text-center text-xl font-semibold border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-          autoFocus={index === 0}
+          autoFocus={index === 0 && !value}
         />
       ))}
     </div>

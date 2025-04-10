@@ -7,6 +7,8 @@ import OTPInput from "@/components/OTPInput";
 import VerificationSuccess from "@/components/VerificationSuccess";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { InfoCircle } from "lucide-react";
 
 const Verify = () => {
   const [otp, setOtp] = useState("");
@@ -15,6 +17,9 @@ const Verify = () => {
   const { verifyOTP, auth } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  
+  // Demo OTP for testing (in a real app, this would be sent via SMS)
+  const [demoOtp] = useState("123456");
   
   // Get phone from location state or from auth context
   const phone = location.state?.phone || auth.phone || "";
@@ -38,11 +43,17 @@ const Verify = () => {
 
     setLoading(true);
     try {
-      await verifyOTP(phone, otp);
-      setVerified(true);
-      setTimeout(() => {
-        navigate("/patient-portal");
-      }, 2000);
+      // For demo purposes, allow the demo OTP or any 6-digit OTP to work
+      if (otp === demoOtp || process.env.NODE_ENV === 'development') {
+        await verifyOTP(phone, otp);
+        setVerified(true);
+        toast.success("Phone number verified successfully!");
+        setTimeout(() => {
+          navigate("/patient-portal");
+        }, 2000);
+      } else {
+        throw new Error("Invalid OTP");
+      }
     } catch (error) {
       console.error("Verification error:", error);
       toast.error("Failed to verify OTP. Please try again.");
@@ -51,9 +62,13 @@ const Verify = () => {
     }
   };
 
+  const handleUseDemoOtp = () => {
+    setOtp(demoOtp);
+  };
+
   const handleResendOTP = () => {
-    // Implement resend OTP functionality here
-    toast.info("OTP resent to your phone number.");
+    // In a real app, this would trigger a new OTP to be sent
+    toast.info(`Demo OTP resent: ${demoOtp}`);
   };
 
   if (verified) {
@@ -85,11 +100,20 @@ const Verify = () => {
               We've sent a code to {phone}
             </p>
           </div>
+          
+          <Alert className="bg-blue-50 border-blue-200">
+            <InfoCircle className="h-4 w-4 text-blue-500" />
+            <AlertDescription className="text-blue-700">
+              This is a demo version. Use code <span className="font-bold">{demoOtp}</span> for testing purposes or click "Use Demo OTP".
+            </AlertDescription>
+          </Alert>
+          
           <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
             <div className="rounded-md shadow-sm -space-y-px">
               <OTPInput
                 length={6}
                 onComplete={handleOtpChange}
+                value={otp}
               />
             </div>
 
@@ -102,6 +126,16 @@ const Verify = () => {
                   disabled={loading}
                 >
                   Resend Code
+                </button>
+              </div>
+              <div className="text-sm">
+                <button
+                  type="button"
+                  onClick={handleUseDemoOtp}
+                  className="font-medium text-primary hover:text-primary/80"
+                  disabled={loading}
+                >
+                  Use Demo OTP
                 </button>
               </div>
             </div>
