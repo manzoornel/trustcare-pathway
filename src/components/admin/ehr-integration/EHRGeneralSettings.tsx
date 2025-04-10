@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,7 +22,6 @@ const EHRGeneralSettings = () => {
     responseBody?: string;
   }>(null);
 
-  // Initialize form with config data
   useEffect(() => {
     if (config) {
       setApiEndpoint(config.apiEndpoint || 'http://103.99.205.192:8008/mirrors/Dr_Mirror/public');
@@ -86,7 +84,7 @@ const EHRGeneralSettings = () => {
       </div>
       
       {!apiEndpoint && (
-        <Alert variant="warning" className="bg-yellow-50 border-yellow-200">
+        <Alert variant="destructive" className="bg-yellow-50 border-yellow-200">
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>API Endpoint Missing</AlertTitle>
           <AlertDescription>
