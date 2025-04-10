@@ -14,7 +14,7 @@ export async function getLoginOTP(phone: string, countryCode: string = "+91", co
         'Content-Type': 'application/json',
         'token': config.api_key
       },
-      body: JSON.stringify({ phone, countryCode })
+      body: JSON.stringify({ mobile: phone }) // Changed from 'phone' to 'mobile' to match API expectation
     });
     
     if (!response.ok) {
@@ -43,7 +43,11 @@ export async function patientLogin(phone: string, otp: string, otpReference: str
         'Content-Type': 'application/json',
         'token': config.api_key
       },
-      body: JSON.stringify({ phone, otp, otpReference })
+      body: JSON.stringify({ 
+        mobile: phone,  // Changed from 'phone' to 'mobile' to match API expectation
+        otp
+        // Removed otpReference as it's not needed according to the API spec
+      })
     });
     
     if (!response.ok) {

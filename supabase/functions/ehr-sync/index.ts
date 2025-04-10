@@ -1,4 +1,3 @@
-
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4'
 import { corsHeaders, handleCORS } from '../_shared/cors-helpers.ts'
@@ -83,6 +82,7 @@ serve(async (req) => {
           return createErrorResponse('Phone number is required')
         }
 
+        console.log(`Requesting OTP for phone: ${phone}`)
         try {
           const result = await getLoginOTP(phone, countryCode, ehrConfig)
           return createSuccessResponse(result)
@@ -95,10 +95,11 @@ serve(async (req) => {
 
       case 'patientLogin': {
         const { phone, otp, otpReference } = requestData
-        if (!phone || !otp || !otpReference) {
-          return createErrorResponse('Phone, OTP and OTP reference are required')
+        if (!phone || !otp) {
+          return createErrorResponse('Phone and OTP are required')
         }
 
+        console.log(`Verifying OTP for phone: ${phone}`)
         try {
           const result = await patientLogin(phone, otp, otpReference, ehrConfig)
           return createSuccessResponse(result)

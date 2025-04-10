@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/auth';
+import { Input } from '@/components/ui/input';
 
 interface EHRLoginButtonProps {
   onLoginSuccess?: (ehrPatientId: string) => void;
@@ -15,10 +16,11 @@ const EHRLoginButton: React.FC<EHRLoginButtonProps> = ({ onLoginSuccess }) => {
   const [step, setStep] = useState<'initial' | 'verify'>('initial');
   const [otpReference, setOtpReference] = useState('');
   const [otp, setOtp] = useState('');
+  const [phone, setPhone] = useState(auth.phone || '');
 
   const handleEHRLogin = async () => {
-    if (!auth.phone) {
-      toast.error('Please update your profile with a phone number first');
+    if (!phone || phone.trim() === '') {
+      toast.error('Please enter your phone number');
       return;
     }
     
@@ -28,7 +30,7 @@ const EHRLoginButton: React.FC<EHRLoginButtonProps> = ({ onLoginSuccess }) => {
       const { data, error } = await supabase.functions.invoke('ehr-sync', {
         body: { 
           action: 'getLoginOTP',
-          phone: auth.phone
+          phone: phone
         }
       });
       
@@ -36,7 +38,7 @@ const EHRLoginButton: React.FC<EHRLoginButtonProps> = ({ onLoginSuccess }) => {
         throw new Error(error?.message || data.message || 'Failed to request OTP');
       }
       
-      setOtpReference(data.otpReference);
+      setOtpReference(data.otpReference || 'OTP_SENT');
       setStep('verify');
       toast.success('OTP sent to your phone');
       
@@ -49,7 +51,7 @@ const EHRLoginButton: React.FC<EHRLoginButtonProps> = ({ onLoginSuccess }) => {
   };
 
   const handleVerifyOTP = async () => {
-    if (!otp || !auth.phone || !otpReference) {
+    if (!otp || !phone || !otpReference) {
       toast.error('Please enter the OTP sent to your phone');
       return;
     }
@@ -60,7 +62,7 @@ const EHRLoginButton: React.FC<EHRLoginButtonProps> = ({ onLoginSuccess }) => {
       const { data, error } = await supabase.functions.invoke('ehr-sync', {
         body: { 
           action: 'patientLogin',
-          phone: auth.phone,
+          phone: phone,
           otp,
           otpReference
         }
@@ -72,10 +74,13 @@ const EHRLoginButton: React.FC<EHRLoginButtonProps> = ({ onLoginSuccess }) => {
 
       // Save the EHR patient ID to the user's profile
       if (data.patientId && onLoginSuccess) {
-        await supabase
-          .from('patient_profiles')
-          .update({ hospital_id: data.patientId })
-          .eq('id', auth.userId);
+        // Update auth context if needed
+        if (auth.userId) {
+          await supabase
+            .from('patient_profiles')
+            .update({ hospital_id: data.patientId })
+            .eq('id', auth.userId);
+        }
           
         onLoginSuccess(data.patientId);
       }
@@ -94,20 +99,24 @@ const EHRLoginButton: React.FC<EHRLoginButtonProps> = ({ onLoginSuccess }) => {
   if (step === 'verify') {
     return (
       <div className="flex flex-col space-y-2">
-        <div className="flex items-center space-x-2">
-          <input
-            type="text"
-            className="px-3 py-2 border rounded-md"
-            placeholder="Enter OTP from SMS"
-            value={otp}
-            onChange={(e) => setOtp(e.target.value)}
-          />
-          <Button 
-            onClick={handleVerifyOTP} 
-            disabled={isLoading}
-          >
-            {isLoading ? 'Verifying...' : 'Verify'}
-          </Button>
+        <div className="flex flex-col space-y-2">
+          <label htmlFor="otp" className="text-sm font-medium">Enter the OTP sent to your phone</label>
+          <div className="flex items-center space-x-2">
+            <Input
+              id="otp"
+              type="text"
+              className="px-3 py-2"
+              placeholder="Enter OTP from SMS"
+              value={otp}
+              onChange={(e) => setOtp(e.target.value)}
+            />
+            <Button 
+              onClick={handleVerifyOTP} 
+              disabled={isLoading}
+            >
+              {isLoading ? 'Verifying...' : 'Verify'}
+            </Button>
+          </div>
         </div>
         <Button 
           variant="outline" 
@@ -120,13 +129,26 @@ const EHRLoginButton: React.FC<EHRLoginButtonProps> = ({ onLoginSuccess }) => {
   }
 
   return (
-    <Button 
-      onClick={handleEHRLogin} 
-      disabled={isLoading || !auth.phone}
-      className="w-full"
-    >
-      {isLoading ? 'Connecting...' : 'Connect to EHR System'}
-    </Button>
+    <div className="flex flex-col space-y-2">
+      <div className="flex flex-col space-y-2">
+        <label htmlFor="phone" className="text-sm font-medium">Phone Number</label>
+        <Input
+          id="phone"
+          type="tel"
+          className="mb-2"
+          placeholder="Enter your phone number"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+        />
+      </div>
+      <Button 
+        onClick={handleEHRLogin} 
+        disabled={isLoading}
+        className="w-full"
+      >
+        {isLoading ? 'Connecting...' : 'Connect to EHR System'}
+      </Button>
+    </div>
   );
 };
 
