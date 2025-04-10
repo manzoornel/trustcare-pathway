@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { EHRSyncHistory as EHRSyncHistoryType } from './types';
+import { EHRSyncHistory as EHRSyncHistoryType } from './types';
 
 type EHRSyncHistoryProps = {
   syncHistory: EHRSyncHistoryType[];

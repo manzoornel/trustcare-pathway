@@ -13,7 +13,9 @@ export const useEHRSyncHistory = () => {
       setIsLoading(true);
       
       // Get sync history from the ehr_sync_history table
-      const { data, error } = await supabase
+      // Cast to 'any' to bypass TypeScript table name validation
+      // since the table exists in the database but not in the TypeScript types
+      const { data, error } = await (supabase as any)
         .from('ehr_sync_history')
         .select('*')
         .order('timestamp', { ascending: false })
@@ -21,8 +23,8 @@ export const useEHRSyncHistory = () => {
       
       if (error) throw error;
       
-      // Ensure data is correctly typed
-      const typedData: EHRSyncHistory[] = data ? data.map(record => ({
+      // Ensure data is correctly typed as EHRSyncHistory objects
+      const typedData: EHRSyncHistory[] = data ? data.map((record: any) => ({
         id: record.id,
         timestamp: record.timestamp,
         status: record.status as 'success' | 'failed' | 'in_progress',
@@ -55,7 +57,7 @@ export const useEHRSyncHistory = () => {
       fetchSyncHistory(); // Refresh history after triggering sync
       
       return data;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error triggering manual sync:', error);
       toast.error('Failed to initiate sync');
       return { success: false, message: error.message || 'Unknown error occurred' };

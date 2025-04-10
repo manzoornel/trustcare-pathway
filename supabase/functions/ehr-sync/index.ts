@@ -32,7 +32,7 @@ serve(async (req) => {
 
     // Create sync history record
     const createSyncRecord = async (patientId: string | null, status: 'success' | 'failed' | 'in_progress', message: string, details?: string) => {
-      const record: Partial<EHRSyncHistory> = {
+      const record = {
         status,
         message,
         patient_id: patientId || null,
@@ -40,7 +40,13 @@ serve(async (req) => {
         timestamp: new Date().toISOString()
       }
       
-      await supabase.from('ehr_sync_history').insert(record)
+      // Log the record to assist with debugging
+      console.log('Creating sync record:', JSON.stringify(record))
+      
+      const { data, error } = await supabase.from('ehr_sync_history').insert(record)
+      if (error) {
+        console.error('Error creating sync record:', error)
+      }
     }
     
     // Handle test connection action
@@ -136,7 +142,7 @@ serve(async (req) => {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
         }
       )
-    } catch (syncError) {
+    } catch (syncError: any) {
       // Log sync failure
       console.error('Error during sync operation:', syncError)
       await createSyncRecord(
@@ -158,7 +164,7 @@ serve(async (req) => {
       )
     }
     
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error in EHR sync function:', error)
     return new Response(
       JSON.stringify({ error: 'Internal Server Error', details: error.message }),
