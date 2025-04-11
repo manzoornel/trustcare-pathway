@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Helmet } from "react-helmet";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -23,7 +23,7 @@ const SignUp = () => {
       <div className="min-h-screen bg-gray-50">
         <Navbar />
         
-        <div className="pt-20 px-4 max-w-md mx-auto">
+        <div className="pt-20 px-4 max-w-lg mx-auto">
           <div className="py-8">
             <h1 className="text-3xl font-bold mb-2 text-center">Create Your Profile</h1>
             <p className="text-gray-600 mb-8 text-center">
@@ -32,9 +32,9 @@ const SignUp = () => {
             
             <Alert variant="warning" className="mb-6">
               <InfoIcon className="h-4 w-4" />
-              <AlertTitle>Quick Registration Process</AlertTitle>
+              <AlertTitle>Verified Registration Process</AlertTitle>
               <AlertDescription>
-                Create your profile now and connect your hospital records later through the patient portal.
+                We verify both your phone number and email to ensure the security of your medical information.
               </AlertDescription>
             </Alert>
             

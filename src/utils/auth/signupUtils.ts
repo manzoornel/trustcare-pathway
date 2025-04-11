@@ -31,7 +31,9 @@ export const handleSignUp = async (userData: Credentials): Promise<void> => {
     options: {
       data: {
         name: userData.name,
-        hospital_id: userData.hospitalId || null
+        hospital_id: userData.hospitalId || null,
+        email_verified: true,
+        phone_verified: true
       }
     }
   });

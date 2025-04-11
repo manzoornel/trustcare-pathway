@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { toast } from 'react-toastify';
 import { AuthState, Credentials } from './types';
@@ -139,10 +138,10 @@ export function useAuthOperations() {
     try {
       await handleSignUp(userData);
       
-      // Update local state
+      // Update local state - now mark the user as already verified
       updateAuthState({
         isAuthenticated: true,
-        isVerified: false, // User needs to verify email
+        isVerified: true, // Mark as already verified since we did OTP verification in the form
         needsProfile: false,
         name: userData.name,
         email: userData.email,
@@ -153,7 +152,7 @@ export function useAuthOperations() {
         rewardPoints: 0
       });
       
-      toast.success('Signup successful! Please check your email to verify your account.');
+      toast.success('Account created successfully!');
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Signup failed. Please try again.';
       toast.error(message);

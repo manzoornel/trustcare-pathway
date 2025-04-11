@@ -8,6 +8,8 @@ export interface SignUpFormData {
   email: string;
   password: string;
   confirmPassword: string;
+  phoneVerified?: boolean;
+  emailVerified?: boolean;
 }
 
 export const validateSignUpForm = (formData: SignUpFormData): boolean => {
@@ -24,6 +26,12 @@ export const validateSignUpForm = (formData: SignUpFormData): boolean => {
     toast.error("Please enter a valid email address");
     return false;
   }
+  
+  // Verify if email is verified
+  if (formData.emailVerified === false) {
+    toast.error("Please verify your email address");
+    return false;
+  }
 
   // Verify if hospital ID is in the correct format (only if provided)
   if (formData.hospitalId && !/^(H\d{5}|dr-\d{5})$/i.test(formData.hospitalId)) {
@@ -34,6 +42,12 @@ export const validateSignUpForm = (formData: SignUpFormData): boolean => {
   // Verify if phone number is in the correct format
   if (!/^\d{10}$/.test(formData.phone)) {
     toast.error("Phone number must be 10 digits");
+    return false;
+  }
+  
+  // Verify if phone is verified
+  if (formData.phoneVerified === false) {
+    toast.error("Please verify your phone number");
     return false;
   }
   
