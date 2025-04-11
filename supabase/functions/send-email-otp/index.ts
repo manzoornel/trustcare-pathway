@@ -61,7 +61,7 @@ serve(async (req) => {
     }
     
     // TODO: In production, integrate with an email service like SendGrid or Resend
-    // Example code for SendGrid integration (commented out):
+    // Example code for SendGrid integration:
     /*
     const sendgridApiKey = Deno.env.get("SENDGRID_API_KEY");
     

@@ -61,7 +61,7 @@ serve(async (req) => {
     }
     
     // TODO: In production, integrate with an SMS service like Twilio
-    // Example code for Twilio integration (commented out):
+    // Example code for Twilio integration:
     /*
     const twilioAccountSid = Deno.env.get("TWILIO_ACCOUNT_SID");
     const twilioAuthToken = Deno.env.get("TWILIO_AUTH_TOKEN");

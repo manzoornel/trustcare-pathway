@@ -239,6 +239,36 @@ export type Database = {
           },
         ]
       }
+      otps: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          expires_at: string
+          id: string
+          otp: string
+          phone: string | null
+          type: string
+        }
+        Insert: {
+          created_at?: string | null
+          email?: string | null
+          expires_at: string
+          id?: string
+          otp: string
+          phone?: string | null
+          type: string
+        }
+        Update: {
+          created_at?: string | null
+          email?: string | null
+          expires_at?: string
+          id?: string
+          otp?: string
+          phone?: string | null
+          type?: string
+        }
+        Relationships: []
+      }
       patient_profiles: {
         Row: {
           created_at: string | null
