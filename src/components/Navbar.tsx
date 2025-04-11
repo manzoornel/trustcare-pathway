@@ -1,13 +1,13 @@
 
 import { useState } from 'react';
-import { Menu, X, LogIn, UserRound } from 'lucide-react';
+import { Menu, X, LogIn, UserRound, LogOut } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
-  const { auth } = useAuth();
+  const { auth, logout } = useAuth();
   
   const menuItems = [{
     name: 'Home',
@@ -42,6 +42,14 @@ const Navbar = () => {
   
   const isDemoAccount = auth.userId?.startsWith('demo-');
   
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
+  
   return <nav className="fixed w-full bg-white/95 backdrop-blur-sm shadow-sm z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
@@ -63,14 +71,23 @@ const Navbar = () => {
               </Link>)}
               
             {auth.isAuthenticated ? (
-              <Link to="/patient-portal" className="flex items-center gap-1">
-                <span className="text-primary font-semibold transition-colors duration-200 font-display">
-                  Patient Portal
-                </span>
-                {isDemoAccount && (
-                  <span className="text-xs px-1.5 py-0.5 bg-yellow-100 text-yellow-800 rounded">Demo</span>
-                )}
-              </Link>
+              <div className="flex items-center gap-3">
+                <Link to="/patient-portal" className="flex items-center gap-1">
+                  <span className="text-primary font-semibold transition-colors duration-200 font-display">
+                    Patient Portal
+                  </span>
+                  {isDemoAccount && (
+                    <span className="text-xs px-1.5 py-0.5 bg-yellow-100 text-yellow-800 rounded">Demo</span>
+                  )}
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-1 text-gray-600 hover:text-primary transition-colors duration-200 font-display"
+                >
+                  <LogOut size={18} />
+                  Logout
+                </button>
+              </div>
             ) : (
               <Link to="/login" className="flex items-center gap-1 text-primary hover:text-primary/80 font-semibold transition-colors duration-200 font-display">
                 <LogIn size={18} />
@@ -96,14 +113,23 @@ const Navbar = () => {
               </Link>)}
               
             {auth.isAuthenticated ? (
-              <Link to="/patient-portal" className="flex items-center gap-1 px-3 py-2" onClick={() => setIsOpen(false)}>
-                <span className="text-base font-medium text-primary font-display">
-                  Patient Portal
-                </span>
-                {isDemoAccount && (
-                  <span className="text-xs px-1.5 py-0.5 bg-yellow-100 text-yellow-800 rounded">Demo</span>
-                )}
-              </Link>
+              <div className="space-y-1">
+                <Link to="/patient-portal" className="flex items-center gap-1 px-3 py-2" onClick={() => setIsOpen(false)}>
+                  <span className="text-base font-medium text-primary font-display">
+                    Patient Portal
+                  </span>
+                  {isDemoAccount && (
+                    <span className="text-xs px-1.5 py-0.5 bg-yellow-100 text-yellow-800 rounded">Demo</span>
+                  )}
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-1 px-3 py-2 text-base font-medium text-gray-600 hover:text-primary font-display w-full text-left"
+                >
+                  <LogOut size={18} />
+                  Logout
+                </button>
+              </div>
             ) : (
               <Link to="/login" className="flex items-center gap-1 px-3 py-2 text-base font-medium text-primary font-display" onClick={() => setIsOpen(false)}>
                 <LogIn size={18} />
