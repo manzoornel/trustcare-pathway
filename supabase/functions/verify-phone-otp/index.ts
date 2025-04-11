@@ -22,7 +22,7 @@ serve(async (req) => {
     
     if (!phone || !otp) {
       return new Response(
-        JSON.stringify({ success: false, message: "Phone number and OTP are required" }),
+        JSON.stringify({ success: false, message: "Phone and OTP are required" }),
         {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
           status: 400,
@@ -30,29 +30,17 @@ serve(async (req) => {
       );
     }
     
-    // Get the stored OTP for this phone
-    const { data: otpData, error: fetchError } = await supabase
+    // Get stored OTP from database
+    const { data: otpData, error: otpError } = await supabase
       .from('otps')
       .select('*')
       .eq('phone', phone)
       .eq('type', 'phone')
       .single();
     
-    if (fetchError || !otpData) {
-      console.error("Error fetching OTP:", fetchError);
+    if (otpError || !otpData) {
       return new Response(
-        JSON.stringify({ success: false, message: "No OTP found for this phone number" }),
-        {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 404,
-        }
-      );
-    }
-    
-    // Check if OTP has expired
-    if (new Date(otpData.expires_at) < new Date()) {
-      return new Response(
-        JSON.stringify({ success: false, message: "OTP has expired" }),
+        JSON.stringify({ success: false, message: "No valid OTP found for this phone number" }),
         {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
           status: 400,
@@ -60,7 +48,22 @@ serve(async (req) => {
       );
     }
     
-    // Check if OTP matches
+    // Check if OTP is expired
+    const expiresAt = new Date(otpData.expires_at);
+    const now = new Date();
+    if (expiresAt < now) {
+      await supabase.from('otps').delete().eq('id', otpData.id);
+      
+      return new Response(
+        JSON.stringify({ success: false, message: "OTP has expired, please request a new one" }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 400,
+        }
+      );
+    }
+    
+    // Verify OTP
     if (otpData.otp !== otp) {
       return new Response(
         JSON.stringify({ success: false, message: "Invalid OTP" }),
@@ -71,16 +74,27 @@ serve(async (req) => {
       );
     }
     
-    // Delete the used OTP
-    await supabase
-      .from('otps')
-      .delete()
-      .eq('phone', phone);
+    // OTP is valid, delete it to prevent reuse
+    await supabase.from('otps').delete().eq('id', otpData.id);
     
-    console.log(`[PRODUCTION] Verified OTP for phone ${phone}`);
+    // Find the user profile
+    const { data: profile, error: profileError } = await supabase
+      .from('patient_profiles')
+      .select('*')
+      .eq('phone', phone)
+      .maybeSingle();
+      
+    if (profileError) {
+      console.error("Error fetching user profile:", profileError);
+    }
     
+    // Return success response
     return new Response(
-      JSON.stringify({ success: true, message: "OTP verified successfully" }),
+      JSON.stringify({
+        success: true,
+        message: "Phone number verified successfully",
+        profile: profile || null
+      }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,

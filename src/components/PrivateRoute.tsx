@@ -1,7 +1,7 @@
 
 import React, { ReactNode, useEffect } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/auth";
 import { toast } from "sonner";
 
 type PrivateRouteProps = {
@@ -21,11 +21,15 @@ const PrivateRoute = ({
   // For debugging
   useEffect(() => {
     console.log("Auth state in PrivateRoute:", auth);
+    console.log("isAuthenticated:", auth.isAuthenticated);
+    console.log("isVerified:", auth.isVerified);
+    console.log("needsProfile:", auth.needsProfile);
     
     // To help debug persistence issues, check localStorage too
     const savedAuth = localStorage.getItem('authState');
     if (savedAuth) {
       const parsedAuth = JSON.parse(savedAuth);
+      console.log("localStorage auth state:", parsedAuth);
       if (parsedAuth.isVerified !== auth.isVerified) {
         console.log("Warning: localStorage auth state differs from context state:", parsedAuth);
         // Auto-correct auth state issues if localStorage shows verified but context doesn't

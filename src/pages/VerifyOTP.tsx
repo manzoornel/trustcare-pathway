@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import OTPInput from "@/components/OTPInput";
 import VerificationSuccess from "@/components/VerificationSuccess";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/auth";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Info } from "lucide-react";
 
@@ -32,7 +32,13 @@ const Verify = () => {
     } else {
       console.log("Phone number for verification:", phone);
     }
-  }, [phone, navigate]);
+    
+    // If user is already authenticated and verified, redirect to patient portal
+    if (auth.isAuthenticated && auth.isVerified) {
+      console.log("User is already verified, redirecting to patient portal");
+      navigate("/patient-portal", { replace: true });
+    }
+  }, [phone, navigate, auth.isAuthenticated, auth.isVerified]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,7 +61,6 @@ const Verify = () => {
         toast.success("Phone number verified successfully!");
         
         // No need to call Supabase verifyOTP if we're in demo mode
-        // This avoids the token expiration issues
         console.log("Demo OTP verified successfully");
         
         // Allow success page to show for 2 seconds before redirecting

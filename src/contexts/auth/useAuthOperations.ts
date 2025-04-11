@@ -1,5 +1,6 @@
+
 import { useState } from 'react';
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 import { AuthState, Credentials } from './types';
 import { useDemoAuth } from './useDemoAuth';
 import { handleLogin, handleLoginWithOTP, handleVerifyOTP } from '@/utils/auth/loginUtils';
@@ -32,6 +33,7 @@ export function useAuthOperations() {
   const updateAuthState = (newState: AuthState | ((prev: AuthState) => AuthState)) => {
     setAuth(prevState => {
       const nextState = typeof newState === 'function' ? newState(prevState) : newState;
+      console.log("Updating auth state:", nextState);
       localStorage.setItem('authState', JSON.stringify(nextState));
       return nextState;
     });
@@ -39,6 +41,8 @@ export function useAuthOperations() {
 
   const login = async (email: string, password: string) => {
     try {
+      console.log("Logging in with email:", email);
+      
       // Check if it's a demo account
       const demoAuthState = handleDemoLogin(email, password);
       
@@ -61,6 +65,7 @@ export function useAuthOperations() {
 
   const loginWithOTP = async (phone: string) => {
     try {
+      console.log("Sending OTP to phone:", phone);
       await handleLoginWithOTP(phone);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to send OTP. Please try again.';
@@ -71,8 +76,10 @@ export function useAuthOperations() {
 
   const verifyOTP = async (phone: string, otp: string) => {
     try {
+      console.log("Verifying OTP for phone:", phone);
       const authState = await handleVerifyOTP(phone, otp);
       if (authState) {
+        console.log("OTP verified, updating auth state:", authState);
         updateAuthState(authState);
       }
     } catch (error) {
@@ -130,6 +137,7 @@ export function useAuthOperations() {
         ...prevAuth,
         isVerified: true
       };
+      console.log("Updated auth state after verification:", newAuth);
       return newAuth;
     });
   };
