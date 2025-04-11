@@ -5,6 +5,8 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SignUpCard from "@/components/signup/SignUpCard";
 import { useSignUp } from "@/hooks/useSignUp";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { InfoIcon } from "lucide-react";
 
 const SignUp = () => {
   const { isLoading, handleSignUp } = useSignUp();
@@ -27,6 +29,14 @@ const SignUp = () => {
             <p className="text-gray-600 mb-8 text-center">
               Create your patient account to access your medical records
             </p>
+            
+            <Alert variant="warning" className="mb-6">
+              <InfoIcon className="h-4 w-4" />
+              <AlertTitle>Email verification required</AlertTitle>
+              <AlertDescription>
+                After signing up, you'll need to verify your email address to activate your account.
+              </AlertDescription>
+            </Alert>
             
             <SignUpCard 
               onSubmit={handleSignUp}

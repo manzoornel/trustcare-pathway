@@ -35,16 +35,17 @@ export const useSignUp = () => {
         
       if (checkError) {
         console.error("Error checking for existing profiles:", checkError);
-        throw checkError;
+        throw new Error("Failed to check for existing accounts. Please try again.");
       }
       
       if (existingProfile) {
         if (existingProfile.hospital_id === formData.hospitalId) {
           toast.error("An account with this Hospital ID already exists");
+          throw new Error("An account with this Hospital ID already exists");
         } else {
           toast.error("An account with this phone number already exists");
+          throw new Error("An account with this phone number already exists");
         }
-        return;
       }
       
       console.log("No existing profile found, proceeding with signup");
@@ -66,6 +67,7 @@ export const useSignUp = () => {
     } catch (error: any) {
       console.error("Signup error:", error);
       toast.error(error.message || "Failed to create account");
+      throw error; // Re-throw error for form handling
     } finally {
       setIsLoading(false);
     }

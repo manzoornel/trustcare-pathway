@@ -15,7 +15,8 @@ export const handleSignUp = async (userData: Credentials): Promise<void> => {
     .limit(1);
     
   if (searchError) {
-    throw new Error(searchError.message);
+    console.error("Error checking for existing email:", searchError);
+    throw new Error("Failed to check email availability. Please try again.");
   }
     
   if (existingUsers && existingUsers.length > 0) {
@@ -36,10 +37,13 @@ export const handleSignUp = async (userData: Credentials): Promise<void> => {
   });
     
   if (error) {
-    throw new Error(error.message);
+    console.error("Supabase signup error:", error);
+    throw new Error(error.message || "Failed to create account");
   }
     
   if (data.user) {
+    console.log("User created in auth system, creating profile record");
+    
     // Create profile record in our database
     const { error: profileError } = await supabase
       .from('patient_profiles')
@@ -55,7 +59,12 @@ export const handleSignUp = async (userData: Credentials): Promise<void> => {
       
     if (profileError) {
       console.error('Error creating profile:', profileError);
-      // We don't throw here because the auth account was already created
+      // We log the error but don't throw here because the auth account was already created
+      toast.warning("Account created but profile setup incomplete. Please contact support if you experience issues.");
     }
+  } else {
+    console.warn("User object not available after signup");
   }
+  
+  console.log("Signup process completed successfully");
 };

@@ -3,6 +3,8 @@ import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { SignUpFormData, validateSignUpForm } from "@/utils/signupValidation";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 interface SignUpFormProps {
   onSubmit: (formData: SignUpFormData) => Promise<void>;
@@ -19,13 +21,17 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onSubmit, isLoading }) => {
     confirmPassword: "",
   });
   
+  const [formError, setFormError] = useState<string | null>(null);
+  
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    setFormError(null); // Clear error when user makes changes
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError(null);
     
     // Validate form data
     if (!validateSignUpForm(formData)) {
@@ -36,11 +42,23 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onSubmit, isLoading }) => {
       await onSubmit(formData);
     } catch (error) {
       console.error("Signup submission error:", error);
+      if (error instanceof Error) {
+        setFormError(error.message);
+      } else {
+        setFormError("An unexpected error occurred during signup");
+      }
     }
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {formError && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{formError}</AlertDescription>
+        </Alert>
+      )}
+      
       <div className="space-y-2">
         <label htmlFor="name" className="text-sm font-medium">Full Name</label>
         <Input
@@ -49,6 +67,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onSubmit, isLoading }) => {
           placeholder="Enter your full name"
           value={formData.name}
           onChange={handleChange}
+          disabled={isLoading}
           required
         />
       </div>
@@ -61,6 +80,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onSubmit, isLoading }) => {
           placeholder="Enter your 10-digit phone number"
           value={formData.phone}
           onChange={handleChange}
+          disabled={isLoading}
           required
         />
         <p className="text-xs text-gray-500">Must be a 10-digit number</p>
@@ -74,6 +94,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onSubmit, isLoading }) => {
           placeholder="Enter your hospital ID (e.g., H12345)"
           value={formData.hospitalId}
           onChange={handleChange}
+          disabled={isLoading}
           required
         />
         <p className="text-xs text-gray-500">Format: H followed by 5 digits (e.g., H12345)</p>
@@ -88,6 +109,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onSubmit, isLoading }) => {
           placeholder="Enter your email address"
           value={formData.email}
           onChange={handleChange}
+          disabled={isLoading}
           required
         />
       </div>
@@ -101,6 +123,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onSubmit, isLoading }) => {
           placeholder="Create a password"
           value={formData.password}
           onChange={handleChange}
+          disabled={isLoading}
           required
         />
         <p className="text-xs text-gray-500">Must be at least 6 characters</p>
@@ -115,6 +138,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onSubmit, isLoading }) => {
           placeholder="Confirm your password"
           value={formData.confirmPassword}
           onChange={handleChange}
+          disabled={isLoading}
           required
         />
       </div>
