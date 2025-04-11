@@ -1,6 +1,11 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { corsHeaders } from "../_shared/cors.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.36.0";
+
+const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
+const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY") || "";
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -25,26 +30,38 @@ serve(async (req) => {
       );
     }
     
-    // TODO: Implement real OTP verification logic here
-    // For now, we'll accept any OTP that's 6 digits for testing
-    const isValid = /^\d{6}$/.test(otp);
+    // Get the stored OTP for this email
+    const { data: otpData, error: fetchError } = await supabase
+      .from('otps')
+      .select('*')
+      .eq('email', email)
+      .eq('type', 'email')
+      .single();
     
-    console.log(`[PRODUCTION] Verifying OTP ${otp} for email ${email}, valid: ${isValid}`);
-    
-    // In a real implementation, you would:
-    // 1. Retrieve the stored OTP from database
-    // 2. Check if it matches and hasn't expired
-    // 3. Mark the email as verified if successful
-    
-    if (isValid) {
+    if (fetchError || !otpData) {
+      console.error("Error fetching OTP:", fetchError);
       return new Response(
-        JSON.stringify({ success: true, message: "OTP verified successfully" }),
+        JSON.stringify({ success: false, message: "No OTP found for this email" }),
         {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 200,
+          status: 404,
         }
       );
-    } else {
+    }
+    
+    // Check if OTP has expired
+    if (new Date(otpData.expires_at) < new Date()) {
+      return new Response(
+        JSON.stringify({ success: false, message: "OTP has expired" }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 400,
+        }
+      );
+    }
+    
+    // Check if OTP matches
+    if (otpData.otp !== otp) {
       return new Response(
         JSON.stringify({ success: false, message: "Invalid OTP" }),
         {
@@ -53,6 +70,22 @@ serve(async (req) => {
         }
       );
     }
+    
+    // Delete the used OTP
+    await supabase
+      .from('otps')
+      .delete()
+      .eq('email', email);
+    
+    console.log(`[PRODUCTION] Verified OTP for email ${email}`);
+    
+    return new Response(
+      JSON.stringify({ success: true, message: "OTP verified successfully" }),
+      {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      }
+    );
   } catch (error) {
     console.error("Error verifying email OTP:", error);
     
