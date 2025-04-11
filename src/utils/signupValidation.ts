@@ -25,10 +25,8 @@ export const validateSignUpForm = (formData: SignUpFormData): boolean => {
     return false;
   }
 
-  // Verify if hospital ID is in the correct format
-  // Note: The example shows dr-37834 but the validation expects H12345
-  // Let's update to handle both formats
-  if (!/^(H\d{5}|dr-\d{5})$/i.test(formData.hospitalId)) {
+  // Verify if hospital ID is in the correct format (only if provided)
+  if (formData.hospitalId && !/^(H\d{5}|dr-\d{5})$/i.test(formData.hospitalId)) {
     toast.error("Hospital ID must be in format H12345 or dr-12345");
     return false;
   }

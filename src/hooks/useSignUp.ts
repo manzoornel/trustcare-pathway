@@ -22,15 +22,14 @@ export const useSignUp = () => {
     try {
       console.log("Starting signup process with data:", { 
         email: formData.email, 
-        phone: formData.phone, 
-        hospitalId: formData.hospitalId 
+        phone: formData.phone
       });
       
-      // Check if hospital ID or phone already exists
+      // Check if phone already exists
       const { data: existingProfile, error: checkError } = await supabase
         .from('patient_profiles')
-        .select('hospital_id, phone')
-        .or(`hospital_id.eq.${formData.hospitalId},phone.eq.${formData.phone}`)
+        .select('phone')
+        .eq('phone', formData.phone)
         .maybeSingle();
         
       if (checkError) {
@@ -39,12 +38,26 @@ export const useSignUp = () => {
       }
       
       if (existingProfile) {
-        if (existingProfile.hospital_id === formData.hospitalId) {
+        toast.error("An account with this phone number already exists");
+        throw new Error("An account with this phone number already exists");
+      }
+      
+      // Only check Hospital ID if it's provided
+      if (formData.hospitalId) {
+        const { data: existingHospitalId, error: hospitalIdCheckError } = await supabase
+          .from('patient_profiles')
+          .select('hospital_id')
+          .eq('hospital_id', formData.hospitalId)
+          .maybeSingle();
+          
+        if (hospitalIdCheckError) {
+          console.error("Error checking for existing hospital ID:", hospitalIdCheckError);
+          throw new Error("Failed to check hospital ID availability. Please try again.");
+        }
+        
+        if (existingHospitalId) {
           toast.error("An account with this Hospital ID already exists");
           throw new Error("An account with this Hospital ID already exists");
-        } else {
-          toast.error("An account with this phone number already exists");
-          throw new Error("An account with this phone number already exists");
         }
       }
       
@@ -56,13 +69,13 @@ export const useSignUp = () => {
         email: formData.email,
         password: formData.password,
         phone: formData.phone,
-        hospitalId: formData.hospitalId,
+        hospitalId: formData.hospitalId || "", // Allow empty hospital ID
       });
       
       console.log("Signup successful, redirecting to verification");
       toast.success("Account created successfully! Redirecting to verification...");
       
-      // Update the navigation path to match the route defined in App.tsx (/verify instead of /verify-otp)
+      // Update the navigation path to match the route defined in App.tsx
       navigate("/verify");
     } catch (error: any) {
       console.error("Signup error:", error);

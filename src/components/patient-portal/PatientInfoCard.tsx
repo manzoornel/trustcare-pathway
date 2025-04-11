@@ -36,6 +36,7 @@ const PatientInfoCard = ({ patientName, hospitalId, phone, email }: PatientInfoC
   } = usePatientInfoForm({ patientName, hospitalId, phone, email });
 
   const isDemoAccount = auth.userId?.startsWith('demo-');
+  const missingHospitalId = !formData.hospitalId;
 
   return (
     <Card className="mb-8">
@@ -54,6 +55,20 @@ const PatientInfoCard = ({ patientName, hospitalId, phone, email }: PatientInfoC
         </div>
       </CardHeader>
       <CardContent>
+        {missingHospitalId && !isEditing && (
+          <div className="mb-4 p-2 bg-amber-50 border border-amber-200 rounded-md text-sm text-amber-800">
+            Please add your Hospital ID (UHID) to connect with your medical records.
+            <Button 
+              variant="link" 
+              size="sm" 
+              onClick={() => setIsEditing(true)} 
+              className="text-amber-700 p-0 ml-1"
+            >
+              Add now
+            </Button>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <PatientInfoField
             label="Name"

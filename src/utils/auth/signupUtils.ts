@@ -31,7 +31,7 @@ export const handleSignUp = async (userData: Credentials): Promise<void> => {
     options: {
       data: {
         name: userData.name,
-        hospital_id: userData.hospitalId
+        hospital_id: userData.hospitalId || null
       }
     }
   });
@@ -53,7 +53,7 @@ export const handleSignUp = async (userData: Credentials): Promise<void> => {
           name: userData.name,
           email: userData.email,
           phone: userData.phone,
-          hospital_id: userData.hospitalId
+          hospital_id: userData.hospitalId || null
         }
       ]);
       

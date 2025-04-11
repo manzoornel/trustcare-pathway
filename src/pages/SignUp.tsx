@@ -25,16 +25,16 @@ const SignUp = () => {
         
         <div className="pt-20 px-4 max-w-md mx-auto">
           <div className="py-8">
-            <h1 className="text-3xl font-bold mb-2 text-center">Patient Sign Up</h1>
+            <h1 className="text-3xl font-bold mb-2 text-center">Create Your Profile</h1>
             <p className="text-gray-600 mb-8 text-center">
-              Create your patient account to access your medical records
+              Get started with Doctor Uncle Family Clinic
             </p>
             
             <Alert variant="warning" className="mb-6">
               <InfoIcon className="h-4 w-4" />
-              <AlertTitle>Email verification required</AlertTitle>
+              <AlertTitle>Quick Registration Process</AlertTitle>
               <AlertDescription>
-                After signing up, you'll need to verify your email address to activate your account.
+                Create your profile now and connect your hospital records later through the patient portal.
               </AlertDescription>
             </Alert>
             
