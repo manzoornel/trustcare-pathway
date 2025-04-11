@@ -32,8 +32,8 @@ export const handleSignUp = async (userData: Credentials): Promise<void> => {
       data: {
         name: userData.name,
         hospital_id: userData.hospitalId || null,
-        email_verified: true,
-        phone_verified: true
+        email_verified: userData.emailVerified || false,
+        phone_verified: userData.phoneVerified || false
       }
     }
   });
@@ -55,7 +55,9 @@ export const handleSignUp = async (userData: Credentials): Promise<void> => {
           name: userData.name,
           email: userData.email,
           phone: userData.phone,
-          hospital_id: userData.hospitalId || null
+          hospital_id: userData.hospitalId || null,
+          email_verified: userData.emailVerified || false,
+          phone_verified: userData.phoneVerified || false
         }
       ]);
       

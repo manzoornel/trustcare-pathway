@@ -1,4 +1,3 @@
-
 export type AuthState = {
   isAuthenticated: boolean;
   needsProfile: boolean;
@@ -21,13 +20,15 @@ export type DemoPatient = {
   phone: string;
 };
 
-export type Credentials = {
-  name: string;
+export interface Credentials {
   email: string;
   password: string;
+  name: string;
   phone: string;
-  hospitalId: string;
-};
+  hospitalId?: string;
+  phoneVerified?: boolean;
+  emailVerified?: boolean;
+}
 
 export type UserProfile = Partial<{
   name: string;

@@ -12,15 +12,8 @@ export const useSignUp = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSignUp = async (formData: SignUpFormData) => {
-    // Set verification status to true since verification is done in the form component
-    const verifiedFormData = {
-      ...formData,
-      phoneVerified: true,
-      emailVerified: true
-    };
-    
     // Validate form data one more time to be safe
-    if (!validateSignUpForm(verifiedFormData)) {
+    if (!validateSignUpForm(formData)) {
       return;
     }
     
@@ -70,19 +63,21 @@ export const useSignUp = () => {
       
       console.log("No existing profile found, proceeding with signup");
       
-      // Sign up the user
+      // Sign up the user with verification status from the form
       await signup({
         name: formData.name,
         email: formData.email,
         password: formData.password,
         phone: formData.phone,
         hospitalId: formData.hospitalId || "", // Allow empty hospital ID
+        phoneVerified: formData.phoneVerified || false,
+        emailVerified: formData.emailVerified || false
       });
       
       console.log("Signup successful, redirecting to patient portal");
       toast.success("Account created successfully! You can now access your patient portal.");
       
-      // Since we've already verified the user, go directly to patient portal
+      // Since verification is already done, go directly to patient portal
       navigate("/patient-portal");
     } catch (error: any) {
       console.error("Signup error:", error);

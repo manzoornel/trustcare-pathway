@@ -88,55 +88,90 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onSubmit, isLoading }) => {
     setFormError(null);
     
     try {
-      // In a real app, these would be API calls to send OTPs
-      console.log("Sending OTP to phone:", formData.phone);
-      console.log("Sending OTP to email:", formData.email);
+      // API calls to send real OTPs to phone and email
+      const phoneResponse = await fetch('/api/send-phone-otp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ phone: formData.phone })
+      });
       
-      // For demo purposes, we'll just simulate OTP sending
-      setTimeout(() => {
-        setCurrentStep("verification");
-        // Demo OTP codes (in a real app, these would be sent to user devices)
-        console.log("Demo phone OTP: 123456");
-        console.log("Demo email OTP: 654321");
-        setIsSendingOtp(false);
-      }, 1500);
+      const emailResponse = await fetch('/api/send-email-otp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: formData.email })
+      });
+      
+      if (!phoneResponse.ok || !emailResponse.ok) {
+        throw new Error("Failed to send verification codes. Please try again.");
+      }
+      
+      // Move to verification step
+      setCurrentStep("verification");
     } catch (error) {
       console.error("Failed to send OTP:", error);
       setFormError("Failed to send verification codes. Please try again.");
+    } finally {
       setIsSendingOtp(false);
     }
   };
 
-  const handleVerifyOtp = () => {
+  const handleVerifyOtp = async () => {
     setIsVerifying(true);
     setFormError(null);
     
     try {
-      // In a real app, we would validate the OTP with our backend
-      // For demo purposes, we'll use hardcoded OTPs
-      if (phoneOtp === "123456") {
+      // Validate phone OTP
+      if (!phoneVerified) {
+        const phoneVerifyResponse = await fetch('/api/verify-phone-otp', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ phone: formData.phone, otp: phoneOtp })
+        });
+        
+        const phoneResult = await phoneVerifyResponse.json();
+        
+        if (!phoneVerifyResponse.ok || !phoneResult.success) {
+          throw new Error("Invalid phone verification code");
+        }
+        
         setPhoneVerified(true);
-      } else {
-        setFormError("Invalid phone OTP code");
-        setIsVerifying(false);
-        return;
       }
       
-      if (emailOtp === "654321") {
+      // Validate email OTP
+      if (!emailVerified) {
+        const emailVerifyResponse = await fetch('/api/verify-email-otp', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email: formData.email, otp: emailOtp })
+        });
+        
+        const emailResult = await emailVerifyResponse.json();
+        
+        if (!emailVerifyResponse.ok || !emailResult.success) {
+          throw new Error("Invalid email verification code");
+        }
+        
         setEmailVerified(true);
-      } else {
-        setFormError("Invalid email OTP code");
-        setPhoneVerified(false); // Reset both verifications if one fails
-        setIsVerifying(false);
-        return;
       }
       
       // If both verified successfully, move to password creation
       setCurrentStep("password");
-      setIsVerifying(false);
     } catch (error) {
       console.error("OTP verification error:", error);
-      setFormError("Verification failed. Please try again.");
+      if (error instanceof Error) {
+        setFormError(error.message);
+      } else {
+        setFormError("Verification failed. Please try again.");
+      }
+    } finally {
       setIsVerifying(false);
     }
   };
@@ -151,7 +186,13 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onSubmit, isLoading }) => {
     }
     
     try {
-      await onSubmit(formData);
+      const submissionData = {
+        ...formData,
+        phoneVerified,
+        emailVerified
+      };
+      
+      await onSubmit(submissionData);
     } catch (error) {
       console.error("Signup submission error:", error);
       if (error instanceof Error) {
@@ -242,7 +283,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onSubmit, isLoading }) => {
         <Alert className="bg-blue-50 border-blue-200">
           <InfoIcon className="h-4 w-4 text-blue-500" />
           <AlertDescription className="text-blue-700">
-            Verification codes have been sent to your phone and email. For this demo, use <span className="font-bold">123456</span> for phone and <span className="font-bold">654321</span> for email.
+            Verification codes have been sent to your phone and email. Please enter them below.
           </AlertDescription>
         </Alert>
         

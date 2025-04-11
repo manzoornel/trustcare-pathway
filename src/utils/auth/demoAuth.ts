@@ -1,80 +1,34 @@
 
-import { toast } from "sonner";
-import { demoPatients } from "@/data/demoPatients";
 import { AuthState } from "@/types/auth.types";
 
 /**
  * Check if a user is a demo user
+ * In production, there are no demo users
  */
 export const isDemoUser = (userId?: string): boolean => {
-  return !!userId?.startsWith('demo-');
+  return false; // No demo users in production
 };
 
 /**
  * Handle demo login
+ * In production, this always returns null to force real authentication
  */
 export const handleDemoLogin = (email: string, password: string): AuthState | null => {
-  // Check if it's a demo account
-  const demoUser = demoPatients.find(p => p.email === email && p.password === password);
-  
-  if (demoUser) {
-    const authState: AuthState = {
-      isAuthenticated: true,
-      isVerified: true,
-      needsProfile: false,
-      name: demoUser.name,
-      email: demoUser.email,
-      phone: demoUser.phone,
-      hospitalId: demoUser.hospitalId,
-      profileComplete: true,
-      userId: `demo-${Date.now()}`,
-      rewardPoints: 250
-    };
-    
-    toast.success(`Welcome, ${demoUser.name}! You're logged in as a demo user.`);
-    return authState;
-  }
-  
-  return null;
+  return null; // No demo login in production
 };
 
 /**
  * Handle demo OTP for phone verification
+ * In production, this always returns false to force real OTP verification
  */
 export const handleDemoOTP = (phone: string): boolean => {
-  const isDemoNumber = demoPatients.some(patient => patient.phone === phone);
-  
-  if (isDemoNumber) {
-    toast.success("Demo OTP sent to your phone (simulated)");
-    return true;
-  }
-  
-  return false;
+  return false; // No demo OTP in production
 };
 
 /**
  * Verify demo OTP
+ * In production, this always returns null to force real OTP verification
  */
 export const verifyDemoOTP = (phone: string): AuthState | null => {
-  const demoUser = demoPatients.find(p => p.phone === phone);
-  
-  if (demoUser) {
-    const authState: AuthState = {
-      isAuthenticated: true,
-      isVerified: true,
-      needsProfile: false,
-      name: demoUser.name,
-      email: demoUser.email,
-      phone: demoUser.phone,
-      hospitalId: demoUser.hospitalId,
-      profileComplete: true,
-      userId: `demo-${Date.now()}`,
-      rewardPoints: 250
-    };
-    
-    toast.success(`Welcome, ${demoUser.name}! You're logged in as a demo user.`);
-    return authState;
-  }
-  
-  return null;
+  return null; // No demo OTP verification in production
 };
