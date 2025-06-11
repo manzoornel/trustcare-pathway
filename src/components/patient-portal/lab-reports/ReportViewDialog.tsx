@@ -1,104 +1,30 @@
-
-import React from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { LabReport } from "./mockData";
-import { isWithinRange } from "./utils";
-
-interface ReportViewDialogProps {
-  report: LabReport | null;
+const ReportViewDialog: React.FC<{
+  report: any | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-}
-
-const ReportViewDialog: React.FC<ReportViewDialogProps> = ({
-  report,
-  open,
-  onOpenChange,
-}) => {
+}> = ({ report, open, onOpenChange }) => {
   if (!report) return null;
 
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl">
-        <DialogHeader>
-          <DialogTitle>Lab Report Details</DialogTitle>
-          <DialogDescription>
-            {report.type} - {report.date}
-          </DialogDescription>
-        </DialogHeader>
-        <div className="overflow-y-auto max-h-[60vh]">
-          <div className="grid grid-cols-2 gap-4 mb-6">
-            <div>
-              <p className="text-sm font-medium text-gray-500">Date</p>
-              <p>{report.date}</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-500">Ordered By</p>
-              <p>{report.doctor}</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-500">Type</p>
-              <p>{report.type}</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-500">Status</p>
-              <p>{report.status}</p>
-            </div>
-          </div>
+  const fullPdfUrl = report.pdfUrl.replace(
+    "/var/www/html/mirrors/Dr_Mirror/public",
+    "http://103.99.205.192:8008/mirrors/Dr_Mirror/public"
+  );
 
-          <h3 className="font-medium text-lg mb-3">Results</h3>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Parameter</TableHead>
-                <TableHead>Result</TableHead>
-                <TableHead>Normal Range</TableHead>
-                <TableHead>Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {report.results.map((result, index) => {
-                const isNormal = isWithinRange(result.value, result.normalRange);
-                return (
-                  <TableRow key={index}>
-                    <TableCell>{result.parameter}</TableCell>
-                    <TableCell>
-                      {result.value} {result.unit}
-                    </TableCell>
-                    <TableCell>{result.normalRange}</TableCell>
-                    <TableCell>
-                      <span
-                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                          isNormal
-                            ? "bg-green-100 text-green-800"
-                            : "bg-red-100 text-red-800"
-                        }`}
-                      >
-                        {isNormal ? "Normal" : "Abnormal"}
-                      </span>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
+  return (
+    <div className={`fixed inset-0 bg-black/50 ${open ? "block" : "hidden"}`}>
+      <div className="bg-white rounded-lg w-11/12 max-w-4xl mx-auto mt-3 p-4">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold">Report from {report.date}</h2>
+          <button onClick={() => onOpenChange(false)}>Close</button>
         </div>
-      </DialogContent>
-    </Dialog>
+        <iframe
+          src={fullPdfUrl}
+          width="100%"
+          height="600px"
+          title="Medical Report"
+        />
+      </div>
+    </div>
   );
 };
 

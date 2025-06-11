@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -30,7 +29,7 @@ const SearchAndFilter: React.FC<SearchAndFilterProps> = ({
           onChange={onSearchChange}
         />
       </div>
-      <div className="flex items-center gap-2">
+      {/* <div className="flex items-center gap-2">
         <Button
           variant={isComparing ? "default" : "outline"}
           onClick={onToggleCompare}
@@ -48,7 +47,7 @@ const SearchAndFilter: React.FC<SearchAndFilterProps> = ({
             Compare Selected ({selectedCount})
           </Button>
         )}
-      </div>
+      </div> */}
     </div>
   );
 };

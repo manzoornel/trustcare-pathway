@@ -1,26 +1,26 @@
-
 import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { 
-  Form, 
-  FormControl, 
-  FormField, 
-  FormItem, 
-  FormLabel, 
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
   FormMessage,
-  FormDescription
+  FormDescription,
 } from "@/components/ui/form";
 
 // Define phone validation schema
 const formSchema = z.object({
-  phone: z.string()
+  phone: z
+    .string()
     .min(10, "Phone number must be at least 10 digits")
     .max(15, "Phone number must not exceed 15 digits")
-    .regex(/^\d+$/, "Phone number must contain only digits")
+    .regex(/^\d+$/, "Phone number must contain only digits"),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -31,13 +31,17 @@ interface PhoneLoginFormProps {
   loading: boolean;
 }
 
-const PhoneLoginForm = ({ handlePhoneLogin, error, loading }: PhoneLoginFormProps) => {
+const PhoneLoginForm = ({
+  handlePhoneLogin,
+  error,
+  loading,
+}: PhoneLoginFormProps) => {
   // Initialize react-hook-form with zod resolver
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      phone: ""
-    }
+      phone: "",
+    },
   });
 
   // Form submission handler
@@ -56,6 +60,7 @@ const PhoneLoginForm = ({ handlePhoneLogin, error, loading }: PhoneLoginFormProp
               <FormLabel>Phone Number</FormLabel>
               <FormControl>
                 <Input
+                  type="number"
                   id="phone"
                   placeholder="1234567890"
                   {...field}
@@ -68,9 +73,9 @@ const PhoneLoginForm = ({ handlePhoneLogin, error, loading }: PhoneLoginFormProp
             </FormItem>
           )}
         />
-        
+
         {error && <p className="text-sm text-red-500">{error}</p>}
-        
+
         <Button type="submit" className="w-full" disabled={loading}>
           {loading ? "Sending OTP..." : "Send OTP"}
         </Button>

@@ -1,8 +1,6 @@
-
 import React, { useState, useEffect } from "react";
-import { useAuth } from '@/contexts/auth';
-import { supabase } from '@/integrations/supabase/client';
-import { LabReport } from "./lab-reports/mockData";
+import axios from "axios";
+import { useAuth } from "@/contexts/auth";
 import SearchAndFilter from "./lab-reports/SearchAndFilter";
 import LabReportsTable from "./lab-reports/LabReportsTable";
 import ReportViewDialog from "./lab-reports/ReportViewDialog";
@@ -10,73 +8,79 @@ import ReportComparisonDialog from "./lab-reports/ReportComparisonDialog";
 import { AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import EHRDataSyncButton from "./EHRDataSyncButton";
 
 const LabReportsTab: React.FC = () => {
   const { auth } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
-  const [viewingReport, setViewingReport] = useState<LabReport | null>(null);
+  const [viewingReport, setViewingReport] = useState<any | null>(null);
   const [isComparing, setIsComparing] = useState(false);
   const [selectedReports, setSelectedReports] = useState<string[]>([]);
   const [showCompareDialog, setShowCompareDialog] = useState(false);
-  const [labReports, setLabReports] = useState<LabReport[]>([]);
+  const [labReports, setLabReports] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isEmailVerified, setIsEmailVerified] = useState<boolean>(true);
 
-  // Fetch lab reports from Supabase
-  useEffect(() => {
-    async function fetchLabReports() {
-      try {
-        setIsLoading(true);
-        setError(null);
-        
-        if (!auth.userId) {
-          throw new Error("User not authenticated");
+  const fetchLabReports = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("User not authenticated");
+
+      const response = await axios.post(
+        "http://103.99.205.192:8008/mirrors/Dr_Mirror/public/patientApp/fetchLabReports",
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
-        
-        const { data, error } = await supabase
-          .from('lab_reports')
-          .select('*')
-          .eq('patient_id', auth.userId);
-          
-        if (error) {
-          throw error;
-        }
-        
-        console.log('Lab reports fetched:', data);
-        
-        // Convert the data to LabReport format
-        const formattedData: LabReport[] = data.map((report: any) => ({
-          id: report.id,
-          ehrReferenceId: report.ehr_reference_id,
-          date: report.date,
-          type: report.type,
-          doctor: report.doctor,
-          status: report.status,
-          results: report.results || []
+      );
+      console.log(response, "called");
+
+      const { data } = response.data;
+
+      if (data != null) {
+        const formattedData = data.map((report: any, index: number) => ({
+          id: `${index}`,
+          visitId: report.visit_id,
+          doctor: report.doctor_name,
+          date: report.visit_date,
+          pdfUrl: report.lab_reports,
+          type: report.type || "General",
+          results: report.results || [],
         }));
-        
-        setLabReports(formattedData);
-      } catch (error: any) {
-        console.error('Error fetching lab reports:', error);
-        setError(error.message || "Failed to load lab reports");
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    
-    fetchLabReports();
-  }, [auth.userId]);
 
-  // Filter reports based on search term
+        setLabReports(formattedData);
+      }
+    } catch (error: any) {
+      console.error("Error fetching lab reports:", error);
+      setError(error.message || "Failed to load lab reports");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const emailVerified = localStorage.getItem("is_email_verified");
+    setIsEmailVerified(emailVerified === "1" || emailVerified === "true");
+  }, []);
+
+  useEffect(() => {
+    if (isEmailVerified) {
+      fetchLabReports();
+    }
+  }, [auth.userId, isEmailVerified]);
+
   const filteredReports = labReports.filter(
     (report) =>
-      report.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
       report.doctor.toLowerCase().includes(searchTerm.toLowerCase()) ||
       report.date.includes(searchTerm)
   );
 
-  const handleViewReport = (report: LabReport) => {
+  const handleViewReport = (report: any) => {
     setViewingReport(report);
   };
 
@@ -98,109 +102,73 @@ const LabReportsTab: React.FC = () => {
   };
 
   const handleCompare = () => {
-    if (selectedReports.length < 2) {
-      return;
-    }
+    if (selectedReports.length < 2) return;
     setShowCompareDialog(true);
   };
 
-  const handleSyncComplete = async () => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      const { data, error } = await supabase
-        .from('lab_reports')
-        .select('*')
-        .eq('patient_id', auth.userId);
-        
-      if (error) {
-        throw error;
-      }
-      
-      // Convert the data to LabReport format
-      const formattedData: LabReport[] = data.map((report: any) => ({
-        id: report.id,
-        ehrReferenceId: report.ehr_reference_id,
-        date: report.date,
-        type: report.type,
-        doctor: report.doctor,
-        status: report.status,
-        results: report.results || []
-      }));
-      
-      setLabReports(formattedData);
-    } catch (error: any) {
-      console.error('Error refreshing lab reports:', error);
-      setError(error.message || "Failed to refresh lab reports");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   return (
-    <div className="space-y-4">
-      {labReports.length === 0 && !isLoading && !error && (
-        <Alert variant="default" className="mb-4">
-          <AlertCircle className="h-4 w-4 mr-2" />
-          <AlertDescription>
-            No lab reports found. If you've recently connected your EHR account, try syncing your data.
-            <div className="mt-2">
-              <EHRDataSyncButton 
-                ehrPatientId={auth.hospitalId} 
-                onSyncComplete={handleSyncComplete}
-              />
-            </div>
-          </AlertDescription>
-        </Alert>
+    <div className="relative">
+      {!isEmailVerified && (
+        <div className="absolute inset-0 bg-white bg-opacity-80 z-10 flex flex-col items-center justify-center text-center p-6 rounded-md">
+          <h2 className="text-xl font-semibold mb-2 text-red-600">
+            Email Not Verified
+          </h2>
+          <p className="text-gray-700 mb-4">
+            Please verify your email to access lab reports.
+          </p>
+        </div>
       )}
 
-      {error && (
-        <Alert variant="destructive" className="mb-4">
-          <AlertCircle className="h-4 w-4 mr-2" />
-          <AlertDescription>
-            {error}
-            <div className="mt-2">
-              <Button size="sm" variant="secondary" onClick={handleSyncComplete}>
-                Retry
-              </Button>
-            </div>
-          </AlertDescription>
-        </Alert>
-      )}
+      <div
+        className={`${
+          !isEmailVerified ? "blur-sm pointer-events-none select-none" : ""
+        }`}
+      >
+        {error && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertCircle className="h-4 w-4 mr-2" />
+            <AlertDescription>
+              {error}
+              <div className="mt-2">
+                <Button size="sm" variant="secondary" onClick={fetchLabReports}>
+                  Retry
+                </Button>
+              </div>
+            </AlertDescription>
+          </Alert>
+        )}
 
-      <SearchAndFilter
-        searchTerm={searchTerm}
-        onSearchChange={(e) => setSearchTerm(e.target.value)}
-        isComparing={isComparing}
-        onToggleCompare={handleToggleCompare}
-        onCompare={handleCompare}
-        selectedCount={selectedReports.length}
-      />
+        <SearchAndFilter
+          searchTerm={searchTerm}
+          onSearchChange={(e) => setSearchTerm(e.target.value)}
+          isComparing={isComparing}
+          onToggleCompare={handleToggleCompare}
+          onCompare={handleCompare}
+          selectedCount={selectedReports.length}
+        />
 
-      <LabReportsTable
-        reports={filteredReports}
-        isComparing={isComparing}
-        selectedReports={selectedReports}
-        onReportSelect={handleReportSelect}
-        onViewReport={handleViewReport}
-        isLoading={isLoading}
-      />
+        <LabReportsTable
+          reports={filteredReports}
+          isComparing={isComparing}
+          selectedReports={selectedReports}
+          onReportSelect={handleReportSelect}
+          onViewReport={handleViewReport}
+          isLoading={isLoading}
+        />
 
-      {/* Single Report View Dialog */}
-      <ReportViewDialog
-        report={viewingReport}
-        open={viewingReport !== null}
-        onOpenChange={handleCloseDialog}
-      />
+        <ReportViewDialog
+          report={viewingReport}
+          open={!!viewingReport}
+          onOpenChange={handleCloseDialog}
+        />
 
-      {/* Reports Comparison Dialog */}
-      <ReportComparisonDialog
-        selectedReports={selectedReports}
-        reports={labReports}
-        open={showCompareDialog}
-        onOpenChange={setShowCompareDialog}
-      />
+        <ReportComparisonDialog
+          selectedReports={selectedReports}
+          reports={labReports}
+          open={showCompareDialog}
+          onOpenChange={setShowCompareDialog}
+        />
+      </div>
     </div>
   );
 };

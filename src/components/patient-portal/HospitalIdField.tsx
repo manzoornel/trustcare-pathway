@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { RefreshCw } from "lucide-react";
@@ -12,12 +11,12 @@ type HospitalIdFieldProps = {
   onSync: () => void;
 };
 
-const HospitalIdField = ({ 
-  hospitalId, 
-  isEditing, 
-  isSyncing, 
+const HospitalIdField = ({
+  hospitalId,
+  isEditing,
+  isSyncing,
   onChange,
-  onSync 
+  onSync,
 }: HospitalIdFieldProps) => {
   return (
     <PatientInfoField
@@ -27,7 +26,7 @@ const HospitalIdField = ({
       name="hospitalId"
       onChange={onChange}
     >
-      {!isEditing && (
+      {/* {!isEditing && (
         <Button 
           variant="outline" 
           size="sm" 
@@ -38,7 +37,7 @@ const HospitalIdField = ({
           <RefreshCw className={`h-3 w-3 mr-1 ${isSyncing ? 'animate-spin' : ''}`} />
           {isSyncing ? 'Syncing...' : 'Sync'}
         </Button>
-      )}
+      )} */}
     </PatientInfoField>
   );
 };

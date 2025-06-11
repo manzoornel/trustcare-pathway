@@ -1,80 +1,114 @@
-import React, { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import VitalsTypeSelector from "./VitalsTypeSelector";
-import VitalChart from "./VitalChart";
-import VitalsTable from "./VitalsTable";
-import VitalsComparisonDialog from "./VitalsComparisonDialog";
-import { VitalType, getVitalsByType, getVitalTypeInfo, vitalTypes } from "./index";
+import React, { useEffect, useState } from "react";
+import { toast } from "react-toastify";
+import { instance } from "../../../axios";
+import { useNavigate } from "react-router-dom";
+import Fetchvitals from "../Fetchvisit";
+
+interface Vital {
+  name: string;
+  vital_value: string;
+  time_taken: string;
+  remark_id: number;
+  max_value?: string;
+  min_value?: string;
+  vital_status?: string;
+}
+
+type VitalsData = {
+  [timestamp: string]: Vital[];
+};
+
+type PivotedVitals = {
+  [vitalName: string]: {
+    [timestamp: string]: string; // vital_value
+  };
+};
 
 const VitalsReportsTab: React.FC = () => {
-  const [selectedVitalType, setSelectedVitalType] = useState<VitalType>("blood_pressure");
-  const [viewMode, setViewMode] = useState<"chart" | "table">("chart");
-  const [isComparing, setIsComparing] = useState(false);
-  const [compareOpen, setCompareOpen] = useState(false);
-  
-  const vitalTypeInfo = getVitalTypeInfo(selectedVitalType);
-  const vitalRecords = getVitalsByType(selectedVitalType);
-  
-  const handleCompare = () => {
-    setCompareOpen(true);
+  const [data, setData] = useState<VitalsData>({});
+  const [currentVisit, setCurrentVisit] = useState("");
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    fetchVitals();
+  }, [currentVisit]);
+
+  const fetchVitals = async () => {
+    try {
+      const { data } = await instance.post(
+        "fetchPatientVitals",
+        {},
+        {
+          params: { visit_id: currentVisit },
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        }
+      );
+      if (data.code === 1) {
+        setData(data.data || {});
+      } else if (
+        data.code === 0 &&
+        (data.status === "Invalid token payload." ||
+          data.status === "Wrong token")
+      ) {
+        toast.error("Invalid token. Please log in again.");
+        localStorage.clear();
+        setData({});
+        navigate("/login", { replace: true });
+      } else {
+        console.error("Error Fetching vitals:", data.status);
+        setData({});
+      }
+    } catch (error) {
+      console.error("Error Fetching vitals:", error);
+    }
   };
-  
+
+  const pivotVitals = (rawData: VitalsData): PivotedVitals => {
+    const result: PivotedVitals = {};
+    Object.entries(rawData).forEach(([timestamp, vitals]) => {
+      vitals.forEach((vital) => {
+        if (!result[vital.name]) result[vital.name] = {};
+        result[vital.name][timestamp] = vital.vital_value;
+      });
+    });
+    return result;
+  };
+
+  const pivotedData = pivotVitals(data);
+  const allDates = Object.keys(data);
+
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader className="pb-3">
-          <div className="flex justify-between items-center">
-            <div>
-              <CardTitle className="text-xl">Vitals Reports</CardTitle>
-              <CardDescription>
-                Track your vital signs and health measurements over time
-              </CardDescription>
-            </div>
-            <Button onClick={handleCompare} variant="outline">
-              Compare Vitals
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div className="md:col-span-3">
-              <VitalsTypeSelector 
-                vitalTypes={vitalTypes} 
-                selectedType={selectedVitalType}
-                onSelectType={setSelectedVitalType}
-              />
-            </div>
-            <div className="md:col-span-1">
-              <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as "chart" | "table")} className="w-full">
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="chart">Chart View</TabsTrigger>
-                  <TabsTrigger value="table">Table View</TabsTrigger>
-                </TabsList>
-              </Tabs>
-            </div>
-          </div>
-          
-          <div className="bg-white p-4 rounded-lg shadow-sm">
-            <TabsContent value="chart" className="mt-0">
-              <div className="h-[400px]">
-                <VitalChart records={vitalRecords} vitalType={vitalTypeInfo} />
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="table" className="mt-0">
-              <VitalsTable records={vitalRecords} vitalType={vitalTypeInfo} />
-            </TabsContent>
-          </div>
-        </CardContent>
-      </Card>
-      
-      <VitalsComparisonDialog 
-        open={compareOpen} 
-        onOpenChange={setCompareOpen}
-      />
-    </div>
+    <>
+      <div className="overflow-x-auto rounded border mt-6">
+        <table className="min-w-full text-sm text-left text-gray-700 border-collapse">
+          <thead className="bg-gray-100">
+            <tr>
+              <th className="px-4 py-2 border">Test</th>
+              {allDates.map((date) => (
+                <th key={date} className="px-4 py-2 border whitespace-nowrap">
+                  {date.split(" ")[0]}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {Object.entries(pivotedData).map(([vitalName, values]) => (
+              <tr key={vitalName}>
+                <td className="px-4 py-2 border font-medium">{vitalName}</td>
+                {allDates.map((date) => (
+                  <td key={date} className="px-4 py-2 border text-center">
+                    {values[date] || "-"}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {Object.keys(pivotedData).length === 0 && (
+          <div className="p-4 text-center text-gray-500">No vitals found</div>
+        )}
+      </div>
+    </>
   );
 };
 

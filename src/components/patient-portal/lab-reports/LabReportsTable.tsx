@@ -1,4 +1,3 @@
-
 import React from "react";
 import {
   Table,
@@ -36,7 +35,7 @@ const LabReportsTable: React.FC<LabReportsTableProps> = ({
   selectedReports,
   onReportSelect,
   onViewReport,
-  isLoading = false
+  isLoading = false,
 }) => {
   return (
     <div className="bg-white rounded-lg border overflow-hidden">
@@ -47,23 +46,30 @@ const LabReportsTable: React.FC<LabReportsTableProps> = ({
             <TableHead>Date</TableHead>
             <TableHead>Type</TableHead>
             <TableHead>Ordered By</TableHead>
-            <TableHead>Status</TableHead>
             <TableHead className="w-24">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {isLoading ? (
             <TableRow>
-              <TableCell colSpan={isComparing ? 6 : 5} className="text-center py-8">
+              <TableCell
+                colSpan={isComparing ? 6 : 5}
+                className="text-center py-8"
+              >
                 <div className="flex justify-center">
                   <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
                 </div>
-                <div className="mt-2 text-sm text-gray-500">Loading lab reports...</div>
+                <div className="mt-2 text-sm text-gray-500">
+                  Loading lab reports...
+                </div>
               </TableCell>
             </TableRow>
           ) : reports.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={isComparing ? 6 : 5} className="text-center py-8">
+              <TableCell
+                colSpan={isComparing ? 6 : 5}
+                className="text-center py-8"
+              >
                 No lab reports found.
               </TableCell>
             </TableRow>
@@ -81,7 +87,7 @@ const LabReportsTable: React.FC<LabReportsTableProps> = ({
                 <TableCell>{report.date}</TableCell>
                 <TableCell>{report.type}</TableCell>
                 <TableCell>{report.doctor}</TableCell>
-                <TableCell>
+                {/* <TableCell>
                   <span
                     className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
                       report.status === "Completed"
@@ -91,7 +97,7 @@ const LabReportsTable: React.FC<LabReportsTableProps> = ({
                   >
                     {report.status}
                   </span>
-                </TableCell>
+                </TableCell> */}
                 <TableCell>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -106,10 +112,10 @@ const LabReportsTable: React.FC<LabReportsTableProps> = ({
                         <FileText className="h-4 w-4 mr-2" />
                         View Report
                       </DropdownMenuItem>
-                      <DropdownMenuItem>
+                      {/* <DropdownMenuItem>
                         <Download className="h-4 w-4 mr-2" />
                         Download PDF
-                      </DropdownMenuItem>
+                      </DropdownMenuItem> */}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>

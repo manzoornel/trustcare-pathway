@@ -1,53 +1,66 @@
-
 import React, { useState, useEffect } from "react";
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardHeader, 
-  CardTitle 
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
 } from "@/components/ui/card";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
+import { instance } from "../../axios";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Eye } from "lucide-react";
 
 type Medication = {
   id: string;
-  name: string;
-  dosage: string;
-  frequency: string;
-  prescribed: string;
-  doctor: string;
+  visit_date: string;
+
+  doctor_name: string;
+  pdf_url: string;
 };
 
 const MedicationsTab = () => {
   const [medications, setMedications] = useState<Medication[]>([]);
+  const [selectedPdf, setSelectedPdf] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
   const { auth } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchMedications();
-  }, [auth.userId]);
+  }, []);
 
   const fetchMedications = async () => {
-    if (!auth.userId) return;
-
     try {
       setIsLoading(true);
-      const { data, error } = await supabase
-        .from('medications')
-        .select('*')
-        .eq('patient_id', auth.userId)
-        .order('prescribed', { ascending: false });
+      const { data } = await instance.post(
+        "fetchPatientMedications",
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
 
-      if (error) throw error;
-
-      if (data) {
-        setMedications(data as Medication[]);
+      if (data.code === 1) {
+        setMedications(data.data || []);
+      } else if (
+        data.code === 0 &&
+        (data.status === "Invalid token payload." ||
+          data.status === "Wrong token")
+      ) {
+        toast.error("Invalid token. Please log in again.");
+        localStorage.clear();
+        navigate("/login", { replace: true });
+      } else {
+        console.error("Error fetching medications:", data.status);
       }
     } catch (error) {
       console.error("Error fetching medications:", error);
-      toast.error("Failed to load medications");
     } finally {
       setIsLoading(false);
     }
@@ -68,32 +81,46 @@ const MedicationsTab = () => {
           </div>
         ) : medications.length === 0 ? (
           <div className="py-8 text-center text-gray-500">
-            No medications found
+            No medications found.
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
-              <thead>
-                <tr className="bg-gray-100">
-                  <th className="text-left p-3 border-b">Medication</th>
-                  <th className="text-left p-3 border-b">Dosage</th>
-                  <th className="text-left p-3 border-b">Frequency</th>
-                  <th className="text-left p-3 border-b">Prescribed</th>
-                  <th className="text-left p-3 border-b">Doctor</th>
-                </tr>
-              </thead>
-              <tbody>
-                {medications.map((medication) => (
-                  <tr key={medication.id} className="hover:bg-gray-50">
-                    <td className="p-3 border-b">{medication.name}</td>
-                    <td className="p-3 border-b">{medication.dosage}</td>
-                    <td className="p-3 border-b">{medication.frequency}</td>
-                    <td className="p-3 border-b">{medication.prescribed}</td>
-                    <td className="p-3 border-b">{medication.doctor}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="space-y-4">
+            {medications.map((med, index) => (
+              <div
+                key={med.id || index}
+                className="flex items-center justify-between border p-3 rounded-md shadow-sm"
+              >
+                <div>
+                  <p className="text-sm text-gray-600">Date:{med.visit_date}</p>
+                  <p className="text-sm text-gray-600">
+                    Doctor: {med.doctor_name}
+                  </p>
+                </div>
+
+                {med.pdf_url && (
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => setSelectedPdf(med.pdf_url)}
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="w-full max-w-3xl h-[80vh]">
+                      <iframe
+                        src={selectedPdf}
+                        title="Medication Report"
+                        width="100%"
+                        height="100%"
+                        style={{ border: "none" }}
+                      />
+                    </DialogContent>
+                  </Dialog>
+                )}
+              </div>
+            ))}
           </div>
         )}
       </CardContent>
