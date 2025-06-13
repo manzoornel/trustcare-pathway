@@ -1,6 +1,5 @@
 import axios from "axios";
-const baseURL =
-  "http://103.99.205.192:8008/mirrors/Dr_Mirror/public/patientApp/";
+const baseURL = "https://clinictrial.grandissolutions.in/patientApp/";
 
 export const instancetoken = axios.create({
   baseURL,
