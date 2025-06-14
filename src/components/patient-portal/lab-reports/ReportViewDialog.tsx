@@ -7,7 +7,7 @@ const ReportViewDialog: React.FC<{
 
   const fullPdfUrl = report.pdfUrl.replace(
     "/var/www/html/mirrors/Dr_Mirror/public",
-    "http://103.99.205.192:8008/mirrors/Dr_Mirror/public"
+    "https://clinictrial.grandissolutions.in/patientApp/"
   );
 
   return (

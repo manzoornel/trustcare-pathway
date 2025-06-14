@@ -1,5 +1,4 @@
-
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -18,38 +17,38 @@ export const useEHRConfig = () => {
   const fetchConfig = async () => {
     try {
       setIsLoading(true);
-      
+
       const { data, error } = await supabase
-        .from('ehr_integration')
-        .select('*')
+        .from("ehr_integration")
+        .select("*")
         .limit(1)
         .single();
-      
-      if (error && error.code !== 'PGRST116') {
+
+      if (error && error.code !== "PGRST116") {
         // PGRST116 means no rows returned, which is fine for first-time setup
-        console.error('Error fetching EHR config:', error);
-        toast.error('Failed to load EHR configuration');
+        console.error("Error fetching EHR config:", error);
+        toast.error("Failed to load EHR configuration");
         throw error;
       }
-      
+
       if (data) {
         setConfig({
           id: data.id,
           apiEndpoint: data.api_endpoint,
           apiKey: data.api_key,
           isActive: data.is_active,
-          lastSyncTime: data.last_sync_time
+          lastSyncTime: data.last_sync_time,
         });
       } else {
         // Default config for first-time setup
         setConfig({
-          apiEndpoint: 'http://103.99.205.192:8008/mirrors/Dr_Mirror/public',
-          apiKey: '',
-          isActive: false
+          apiEndpoint: "https://clinictrial.grandissolutions.in/patientApp/",
+          apiKey: "",
+          isActive: false,
         });
       }
     } catch (error) {
-      console.error('Error in fetchConfig:', error);
+      console.error("Error in fetchConfig:", error);
     } finally {
       setIsLoading(false);
     }
@@ -60,33 +59,33 @@ export const useEHRConfig = () => {
       if (config?.id) {
         // Update existing config
         const { error } = await supabase
-          .from('ehr_integration')
+          .from("ehr_integration")
           .update({
             api_endpoint: newConfig.apiEndpoint,
             api_key: newConfig.apiKey,
-            is_active: newConfig.isActive
+            is_active: newConfig.isActive,
           })
-          .eq('id', config.id);
-        
+          .eq("id", config.id);
+
         if (error) throw error;
       } else {
         // Insert new config
-        const { error } = await supabase
-          .from('ehr_integration')
-          .insert({
-            api_endpoint: newConfig.apiEndpoint,
-            api_key: newConfig.apiKey,
-            is_active: newConfig.isActive
-          });
-        
+        const { error } = await supabase.from("ehr_integration").insert({
+          api_endpoint: newConfig.apiEndpoint,
+          api_key: newConfig.apiKey,
+          is_active: newConfig.isActive,
+        });
+
         if (error) throw error;
       }
-      
+
       // Update local state
-      setConfig(prev => prev ? { ...prev, ...newConfig } : newConfig as EHRConfig);
+      setConfig((prev) =>
+        prev ? { ...prev, ...newConfig } : (newConfig as EHRConfig)
+      );
       return true;
     } catch (error) {
-      console.error('Error updating EHR config:', error);
+      console.error("Error updating EHR config:", error);
       throw error;
     }
   };
@@ -94,29 +93,29 @@ export const useEHRConfig = () => {
   const testConnection = async (apiEndpoint: string, apiKey: string) => {
     try {
       // Use the ehr-sync edge function to test the connection
-      const { data, error } = await supabase.functions.invoke('ehr-sync', {
-        body: { 
-          action: 'test',
+      const { data, error } = await supabase.functions.invoke("ehr-sync", {
+        body: {
+          action: "test",
           config: {
             api_endpoint: apiEndpoint,
-            api_key: apiKey
-          }
-        }
+            api_key: apiKey,
+          },
+        },
       });
-      
+
       if (error) throw error;
-      
+
       return {
         success: data.success,
-        message: data.message || 'Connection successful',
+        message: data.message || "Connection successful",
         statusCode: data.statusCode,
-        responseBody: data.responseBody
+        responseBody: data.responseBody,
       };
     } catch (error: any) {
-      console.error('Error testing EHR connection:', error);
+      console.error("Error testing EHR connection:", error);
       return {
         success: false,
-        message: error.message || 'Connection failed'
+        message: error.message || "Connection failed",
       };
     }
   };
@@ -130,6 +129,6 @@ export const useEHRConfig = () => {
     config,
     fetchConfig,
     updateConfig,
-    testConnection
+    testConnection,
   };
 };
