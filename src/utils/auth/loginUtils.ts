@@ -43,7 +43,7 @@ export const handleLogin = async (email: string, password: string): Promise<Auth
     phone: profile?.phone,
     hospitalId: profile?.hospital_id,
     profileComplete: !!profile,
-    rewardPoints: profile?.reward_points || 0,
+    rewardPoints: 0,
   };
 
   toast.success("Login successful!");
@@ -155,7 +155,7 @@ export const handleVerifyOTP = async (phone: string, otp: string): Promise<AuthS
       phone: profile.phone,
       hospitalId: profile.hospital_id,
       profileComplete: true,
-      rewardPoints: profile.reward_points || 0,
+      rewardPoints: 0,
     };
     
     toast.success("OTP verified successfully!");
