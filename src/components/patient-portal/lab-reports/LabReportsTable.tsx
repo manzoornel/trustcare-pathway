@@ -27,6 +27,7 @@ interface LabReportsTableProps {
   onReportSelect: (report: LabReport) => void;
   onViewReport: (report: LabReport) => void;
   isLoading?: boolean;
+  onToggleSelectAll?: (selectAll: boolean) => void;
 }
 
 const LabReportsTable: React.FC<LabReportsTableProps> = ({
@@ -36,7 +37,14 @@ const LabReportsTable: React.FC<LabReportsTableProps> = ({
   onReportSelect,
   onViewReport,
   isLoading = false,
+  onToggleSelectAll,
 }) => {
+  const visibleVisitIds = new Set(reports.map((r) => r.visitId));
+  const selectedVisitIds = new Set(selectedReports.map((r) => r.visitId));
+  const allVisibleSelected =
+    reports.length > 0 && reports.every((r) => selectedVisitIds.has(r.visitId));
+  const someVisibleSelected =
+    !allVisibleSelected && reports.some((r) => selectedVisitIds.has(r.visitId));
   return (
     <div className="bg-white rounded-lg border overflow-hidden">
       {/* Horizontal scroll container for mobile */}
@@ -44,7 +52,23 @@ const LabReportsTable: React.FC<LabReportsTableProps> = ({
         <Table className="min-w-full">
           <TableHeader>
             <TableRow>
-              {isComparing && <TableHead className="w-12"></TableHead>}
+              {isComparing && (
+                <TableHead className="w-12">
+                  <Checkbox
+                    checked={
+                      allVisibleSelected
+                        ? true
+                        : someVisibleSelected
+                        ? "indeterminate"
+                        : false
+                    }
+                    onCheckedChange={(checked) =>
+                      onToggleSelectAll && onToggleSelectAll(checked === true)
+                    }
+                    aria-label="Select all visible lab reports"
+                  />
+                </TableHead>
+              )}
               <TableHead>Date</TableHead>
               <TableHead>Type</TableHead>
               <TableHead>Ordered By</TableHead>

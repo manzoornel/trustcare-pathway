@@ -164,6 +164,32 @@ const LabReportsTab: React.FC = () => {
           onReportSelect={handleReportSelect}
           onViewReport={handleViewReport}
           isLoading={isLoading}
+          onToggleSelectAll={(selectAll) => {
+            if (selectAll) {
+              // Select all currently visible filtered reports
+              const newIds = filteredReports.map((r) => r.visitId);
+              setSelectedReportsids((prev) =>
+                Array.from(new Set([...prev, ...newIds]))
+              );
+              // Add full report objects, avoid duplicates by visitId
+              setSelectedReports((prev) => {
+                const existingById = new Map(
+                  prev.map((r: any) => [r.visitId, r])
+                );
+                filteredReports.forEach((r) => existingById.set(r.visitId, r));
+                return Array.from(existingById.values());
+              });
+            } else {
+              // Deselect all currently visible filtered reports
+              const visibleIds = new Set(filteredReports.map((r) => r.visitId));
+              setSelectedReportsids((prev) =>
+                prev.filter((id) => !visibleIds.has(id))
+              );
+              setSelectedReports((prev) =>
+                prev.filter((r) => !visibleIds.has(r.visitId))
+              );
+            }
+          }}
         />
 
         <ReportViewDialog
