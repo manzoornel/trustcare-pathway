@@ -14,7 +14,9 @@ const LabReportsTab: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [viewingReport, setViewingReport] = useState<any | null>(null);
   const [isComparing, setIsComparing] = useState(false);
-  const [selectedReports, setSelectedReports] = useState<string[]>([]);
+  const [selectedReports, setSelectedReports] = useState<any[]>([]);
+  const [selectedReportsids, setSelectedReportsids] = useState<any[]>([]);
+
   const [showCompareDialog, setShowCompareDialog] = useState(false);
   const [labReports, setLabReports] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -48,11 +50,11 @@ const LabReportsTab: React.FC = () => {
           visitId: report.visit_id,
           doctor: report.doctor_name,
           date: report.visit_date,
-          pdfUrl: report.lab_reports,
+          pdfUrl: report.lab_reports?.fullPath || "",
           type: report.type || "General",
-          results: report.results || [],
+          // Align with API response structure for comparison dialog
+          result: report.lab_reports?.result || [],
         }));
-
         setLabReports(formattedData);
       }
     } catch (error: any) {
@@ -92,12 +94,20 @@ const LabReportsTab: React.FC = () => {
     setIsComparing(!isComparing);
     setSelectedReports([]);
   };
-
-  const handleReportSelect = (reportId: string) => {
-    if (selectedReports.includes(reportId)) {
-      setSelectedReports(selectedReports.filter((id) => id !== reportId));
+  const handleReportSelect = (report: any) => {
+    const isSelected = selectedReportsids.includes(report.visitId);
+    if (isSelected) {
+      // Deselect
+      setSelectedReportsids((prev) =>
+        prev.filter((id) => id !== report.visitId)
+      );
+      setSelectedReports((prev) =>
+        prev.filter((r) => r.visitId !== report.visitId)
+      );
     } else {
-      setSelectedReports([...selectedReports, reportId]);
+      // Select
+      setSelectedReportsids((prev) => [...prev, report.visitId]);
+      setSelectedReports((prev) => [...prev, report]);
     }
   };
 

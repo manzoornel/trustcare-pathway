@@ -1,4 +1,3 @@
-
 import React, { useEffect } from "react";
 import { Helmet } from "react-helmet";
 import Navbar from "@/components/Navbar";
@@ -26,9 +25,13 @@ const Doctors = () => {
         <div className="py-12 bg-gradient-to-b from-blue-50 to-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-8">
-              <h1 className="text-4xl font-bold text-gray-900 mb-4">Our Medical Team</h1>
+              <h1 className="text-4xl font-bold text-gray-900 mb-4">
+                Our Medical Team
+              </h1>
               <p className="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">
-                Meet the experienced physicians behind Doctor Uncle Family Clinic, committed to providing you and your family with the best care.
+                Meet the experienced physicians behind Doctor Uncle Family
+                Clinic, committed to providing you and your family with the best
+                care.
               </p>
             </div>
           </div>

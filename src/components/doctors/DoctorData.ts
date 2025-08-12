@@ -1,4 +1,3 @@
-
 export interface Doctor {
   id: string;
   name: string;
@@ -24,7 +23,7 @@ export const doctors: Doctor[] = [
     experience: "20+ years",
     languages: ["English", "Hindi", "Urdu", "Malayalam"],
     availableDays: ["Monday", "Tuesday", "Wednesday", "Thursday", "Saturday"],
-    featured: true
+    featured: true,
   },
   {
     id: "dr-shameem",
@@ -36,7 +35,7 @@ export const doctors: Doctor[] = [
     experience: "12 years",
     languages: ["English", "Hindi", "Malayalam"],
     availableDays: ["Monday", "Wednesday", "Friday"],
-    featured: true
+    featured: true,
   },
   {
     id: "dr-wazeem",
@@ -48,7 +47,7 @@ export const doctors: Doctor[] = [
     experience: "15 years",
     languages: ["English", "Hindi", "Malayalam"],
     availableDays: ["Tuesday", "Thursday", "Saturday"],
-    featured: true
+    featured: true,
   },
   {
     id: "dr-praveen",
@@ -60,7 +59,7 @@ export const doctors: Doctor[] = [
     experience: "10 years",
     languages: ["English", "Malayalam", "Tamil"],
     availableDays: ["Monday", "Wednesday", "Friday"],
-    featured: false
+    featured: false,
   },
   {
     id: "dr-shaharban",
@@ -72,7 +71,7 @@ export const doctors: Doctor[] = [
     experience: "8 years",
     languages: ["English", "Malayalam", "Hindi"],
     availableDays: ["Tuesday", "Thursday", "Saturday"],
-    featured: false
+    featured: false,
   },
   {
     id: "dr-mansheer",
@@ -84,7 +83,7 @@ export const doctors: Doctor[] = [
     experience: "7 years",
     languages: ["English", "Hindi", "Malayalam"],
     availableDays: ["Monday", "Wednesday", "Friday"],
-    featured: false
+    featured: false,
   },
   {
     id: "dr-vijay",
@@ -96,13 +95,13 @@ export const doctors: Doctor[] = [
     experience: "9 years",
     languages: ["English", "Malayalam", "Tamil"],
     availableDays: ["Tuesday", "Thursday", "Saturday"],
-    featured: false
-  }
+    featured: false,
+  },
 ];
 
 // Helper functions to access doctor data
 export const getFeaturedDoctors = (): Doctor[] => {
-  return doctors.filter(doctor => doctor.featured);
+  return doctors.filter((doctor) => doctor.featured);
 };
 
 export const getAllDoctors = (): Doctor[] => {
@@ -110,5 +109,5 @@ export const getAllDoctors = (): Doctor[] => {
 };
 
 export const getDoctorById = (id: string): Doctor | undefined => {
-  return doctors.find(doctor => doctor.id === id);
+  return doctors.find((doctor) => doctor.id === id);
 };

@@ -50,11 +50,10 @@ const PatientInfoCard: React.FC<PatientInfoCardProps> = ({
   const missingHospitalId = !formData.hospitalId;
   const [patients, setPatients] = useState<Patient[]>([]);
   const [currentPatient, setCurrentPatient] = useState<string>(
-    localStorage.getItem("patient_id")
+    localStorage.getItem("patient_id") || ""
   );
   const [otp, setOtp] = useState<string>("");
   const [otperror, setOtperror] = useState<string>("");
-
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const fetchPatients = useCallback(async () => {
@@ -94,21 +93,12 @@ const PatientInfoCard: React.FC<PatientInfoCardProps> = ({
   }, [navigate]);
 
   useEffect(() => {
-    let isMounted = true;
-
-    if (isMounted) {
-      fetchPatients();
-    }
-
-    return () => {
-      isMounted = false;
-    };
+    fetchPatients();
   }, [fetchPatients]);
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
-      console.log(otp);
       setOtperror("");
       if (!otp || otp.length !== 6) {
         setOtperror("OTP must be exactly 6 digits.");
@@ -139,7 +129,6 @@ const PatientInfoCard: React.FC<PatientInfoCardProps> = ({
 
         if (response.data.code === 1) {
           toast.success("Profile updated successfully");
-          setShowVerifyModal(false);
           if (
             response?.data?.data?.is_email_verified == 1 ||
             response?.data?.data?.is_email_verified == true
@@ -153,7 +142,6 @@ const PatientInfoCard: React.FC<PatientInfoCardProps> = ({
             localStorage.setItem("email", "");
             localStorage.setItem("is_email_verified", "0");
           }
-
           setOtp("");
           setOtperror("");
         } else if (
@@ -161,13 +149,8 @@ const PatientInfoCard: React.FC<PatientInfoCardProps> = ({
           response.data.status === "Invalid OTP."
         ) {
           setOtperror("Invalid otp.");
-
           toast.error("Invalid Otp.");
-          console.log(showVerifyModal);
-
           setShowVerifyModal(true);
-
-          return;
         } else if (
           response.data.code === 0 &&
           (response.data.status === "Invalid token payload." ||
@@ -187,13 +170,11 @@ const PatientInfoCard: React.FC<PatientInfoCardProps> = ({
         setIsLoading(false);
       }
     },
-
-    [otp, formData.email, navigate, handleSave, setShowVerifyModal]
+    [otp, formData.email, navigate, setShowVerifyModal]
   );
 
   const handleswitch = async (e) => {
     e.preventDefault();
-
     try {
       setIsLoading(true);
       const response = await instance.post(
@@ -207,17 +188,14 @@ const PatientInfoCard: React.FC<PatientInfoCardProps> = ({
           },
         }
       );
-      console.log(response);
 
       if (response.data.code === 1) {
         toast.success("Profile updated successfully");
-
         localStorage.setItem("email", response?.data?.data?.email);
         localStorage.setItem(
           "is_email_verified",
           response?.data?.data?.is_email_verified
         );
-
         localStorage.setItem("patient_id", response?.data?.data?.patient_id);
         localStorage.setItem(
           "patient_name",
@@ -238,18 +216,20 @@ const PatientInfoCard: React.FC<PatientInfoCardProps> = ({
         navigate("/login", { replace: true });
       } else {
         toast.error("Failed to verify OTP");
-        setOtperror("Failed to verify OTP.");
       }
     } catch (error) {
       toast.error("Failed to update profile");
       console.error("Error updating profile:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
+
   return (
     <Card className="mb-8">
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
+      <CardHeader className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 pb-2">
         <CardTitle>Patient Information</CardTitle>
-        <div className="flex gap-2 items-center">
+        <div className="flex gap-2 items-center flex-wrap">
           {isDemoAccount && (
             <div className="text-xs px-2 py-1 bg-yellow-100 text-yellow-800 rounded">
               Demo Account
@@ -316,7 +296,7 @@ const PatientInfoCard: React.FC<PatientInfoCardProps> = ({
         </div>
 
         <select
-          className="mt-4 bg-[#ECECFB] p-2 rounded-lg text-sm w-[250px] border border-gray-300 outline-none"
+          className="mt-4 bg-[#ECECFB] p-2 rounded-lg text-sm w-full sm:w-[250px] border border-gray-300 outline-none"
           value={currentPatient}
           onChange={(e) => handleswitch(e)}
           disabled={isLoading}
@@ -366,6 +346,9 @@ const PatientInfoCard: React.FC<PatientInfoCardProps> = ({
               <p className="text-sm text-gray-500 mb-4">
                 Please enter the 6-digit code sent to your email.
               </p>
+              <p className="text-sm text-gray-500 mb-4">
+                Note:It may take sometime
+              </p>
               <input
                 type="text"
                 value={otp}
@@ -375,12 +358,12 @@ const PatientInfoCard: React.FC<PatientInfoCardProps> = ({
                 placeholder="------"
                 disabled={isLoading}
               />
-              {otperror && <h6 style={{ color: "red" }}>{otperror}</h6>}
-              <div className="flex justify-center gap-4">
+              {otperror && <h6 className="text-red-500">{otperror}</h6>}
+              <div className="flex flex-col sm:flex-row justify-center gap-4">
                 <Button
                   onClick={handleSubmit}
                   disabled={isLoading}
-                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 w-full sm:w-auto"
                 >
                   {isLoading ? "Submitting..." : "Submit"}
                 </Button>
@@ -390,7 +373,7 @@ const PatientInfoCard: React.FC<PatientInfoCardProps> = ({
                     setShowVerifyModal(false);
                   }}
                   disabled={isLoading}
-                  className="px-4 py-2 border border-gray-400 text-gray-700 rounded hover:bg-gray-100 disabled:opacity-50"
+                  className="px-4 py-2 border border-gray-400 text-gray-700 rounded hover:bg-gray-100 disabled:opacity-50 w-full sm:w-auto"
                 >
                   Cancel
                 </Button>
