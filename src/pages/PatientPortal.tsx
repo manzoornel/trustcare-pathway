@@ -8,6 +8,9 @@ import { toast, ToastContainer } from "react-toastify";
 const PatientPortal: React.FC = () => {
   const { auth } = useAuth();
   const [activeTab, setActiveTab] = useState("labReports");
+  const [openPatientInfoEdit, setOpenPatientInfoEdit] = useState<
+    (() => void) | null
+  >(null);
   const navigate = useNavigate();
 
   const handleClick = () => {
@@ -69,6 +72,7 @@ const PatientPortal: React.FC = () => {
             hospitalId={auth.hospitalId}
             phone={auth.phone}
             email={auth.email}
+            onRegisterOpenEdit={(fn) => setOpenPatientInfoEdit(() => fn)}
           />
           {/* Optional future components like RewardsCard */}
         </div>
@@ -78,6 +82,7 @@ const PatientPortal: React.FC = () => {
           <PortalTabsSection
             activeTab={activeTab}
             setActiveTab={setActiveTab}
+            openPatientInfoEdit={openPatientInfoEdit || undefined}
           />
         </div>
       </div>

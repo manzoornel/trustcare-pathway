@@ -81,7 +81,7 @@ const parseDateString = (input: string): Date => {
   return new Date(year, month - 1, day, hour, minute);
 };
 
-const ReportComparisonDialog: React.FC<ReportComparisonDialogProps> = ({
+export const ReportComparisonDialog: React.FC<ReportComparisonDialogProps> = ({
   selectedReports,
   reports,
   open,
@@ -104,7 +104,6 @@ const ReportComparisonDialog: React.FC<ReportComparisonDialogProps> = ({
   );
   const paramList = Array.from(allParameters);
 
-  console.log(selectedData, allParameters, paramList, reports, selectedReports);
   // Dynamically load jsPDF + autotable from CDN and download PDF without opening a new page
   const ensureJsPDF = async (): Promise<any> => {
     const w = window as any;

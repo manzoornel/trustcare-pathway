@@ -22,6 +22,7 @@ interface PatientInfoCardProps {
   hospitalId?: string;
   phone?: string;
   email?: string;
+  onRegisterOpenEdit?: (openEdit: () => void) => void;
 }
 
 const PatientInfoCard: React.FC<PatientInfoCardProps> = ({
@@ -29,6 +30,7 @@ const PatientInfoCard: React.FC<PatientInfoCardProps> = ({
   hospitalId,
   phone,
   email,
+  onRegisterOpenEdit,
 }) => {
   const navigate = useNavigate();
   const { auth } = useAuth();
@@ -55,6 +57,26 @@ const PatientInfoCard: React.FC<PatientInfoCardProps> = ({
   const [otp, setOtp] = useState<string>("");
   const [otperror, setOtperror] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  // Collapse behavior for very small devices (<500px)
+  const [isSmallScreen, setIsSmallScreen] = useState<boolean>(() =>
+    typeof window !== "undefined" ? window.innerWidth < 500 : false
+  );
+  const [isCollapsed, setIsCollapsed] = useState<boolean>(() =>
+    typeof window !== "undefined" ? window.innerWidth < 500 : false
+  );
+
+  useEffect(() => {
+    const onResize = () => {
+      const small = window.innerWidth < 500;
+      setIsSmallScreen(small);
+      if (!small) {
+        setIsCollapsed(false);
+      }
+    };
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
 
   const fetchPatients = useCallback(async () => {
     try {
@@ -95,6 +117,18 @@ const PatientInfoCard: React.FC<PatientInfoCardProps> = ({
   useEffect(() => {
     fetchPatients();
   }, [fetchPatients]);
+
+  // Expose an external way to open the edit state from other tabs (e.g., Lab Reports)
+  useEffect(() => {
+    if (onRegisterOpenEdit) {
+      onRegisterOpenEdit(() => {
+        if (isSmallScreen) {
+          setIsCollapsed(false);
+        }
+        setIsEditing(true);
+      });
+    }
+  }, [onRegisterOpenEdit, setIsEditing, isSmallScreen]);
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
@@ -235,7 +269,17 @@ const PatientInfoCard: React.FC<PatientInfoCardProps> = ({
               Demo Account
             </div>
           )}
-          {!isEditing && (
+          {isSmallScreen && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsCollapsed((c) => !c)}
+              className="flex items-center gap-1"
+            >
+              {isCollapsed ? "Show" : "Hide"}
+            </Button>
+          )}
+          {(!isSmallScreen || !isCollapsed) && !isEditing && (
             <Button
               variant="ghost"
               size="sm"
@@ -264,7 +308,12 @@ const PatientInfoCard: React.FC<PatientInfoCardProps> = ({
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Collapsible Patient Info fields on very small screens */}
+        <div
+          className={`${
+            isSmallScreen && isCollapsed ? "hidden" : "grid"
+          } grid-cols-1 md:grid-cols-2 gap-4`}
+        >
           <PatientInfoField
             label="Name"
             value={formData.name}
@@ -295,18 +344,24 @@ const PatientInfoCard: React.FC<PatientInfoCardProps> = ({
           />
         </div>
 
-        <select
-          className="mt-4 bg-[#ECECFB] p-2 rounded-lg text-sm w-full sm:w-[250px] border border-gray-300 outline-none"
-          value={currentPatient}
-          onChange={(e) => handleswitch(e)}
-          disabled={isLoading}
-        >
-          {patients?.map((patient) => (
-            <option key={patient.patient_id} value={patient.patient_id}>
-              {patient.patient_name}
-            </option>
-          ))}
-        </select>
+        {/* Patient Switch - stays visible even when collapsed */}
+        <div className="mt-4">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Switch patient
+          </label>
+          <select
+            className="bg-[#ECECFB] p-2 rounded-lg text-sm w-full sm:w-[280px] border border-gray-300 outline-none"
+            value={currentPatient}
+            onChange={(e) => handleswitch(e)}
+            disabled={isLoading}
+          >
+            {patients?.map((patient) => (
+              <option key={patient.patient_id} value={patient.patient_id}>
+                {patient.patient_name}
+              </option>
+            ))}
+          </select>
+        </div>
       </CardContent>
 
       {isEditing && (

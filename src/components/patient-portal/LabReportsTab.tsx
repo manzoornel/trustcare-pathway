@@ -5,11 +5,17 @@ import SearchAndFilter from "./lab-reports/SearchAndFilter";
 import LabReportsTable from "./lab-reports/LabReportsTable";
 import ReportViewDialog from "./lab-reports/ReportViewDialog";
 import ReportComparisonDialog from "./lab-reports/ReportComparisonDialog";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Edit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
-const LabReportsTab: React.FC = () => {
+type LabReportsTabProps = {
+  openPatientInfoEdit?: () => void;
+};
+
+const LabReportsTab: React.FC<LabReportsTabProps> = ({
+  openPatientInfoEdit,
+}) => {
   const { auth } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [viewingReport, setViewingReport] = useState<any | null>(null);
@@ -126,6 +132,14 @@ const LabReportsTab: React.FC = () => {
           <p className="text-gray-700 mb-4">
             Please verify your email to access lab reports.
           </p>
+          <Button
+            onClick={() => {
+              openPatientInfoEdit && openPatientInfoEdit();
+              window.scrollTo(250, 250);
+            }}
+          >
+            Verify email
+          </Button>
         </div>
       )}
 
