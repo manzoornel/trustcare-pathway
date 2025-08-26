@@ -278,7 +278,7 @@ const AppointmentsTab = () => {
         <Button
           type="primary"
           onClick={handleOpenModal}
-          style={{ marginLeft: "auto" }}
+          style={{ marginLeft: "auto", marginTop: "10px" }}
           icon={<PlusCircle className="mr-2" />}
         >
           Create Appointment

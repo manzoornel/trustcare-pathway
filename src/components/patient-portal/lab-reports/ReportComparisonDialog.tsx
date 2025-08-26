@@ -22,7 +22,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileDown } from "lucide-react";
+import { FileDown, Home } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface LabResult {
   detail_description: string;
@@ -87,7 +88,17 @@ export const ReportComparisonDialog: React.FC<ReportComparisonDialogProps> = ({
   open,
   onOpenChange,
 }) => {
-  const selectedVisitIds = (selectedReports || []).map((s: any) =>
+  const navigate = useNavigate();
+  // Sort selected reports by date before processing
+  const sortedSelectedReports = (selectedReports || []).sort(
+    (a: any, b: any) => {
+      const dateA = new Date(a.date);
+      const dateB = new Date(b.date);
+      return dateB.getTime() - dateA.getTime();
+    }
+  );
+
+  const selectedVisitIds = sortedSelectedReports.map((s: any) =>
     typeof s === "object" && s !== null ? s.visitId : s
   );
 
@@ -95,7 +106,7 @@ export const ReportComparisonDialog: React.FC<ReportComparisonDialogProps> = ({
     .filter((report) => selectedVisitIds.includes(report.visitId))
     .sort(
       (a, b) =>
-        parseDateString(a.date).getTime() - parseDateString(b.date).getTime()
+        parseDateString(b.date).getTime() - parseDateString(a.date).getTime()
     );
 
   const allParameters = useMemo(() => {
@@ -340,12 +351,16 @@ export const ReportComparisonDialog: React.FC<ReportComparisonDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl">
-        <DialogHeader>
-          <DialogTitle>Report Comparison</DialogTitle>
-          <DialogDescription>
-            Comparing {selectedData.length} reports by date
-          </DialogDescription>
+      <DialogContent className="max-w-5xl h-[90vh] flex flex-col">
+        <DialogHeader className="flex-shrink-0">
+          <div className="flex justify-between items-start">
+            <div>
+              <DialogTitle>Report Comparison</DialogTitle>
+              <DialogDescription>
+                Comparing {selectedData.length} reports by date
+              </DialogDescription>
+            </div>
+          </div>
 
           <div className="mt-3 flex flex-col gap-4">
             {/* Parameter Selection Buttons */}
@@ -380,9 +395,9 @@ export const ReportComparisonDialog: React.FC<ReportComparisonDialogProps> = ({
           </div>
         </DialogHeader>
 
-        <div className="overflow-y-auto max-h-[70vh]">
-          <Card className="mb-6">
-            <CardHeader>
+        <div className="flex-1 overflow-hidden">
+          <Card className="h-full flex flex-col">
+            <CardHeader className="flex-shrink-0">
               <CardTitle>Report Comparison</CardTitle>
               <CardDescription>
                 {displayParams[0]
@@ -390,10 +405,10 @@ export const ReportComparisonDialog: React.FC<ReportComparisonDialogProps> = ({
                   : "Select a parameter to compare"}
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="flex-1 overflow-hidden">
               {displayParams.length > 0 ? (
-                <div>
-                  <div className="mb-4">
+                <div className="h-full flex flex-col">
+                  <div className="flex-shrink-0 mb-4">
                     <h3 className="text-lg font-semibold text-center mb-2">
                       {displayParams[0]}
                     </h3>
@@ -427,61 +442,77 @@ export const ReportComparisonDialog: React.FC<ReportComparisonDialogProps> = ({
                       return null;
                     })()}
                   </div>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Date</TableHead>
-                        <TableHead>Value</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {(() => {
-                        const values = selectedData
-                          .map((report) => ({
-                            date: report.date,
-                            value: report.result.find(
-                              (r) => r.detail_description === displayParams[0]
-                            ),
-                          }))
-                          .filter(
-                            (item) =>
-                              item.value &&
-                              item.value.actual_result !== "-" &&
-                              !isNaN(Number(item.value.actual_result))
-                          );
+                  <div className="flex-1 overflow-y-auto">
+                    <Table>
+                      <TableHeader className="sticky top-0 bg-white z-10 border-b">
+                        <TableRow>
+                          <TableHead className="bg-gray-50 font-semibold">
+                            Date
+                          </TableHead>
+                          <TableHead className="bg-gray-50 font-semibold">
+                            Value
+                          </TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {(() => {
+                          const values = selectedData
+                            .map((report) => ({
+                              date: report.date,
+                              value: report.result.find(
+                                (r) => r.detail_description === displayParams[0]
+                              ),
+                            }))
+                            .filter(
+                              (item) =>
+                                item.value &&
+                                item.value.actual_result !== "-" &&
+                                !isNaN(Number(item.value.actual_result))
+                            );
 
-                        return values.map((item, index) => {
-                          const result = Number(item.value.actual_result);
-                          const min = Number(item.value.min_value);
-                          const max = Number(item.value.max_value);
-                          const normal = isWithinRange(result, min, max);
+                          return values.map((item, index) => {
+                            const result = Number(item.value.actual_result);
+                            const min = Number(item.value.min_value);
+                            const max = Number(item.value.max_value);
+                            const normal = isWithinRange(result, min, max);
 
-                          return (
-                            <TableRow key={index}>
-                              <TableCell className="font-medium">
-                                {item.date}
-                              </TableCell>
-                              <TableCell>
-                                <span
-                                  className={
-                                    normal
-                                      ? "text-gray-900"
-                                      : "text-red-600 font-semibold"
-                                  }
-                                >
-                                  {result}
-                                </span>
-                              </TableCell>
-                            </TableRow>
-                          );
-                        });
-                      })()}
-                    </TableBody>
-                  </Table>
+                            return (
+                              <TableRow
+                                key={index}
+                                className="hover:bg-gray-50"
+                              >
+                                <TableCell className="font-medium">
+                                  {item.date}
+                                </TableCell>
+                                <TableCell>
+                                  <span
+                                    className={
+                                      normal
+                                        ? "text-gray-900"
+                                        : "text-red-600 font-semibold"
+                                    }
+                                  >
+                                    {result}
+                                  </span>
+                                </TableCell>
+                              </TableRow>
+                            );
+                          });
+                        })()}
+                      </TableBody>
+                    </Table>
+                  </div>
                 </div>
               ) : (
-                <div className="text-center py-8 text-gray-500">
-                  Select a parameter to view comparison
+                <div className="h-full flex items-center justify-center">
+                  <div className="text-center text-gray-500">
+                    <p className="text-lg font-medium mb-2">
+                      No data available
+                    </p>
+                    <p className="text-sm">
+                      Select a parameter to view comparison
+                    </p>
+                  </div>
                 </div>
               )}
             </CardContent>

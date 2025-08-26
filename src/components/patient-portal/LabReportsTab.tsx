@@ -61,7 +61,15 @@ const LabReportsTab: React.FC<LabReportsTabProps> = ({
           // Align with API response structure for comparison dialog
           result: report.lab_reports?.result || [],
         }));
-        setLabReports(formattedData);
+
+        // Sort the formatted data by date in descending order (newest first)
+        const sortedData = formattedData.sort((a, b) => {
+          const dateA = new Date(a.date);
+          const dateB = new Date(b.date);
+          return dateB.getTime() - dateA.getTime();
+        });
+
+        setLabReports(sortedData);
       }
     } catch (error: any) {
       console.error("Error fetching lab reports:", error);
@@ -82,11 +90,18 @@ const LabReportsTab: React.FC<LabReportsTabProps> = ({
     }
   }, [auth.userId, isEmailVerified]);
 
-  const filteredReports = labReports.filter(
-    (report) =>
-      report.doctor.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      report.date.includes(searchTerm)
-  );
+  const filteredReports = labReports
+    .filter(
+      (report) =>
+        report.doctor.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        report.date.includes(searchTerm)
+    )
+    .sort((a, b) => {
+      // Sort by date in descending order (newest first)
+      const dateA = new Date(a.date);
+      const dateB = new Date(b.date);
+      return dateB.getTime() - dateA.getTime();
+    });
 
   const handleViewReport = (report: any) => {
     setViewingReport(report);
@@ -148,6 +163,14 @@ const LabReportsTab: React.FC<LabReportsTabProps> = ({
           !isEmailVerified ? "blur-sm pointer-events-none select-none" : ""
         }`}
       >
+        {/* Mobile-friendly heading */}
+        <div className="md:hidden mb-6">
+          <h2 className="text-xl font-semibold mb-2">Lab Reports</h2>
+          <p className="text-sm text-gray-600">
+            View and compare your medical test results
+          </p>
+        </div>
+
         {error && (
           <Alert variant="destructive" className="mb-4">
             <AlertCircle className="h-4 w-4 mr-2" />

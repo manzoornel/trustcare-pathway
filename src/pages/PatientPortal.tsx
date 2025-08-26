@@ -4,6 +4,8 @@ import PatientInfoCard from "@/components/patient-portal/PatientInfoCard";
 import PortalTabsSection from "@/components/patient-portal/PortalTabsSection";
 import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
+import { FileDown, Home } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const PatientPortal: React.FC = () => {
   const { auth } = useAuth();
@@ -53,6 +55,15 @@ const PatientPortal: React.FC = () => {
         <h1 className="text-2xl md:text-3xl font-bold text-center md:text-left">
           Welcome to Patient Portal
         </h1>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => navigate("/")}
+          className="flex items-center gap-2"
+        >
+          <Home className="h-4 w-4" />
+          Home
+        </Button>
         <button
           onClick={handleClick}
           className="px-4 py-2 border border-red-500 text-red-500 rounded hover:bg-red-50 transition"
