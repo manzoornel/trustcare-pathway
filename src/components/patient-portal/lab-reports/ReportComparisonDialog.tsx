@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -98,11 +98,46 @@ export const ReportComparisonDialog: React.FC<ReportComparisonDialogProps> = ({
         parseDateString(a.date).getTime() - parseDateString(b.date).getTime()
     );
 
-  const allParameters = new Set<string>();
-  selectedData.forEach((report) =>
-    report.result.forEach((r) => allParameters.add(r.detail_description))
+  const allParameters = useMemo(() => {
+    const set = new Set<string>();
+    selectedData.forEach((report) =>
+      report.result.forEach((r) => set.add(r.detail_description))
+    );
+    return Array.from(set);
+  }, [selectedData]);
+
+  // Filter parameters that have valid values
+  const validParameters = useMemo(() => {
+    return allParameters.filter((paramName) => {
+      const hasValidValues = selectedData.some((report) => {
+        const result = report.result.find(
+          (r) => r.detail_description === paramName
+        );
+        return (
+          result &&
+          result.actual_result !== "-" &&
+          !isNaN(Number(result.actual_result))
+        );
+      });
+      return hasValidValues;
+    });
+  }, [allParameters, selectedData]);
+
+  // Single-parameter selection (one-by-one)
+  const [selectedParam, setSelectedParam] = useState<string | null>(null);
+  useEffect(() => {
+    if (validParameters.length > 0) {
+      // Default to the first parameter to force one-by-one view
+      setSelectedParam((prev) => prev ?? validParameters[0]);
+    } else {
+      setSelectedParam(null);
+    }
+  }, [validParameters]);
+
+  const displayParams = useMemo(
+    () => (selectedParam ? [selectedParam] : []),
+    [selectedParam]
   );
-  const paramList = Array.from(allParameters);
 
   // Dynamically load jsPDF + autotable from CDN and download PDF without opening a new page
   const ensureJsPDF = async (): Promise<any> => {
@@ -170,6 +205,35 @@ export const ReportComparisonDialog: React.FC<ReportComparisonDialogProps> = ({
     return initials.join("") || "DR";
   };
 
+  const buildComparisonGrid = () => {
+    const header = ["Date", "Value"];
+
+    const rows = displayParams
+      .map((paramName) => {
+        const values = selectedData
+          .map((report) => ({
+            date: report.date,
+            value: report.result.find(
+              (r) => r.detail_description === paramName
+            ),
+          }))
+          .filter(
+            (item) =>
+              item.value &&
+              item.value.actual_result !== "-" &&
+              !isNaN(Number(item.value.actual_result))
+          );
+
+        return values.map((item) => [
+          item.date,
+          item.value.actual_result.toString(),
+        ]);
+      })
+      .flat();
+
+    return { header, rows };
+  };
+
   const downloadPDF = async () => {
     const { header, rows } = buildComparisonGrid();
     const { jsPDF } = await ensureJsPDF();
@@ -222,7 +286,11 @@ export const ReportComparisonDialog: React.FC<ReportComparisonDialogProps> = ({
     doc.setFontSize(14);
     doc.text(`Dr Uncle`, leftMargin + 70, topMargin + 12);
     doc.setFontSize(12);
-    doc.text("Lab Report Comparison", leftMargin + 70, topMargin + 32);
+    doc.text(
+      `Lab Report Comparison - ${displayParams[0] ?? ""}`,
+      leftMargin + 70,
+      topMargin + 32
+    );
     doc.setTextColor(100);
 
     // Divider
@@ -263,48 +331,13 @@ export const ReportComparisonDialog: React.FC<ReportComparisonDialogProps> = ({
       });
     }
 
-    doc.save("lab-report-comparison.pdf");
+    const safeParam = (displayParams[0] || "comparison").replace(
+      /[^\w-]+/g,
+      "_"
+    );
+    doc.save(`lab-report-${safeParam}.pdf`);
   };
 
-  // PDF downloads only when the user clicks the Download button.
-  const buildComparisonGrid = () => {
-    const header = [
-      "Parameter",
-      ...selectedData.map((report) => report.date),
-      "% Change",
-    ];
-
-    const rows = paramList.map((paramName) => {
-      const values = selectedData.map((report) =>
-        report.result.find((r) => r.detail_description === paramName)
-      );
-
-      const latest = values[values.length - 1];
-      const previous = values[values.length - 2];
-      const percentChange =
-        latest && previous
-          ? getPercentageChange(
-              Number(latest.actual_result),
-              Number(previous.actual_result)
-            )
-          : null;
-
-      const cells = values.map((val) =>
-        val ? `${val.actual_result} ${val.unitdesc ?? ""}`.trim() : "—"
-      );
-
-      const pctCell =
-        percentChange !== null
-          ? `${percentChange > 0 ? "+" : ""}${percentChange.toFixed(1)}%`
-          : "—";
-
-      return [paramName, ...cells, pctCell];
-    });
-
-    return { header, rows };
-  };
-
-  // Removed CSV/print HTML export in favor of direct PDF download
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-5xl">
@@ -313,15 +346,37 @@ export const ReportComparisonDialog: React.FC<ReportComparisonDialogProps> = ({
           <DialogDescription>
             Comparing {selectedData.length} reports by date
           </DialogDescription>
-          <div className="mt-2 flex gap-2 justify-end">
-            <Button
-              variant="default"
-              size="sm"
-              onClick={downloadPDF}
-              disabled={selectedData.length === 0 || paramList.length === 0}
-            >
-              <FileDown className="h-4 w-4 mr-2" /> Download PDF
-            </Button>
+
+          <div className="mt-3 flex flex-col gap-4">
+            {/* Parameter Selection Buttons */}
+            <div className="flex flex-wrap gap-2">
+              {validParameters.map((param) => (
+                <Button
+                  key={param}
+                  variant={selectedParam === param ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setSelectedParam(param)}
+                  className="text-sm"
+                >
+                  {param}
+                </Button>
+              ))}
+            </div>
+
+            {/* Download Button */}
+            <div className="flex justify-end">
+              <Button
+                variant="default"
+                size="sm"
+                onClick={downloadPDF}
+                disabled={
+                  selectedData.length === 0 ||
+                  (displayParams.length === 0 && allParameters.length === 0)
+                }
+              >
+                <FileDown className="h-4 w-4 mr-2" /> Download PDF
+              </Button>
+            </div>
           </div>
         </DialogHeader>
 
@@ -330,54 +385,83 @@ export const ReportComparisonDialog: React.FC<ReportComparisonDialogProps> = ({
             <CardHeader>
               <CardTitle>Report Comparison</CardTitle>
               <CardDescription>
-                From {selectedData[0]?.date} to{" "}
-                {selectedData[selectedData.length - 1]?.date}
+                {displayParams[0]
+                  ? `Parameter: ${displayParams[0]}`
+                  : "Select a parameter to compare"}
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Parameter</TableHead>
-                    {selectedData.map((report) => (
-                      <TableHead key={report.id}>{report.date}</TableHead>
-                    ))}
-                    <TableHead>% Change</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {paramList.map((paramName) => {
-                    const values = selectedData.map((report) =>
-                      report.result.find(
-                        (r) => r.detail_description === paramName
-                      )
-                    );
+              {displayParams.length > 0 ? (
+                <div>
+                  <div className="mb-4">
+                    <h3 className="text-lg font-semibold text-center mb-2">
+                      {displayParams[0]}
+                    </h3>
+                    {(() => {
+                      // Get the first valid result to extract normal range
+                      const firstValidResult = selectedData
+                        .map((report) => ({
+                          date: report.date,
+                          value: report.result.find(
+                            (r) => r.detail_description === displayParams[0]
+                          ),
+                        }))
+                        .filter(
+                          (item) =>
+                            item.value &&
+                            item.value.actual_result !== "-" &&
+                            !isNaN(Number(item.value.actual_result))
+                        )[0];
 
-                    const latest = values[values.length - 1];
-                    const previous = values[values.length - 2];
+                      if (
+                        firstValidResult?.value?.min_value &&
+                        firstValidResult?.value?.max_value
+                      ) {
+                        return (
+                          <p className="text-sm text-gray-600 text-center">
+                            Normal Range: {firstValidResult.value.min_value} -{" "}
+                            {firstValidResult.value.max_value}
+                          </p>
+                        );
+                      }
+                      return null;
+                    })()}
+                  </div>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Value</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {(() => {
+                        const values = selectedData
+                          .map((report) => ({
+                            date: report.date,
+                            value: report.result.find(
+                              (r) => r.detail_description === displayParams[0]
+                            ),
+                          }))
+                          .filter(
+                            (item) =>
+                              item.value &&
+                              item.value.actual_result !== "-" &&
+                              !isNaN(Number(item.value.actual_result))
+                          );
 
-                    const percentChange =
-                      latest && previous
-                        ? getPercentageChange(
-                            Number(latest.actual_result),
-                            Number(previous.actual_result)
-                          )
-                        : null;
-
-                    return (
-                      <TableRow key={paramName}>
-                        <TableCell>{paramName}</TableCell>
-                        {values.map((val, i) => {
-                          if (!val) return <TableCell key={i}>—</TableCell>;
-
-                          const result = Number(val.actual_result);
-                          const min = Number(val.min_value);
-                          const max = Number(val.max_value);
+                        return values.map((item, index) => {
+                          const result = Number(item.value.actual_result);
+                          const min = Number(item.value.min_value);
+                          const max = Number(item.value.max_value);
                           const normal = isWithinRange(result, min, max);
 
                           return (
-                            <TableCell key={i}>
-                              <div className="flex items-center">
+                            <TableRow key={index}>
+                              <TableCell className="font-medium">
+                                {item.date}
+                              </TableCell>
+                              <TableCell>
                                 <span
                                   className={
                                     normal
@@ -387,36 +471,19 @@ export const ReportComparisonDialog: React.FC<ReportComparisonDialogProps> = ({
                                 >
                                   {result}
                                 </span>
-                                <span className="text-sm text-muted-foreground ml-1">
-                                  {val.unitdesc}
-                                </span>
-                              </div>
-                            </TableCell>
+                              </TableCell>
+                            </TableRow>
                           );
-                        })}
-                        <TableCell>
-                          {percentChange !== null ? (
-                            <span
-                              className={`${
-                                percentChange > 0
-                                  ? "text-green-600"
-                                  : percentChange < 0
-                                  ? "text-red-600"
-                                  : "text-gray-500"
-                              }`}
-                            >
-                              {percentChange > 0 ? "+" : ""}
-                              {percentChange.toFixed(1)}%
-                            </span>
-                          ) : (
-                            "—"
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
+                        });
+                      })()}
+                    </TableBody>
+                  </Table>
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  Select a parameter to view comparison
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
