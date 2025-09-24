@@ -16,59 +16,55 @@ export interface Doctor {
 export const doctors: Doctor[] = [
   // General Practice Department
   {
-    id: "dr-jismia-k",
-    name: "Dr. Jismia K",
-    specialty: "General Practitioner",
-    bio: "Dr. Jismia K (MBBS, TCMS 72852) is a dedicated General Practitioner committed to providing comprehensive healthcare for your entire family. With a patient-centric approach, she focuses on preventive care, diagnosis, and treatment of common illnesses. Expert care, round-the-clock availability for emergencies, and a compassionate approach to family health.",
-    image: "/placeholder.svg",
-    qualification: "MBBS, TCMS 72852",
-    experience: "24-hour on call",
-    languages: ["English", "Malayalam"],
-    availableDays: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
-    featured: true
+    id: "dr-manzoor",
+    name: "Dr. Manzoor Nellancheri",
+    specialty: "Family Medicine & Founder",
+    bio: "Dr. Manzoor Nellancheri is a highly experienced family physician with over 20 years of practice. As the founder of Doctor Uncle Family Clinic, he has built a reputation for providing compassionate, patient-centered care to families across all generations.",
+    image: "/lovable-uploads/84716f55-3da5-45a6-bb8f-5c84e1a8b6fa.png",
+    qualification: "MBBS, MD (Family Medicine)",
+    experience: "20+ years",
+    languages: ["English", "Hindi", "Urdu", "Malayalam"],
+    availableDays: ["Monday", "Tuesday", "Wednesday", "Thursday", "Saturday"],
+    featured: true,
   },
   {
-    id: "dr-rauoof-k",
-    name: "Dr. Rauoof K",
-    specialty: "General Practitioner",
-    bio: "Dr. Rauoof K (MBBS) is an experienced General Practitioner offering essential medical services during the evening and night hours. He is dedicated to addressing urgent health concerns and providing continuous care for the community. Reliable night-time consultations and accessible primary care for all your immediate health needs.",
-    image: "/placeholder.svg",
-    qualification: "MBBS",
-    experience: "Night consultations",
-    languages: ["English", "Malayalam"],
-    availableDays: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
-    featured: true
+    id: "dr-shameem",
+    name: "Dr. Shameem Samad PK",
+    specialty: "Pediatrics",
+    bio: "Dr. Shameem specializes in the care of infants, children, and adolescents. With a gentle approach and expertise in childhood development, she ensures your children receive the best care from birth through their teenage years.",
+    image: "/lovable-uploads/5b0045c2-3301-401d-9d16-faf9110a47bf.png",
+    qualification: "MBBS, MD (Pediatrics)",
+    experience: "12 years",
+    languages: ["English", "Hindi", "Malayalam"],
+    availableDays: ["Monday", "Wednesday", "Friday"],
+    featured: true,
   },
-  
+
   // Gynecology Department
   {
-    id: "dr-shaflia",
-    name: "Dr. Shaflia",
-    specialty: "Consultant Obstetrician and Gynecologist",
-    bio: "Dr. Shaflia (MBBS, MS (OBG), FMAS) is a highly skilled Consultant Obstetrician and Gynecologist. She provides expert care for women's health, covering everything from prenatal care and childbirth to gynecological conditions and minimally invasive surgeries. Specialized care for women's health, including obstetrics and gynecology, ensuring comprehensive and compassionate treatment.",
-    image: "/placeholder.svg",
-    qualification: "MBBS, MS (OBG), FMAS",
-    experience: "Specialized women's health",
-    languages: ["English", "Malayalam"],
-    availableDays: ["Monday", "Thursday"],
-    featured: true
+    id: "dr-wazeem",
+    name: "Dr. Wazeem",
+    specialty: "Internal Medicine",
+    bio: "Dr. Wazeem is dedicated to providing comprehensive care for adults with complex medical conditions. He specializes in preventive care and managing chronic diseases such as diabetes, hypertension, and heart disease.",
+    image: "/lovable-uploads/1aff5afe-1070-44a1-8b38-24f7962a7840.png",
+    qualification: "MBBS, MD (Internal Medicine)",
+    experience: "15 years",
+    languages: ["English", "Hindi", "Malayalam"],
+    availableDays: ["Tuesday", "Thursday", "Saturday"],
+    featured: true,
   },
-
-  // Diabetes & Thyroid Department
   {
-    id: "dr-iqbal-kotta",
-    name: "Dr. Iqbal Kotta",
-    specialty: "General Medicine (Diabetes & Thyroid Specialist)",
-    bio: "Dr. Iqbal Kotta (MBBS, MD General Medicine, TCMC 55965) specializes in the diagnosis and management of diabetes and thyroid disorders. He offers personalized treatment plans to help patients effectively manage their conditions and improve their quality of life. Expert management of diabetes and thyroid conditions with a focus on patient-specific care.",
-    image: "/placeholder.svg",
-    qualification: "MBBS, MD General Medicine, TCMC 55965",
-    experience: "Diabetes & Thyroid specialist",
-    languages: ["English", "Malayalam"],
-    availableDays: ["Tuesday"],
+    id: "dr-praveen",
+    name: "Dr. Praveen V",
+    specialty: "Dermatology",
+    bio: "Dr. Praveen is committed to dermatological care throughout all stages of life. From routine skin check-ups to managing complex skin conditions, he provides compassionate and comprehensive dermatological services.",
+    image: "/lovable-uploads/c4beddef-b77c-4f28-8e9b-8f2f43be79e6.png",
+    qualification: "MBBS, MD (Dermatology)",
+    experience: "10 years",
+    languages: ["English", "Malayalam", "Tamil"],
+    availableDays: ["Monday", "Wednesday", "Friday"],
     featured: false
   },
-
-  // Diabetics & Pain Management
   {
     id: "dr-manzoor-n",
     name: "Dr. Manzoor N",
@@ -108,19 +104,17 @@ export const doctors: Doctor[] = [
     featured: false
   },
   {
-    id: "dr-mansheer-nellancheri",
+    id: "dr-mansheer",
     name: "Dr. Mansheer Nellancheri",
-    specialty: "ENT Specialist",
-    bio: "Dr. Mansheer Nellancheri (MBBS, Dip ENT) is a visiting ENT specialist at Doctor Uncle Family Clinic, available for consultations by appointment. He provides specialized care for various ear, nose, and throat conditions. Convenient appointment-based consultations for specialized ENT care.",
-    image: "/placeholder.svg",
-    qualification: "MBBS, Dip ENT",
-    experience: "Visiting ENT specialist",
-    languages: ["English", "Malayalam"],
-    availableDays: ["Sunday"],
+    specialty: "General Medicine",
+    bio: "Dr. Mansheer Nellancheri helps patients achieve their health goals through personalized care plans. He specializes in managing various conditions including diabetes, respiratory disorders, and digestive issues.",
+    image: "/lovable-uploads/b43b47a5-cb17-407e-a024-0919f8f22ad4.png",
+    qualification: "MBBS, MD (General Medicine)",
+    experience: "7 years",
+    languages: ["English", "Hindi", "Malayalam"],
+    availableDays: ["Monday", "Wednesday", "Friday"],
     featured: false
   },
-
-  // Skin & Cosmetology Department
   {
     id: "dr-praveen-p",
     name: "Dr. Praveen P",
@@ -151,7 +145,7 @@ export const doctors: Doctor[] = [
 
 // Helper functions to access doctor data
 export const getFeaturedDoctors = (): Doctor[] => {
-  return doctors.filter(doctor => doctor.featured);
+  return doctors.filter((doctor) => doctor.featured);
 };
 
 export const getAllDoctors = (): Doctor[] => {
@@ -159,5 +153,5 @@ export const getAllDoctors = (): Doctor[] => {
 };
 
 export const getDoctorById = (id: string): Doctor | undefined => {
-  return doctors.find(doctor => doctor.id === id);
+  return doctors.find((doctor) => doctor.id === id);
 };

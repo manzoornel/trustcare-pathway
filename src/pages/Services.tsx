@@ -1,4 +1,3 @@
-
 import Navbar from "@/components/Navbar";
 import { Helmet } from "react-helmet";
 import { Check } from "lucide-react";
@@ -8,38 +7,48 @@ const Services = () => {
   const services = [
     {
       title: "Primary Care",
-      description: "Comprehensive healthcare for patients of all ages, including routine check-ups, preventive care, and treatment for acute and chronic conditions.",
+      description:
+        "Comprehensive healthcare for patients of all ages, including routine check-ups, preventive care, and treatment for acute and chronic conditions.",
     },
     {
       title: "Specialized Diabetes Care",
-      description: "Expert management of diabetes with personalized treatment plans, continuous glucose monitoring, and nutritional counseling.",
+      description:
+        "Expert management of diabetes with personalized treatment plans, continuous glucose monitoring, and nutritional counseling.",
     },
     {
       title: "Women's Health",
-      description: "Comprehensive women's health services including preventive screenings, prenatal care, and management of women's health concerns.",
+      description:
+        "Comprehensive women's health services including preventive screenings, prenatal care, and management of women's health concerns.",
     },
     {
       title: "Home Care Services",
-      description: "Professional healthcare at your doorstep including doctor visits, nursing care, physiotherapy, injections, ECG and laboratory tests.",
+      description:
+        "Professional healthcare at your doorstep including doctor visits, nursing care, physiotherapy, injections, ECG and laboratory tests.",
     },
     {
       title: "Diagnostic Services",
-      description: "State-of-the-art laboratory testing, ECG, ultrasound, and other diagnostic procedures to ensure accurate diagnosis.",
+      description:
+        "State-of-the-art laboratory testing, ECG, ultrasound, and other diagnostic procedures to ensure accurate diagnosis.",
     },
     {
       title: "Pharmacy Services",
-      description: "Convenient on-site pharmacy providing prescription medications, over-the-counter products, and medication counseling.",
+      description:
+        "Convenient on-site pharmacy providing prescription medications, over-the-counter products, and medication counseling.",
     },
     {
       title: "Telemedicine",
-      description: "Virtual consultations with our healthcare providers for those unable to visit in person or requiring follow-up care.",
+      description:
+        "Virtual consultations with our healthcare providers for those unable to visit in person or requiring follow-up care.",
     },
   ];
 
   return (
     <>
       <Helmet>
-        <title>Healthcare Services at Doctor Uncle Family Clinic – Expert Care for Your Family</title>
+        <title>
+          Healthcare Services at Doctor Uncle Family Clinic – Expert Care for
+          Your Family
+        </title>
         <meta
           name="description"
           content="Explore our wide range of medical services, including primary care, diabetes management, women's health, diagnostic services, and telemedicine."
@@ -51,18 +60,20 @@ const Services = () => {
           <div className="py-12">
             <h1 className="text-4xl font-bold mb-8">Our Healthcare Services</h1>
             <p className="text-lg text-gray-600 mb-6">
-              At Doctor Uncle Family Clinic, we offer a comprehensive range of medical services 
-              designed to meet the diverse healthcare needs of your entire family.
+              At Doctor Uncle Family Clinic, we offer a comprehensive range of
+              medical services designed to meet the diverse healthcare needs of
+              your entire family.
             </p>
-            
+
             <p className="text-lg text-gray-600 mb-12">
-              All services are available at both our Vakkad and Unniyal branches, ensuring convenient access
-              to quality healthcare no matter which location you visit.
+              All services are available at both our Vakkad and Unniyal
+              branches, ensuring convenient access to quality healthcare no
+              matter which location you visit.
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {services.map((service, index) => (
-                <div 
+                <div
                   key={index}
                   className="p-6 bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-200"
                 >
@@ -73,7 +84,9 @@ const Services = () => {
                       </div>
                     </div>
                     <div>
-                      <h3 className="text-xl font-semibold mb-2">{service.title}</h3>
+                      <h3 className="text-xl font-semibold mb-2">
+                        {service.title}
+                      </h3>
                       <p className="text-gray-600">{service.description}</p>
                     </div>
                   </div>
@@ -83,16 +96,10 @@ const Services = () => {
 
             <div className="mt-12 text-center">
               <p className="text-lg text-gray-600 mb-6">
-                Visit either our Vakkad branch (near Aneesha Theatre) or our Unniyal branch (Unniyal Junction, Tanur Road)
-                to access our complete range of healthcare services.
+                Visit either our Vakkad branch (near Aneesha Theatre) or our
+                Unniyal branch (Unniyal Junction, Tanur Road) to access our
+                complete range of healthcare services.
               </p>
-              
-              <a
-                href="/appointments"
-                className="inline-flex items-center px-6 py-3 bg-primary text-white font-semibold rounded-lg hover:bg-primary/90 transition-colors duration-200"
-              >
-                Book an appointment today!
-              </a>
             </div>
           </div>
         </div>

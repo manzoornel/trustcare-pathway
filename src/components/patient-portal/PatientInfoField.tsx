@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Input } from "@/components/ui/input";
 
@@ -11,20 +10,20 @@ type PatientInfoFieldProps = {
   children?: React.ReactNode;
 };
 
-const PatientInfoField = ({ 
-  label, 
-  value, 
-  isEditing, 
-  name, 
+const PatientInfoField = ({
+  label,
+  value,
+  isEditing,
+  name,
   onChange,
-  children 
+  children,
 }: PatientInfoFieldProps) => {
   return (
     <div>
       <p className="text-sm font-medium text-gray-500">{label}</p>
       {isEditing ? (
-        <Input 
-          name={name} 
+        <Input
+          name={name}
           value={value}
           onChange={onChange}
           className="mt-1"
@@ -32,7 +31,7 @@ const PatientInfoField = ({
         />
       ) : (
         <div className="flex items-center gap-2">
-          <p>{value || "Not available"}</p>
+          <p style={{ lineBreak: "anywhere" }}>{value || "Not available"}</p>
           {children}
         </div>
       )}

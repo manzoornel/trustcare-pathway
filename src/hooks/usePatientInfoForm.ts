@@ -1,8 +1,9 @@
-
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
+import { instance } from "./../axios";
 
 type FormData = {
   name: string;
@@ -20,48 +21,62 @@ export const usePatientInfoForm = (initialData: {
   const { updateProfile, auth } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState<FormData>({
-    name: initialData.patientName || "",
-    phone: initialData.phone || "",
-    email: initialData.email || "",
-    hospitalId: initialData.hospitalId || ""
+    name: initialData.patientName || localStorage.getItem("patient_name") || "",
+    phone: initialData.phone || localStorage.getItem("phone") || "",
+    email: initialData.email || localStorage.getItem("email") || "",
+    hospitalId: initialData.hospitalId || localStorage.getItem("uhid") || "",
   });
+  const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [showVerifyModal, setShowVerifyModal] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSave = async () => {
     // Validate inputs
-    if (!formData.name.trim()) {
-      toast.error("Name cannot be empty");
-      return;
-    }
-    
+
     if (!formData.email.trim()) {
       toast.error("Email cannot be empty");
       return;
     }
-    
-    if (!formData.phone.trim()) {
-      toast.error("Phone number cannot be empty");
-      return;
-    }
-
     try {
       setIsSubmitting(true);
-      // Update profile
-      await updateProfile({
-        name: formData.name,
-        phone: formData.phone,
-        email: formData.email,
-        hospitalId: formData.hospitalId
-      });
-      
+
+      const { data } = await instance.post(
+        `sendOtpEmail?email=${formData.email}&patient_id=${localStorage.getItem(
+          "patient_id"
+        )}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
       setIsEditing(false);
-      toast.success("Profile updated successfully");
+
+      if (data.code === 1) {
+        toast.success("Profile updated successfully");
+        setShowVerifyModal(true);
+        console.log(showVerifyModal);
+      } else if (data.code === 0 && data.status === "Invalid OTP.") {
+        toast.error("Invalid Otp.");
+        setShowVerifyModal(true);
+        return;
+      } else if (
+        data.code === 0 &&
+        (data.status === "Invalid token payload." ||
+          data.status === "Wrong token")
+      ) {
+        toast.error("Invalid token. Please log in again.");
+        localStorage.clear();
+        navigate("/login", { replace: true });
+      } else {
+        console.error("Error fetching medications:", data.status);
+      }
     } catch (error) {
       console.error("Error updating profile:", error);
       toast.error("Failed to update profile");
@@ -73,10 +88,11 @@ export const usePatientInfoForm = (initialData: {
   const handleCancel = () => {
     // Reset form data to original values
     setFormData({
-      name: initialData.patientName || "",
-      phone: initialData.phone || "",
-      email: initialData.email || "",
-      hospitalId: initialData.hospitalId || ""
+      name:
+        initialData.patientName || localStorage.getItem("patient_name") || "",
+      phone: initialData.phone || localStorage.getItem("phone") || "",
+      email: initialData.email || localStorage.getItem("email") || "",
+      hospitalId: initialData.hospitalId || localStorage.getItem("uhid") || "",
     });
     setIsEditing(false);
   };
@@ -90,22 +106,23 @@ export const usePatientInfoForm = (initialData: {
     setIsSyncing(true);
     try {
       // Call the EHR sync function with your patient ID
-      const response = await supabase.functions.invoke('ehr-sync', {
-        body: { 
-          action: 'sync', 
+      const response = await supabase.functions.invoke("ehr-sync", {
+        body: {
+          action: "sync",
           patientId: auth.userId,
-          patientEhrId: formData.hospitalId || initialData.hospitalId
-        }
+          patientEhrId: formData.hospitalId || initialData.hospitalId,
+        },
       });
-      
+
       if (response.error) {
         throw new Error(response.error.message || "Failed to sync with EHR");
       }
-      
+
       if (response.data && response.data.success) {
         toast.success("Successfully synced with EHR system");
       } else {
-        const errorMsg = response.data?.message || "Failed to sync with EHR system";
+        const errorMsg =
+          response.data?.message || "Failed to sync with EHR system";
         toast.error(errorMsg);
       }
     } catch (error) {
@@ -125,6 +142,8 @@ export const usePatientInfoForm = (initialData: {
     handleSave,
     handleCancel,
     handleSyncPatientData,
-    setIsEditing
+    setIsEditing,
+    showVerifyModal,
+    setShowVerifyModal,
   };
 };

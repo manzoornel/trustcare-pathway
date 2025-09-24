@@ -1,4 +1,3 @@
-
 export interface ClinicInformation {
   location: string;
   timing?: string;
@@ -7,7 +6,6 @@ export interface ClinicInformation {
 
 export interface DoctorProfile {
   name: string;
-  title: string;
   specialty: string;
   experience: string;
   education: string;

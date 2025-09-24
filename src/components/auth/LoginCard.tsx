@@ -1,12 +1,18 @@
-
-import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import React, { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import EmailLoginForm from '@/components/login/EmailLoginForm';
-import PhoneLoginForm from '@/components/login/PhoneLoginForm';
-import { Link } from 'react-router-dom';
-import DemoAccountsSection from '@/components/login/DemoAccountsSection';
-import { demoPatients } from '@/data/demoPatients';
+import EmailLoginForm from "@/components/login/EmailLoginForm";
+import PhoneLoginForm from "@/components/login/PhoneLoginForm";
+import { Link } from "react-router-dom";
+import DemoAccountsSection from "@/components/login/DemoAccountsSection";
+import { demoPatients } from "@/data/demoPatients";
 
 type LoginCardProps = {
   onEmailLogin?: (values: { email: string; password: string }) => Promise<void>;
@@ -25,7 +31,10 @@ const LoginCard: React.FC<LoginCardProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<string>("email");
 
-  const handleEmailLogin = async (values: { email: string; password: string }) => {
+  const handleEmailLogin = async (values: {
+    email: string;
+    password: string;
+  }) => {
     if (onEmailLogin) {
       await onEmailLogin(values);
     }
@@ -58,22 +67,22 @@ const LoginCard: React.FC<LoginCardProps> = ({
             <TabsTrigger value="phone">Phone</TabsTrigger>
           </TabsList>
           <TabsContent value="email">
-            <EmailLoginForm 
-              handleEmailLogin={handleEmailLogin} 
+            <EmailLoginForm
+              handleEmailLogin={handleEmailLogin}
               loading={loading}
               error={error}
             />
           </TabsContent>
           <TabsContent value="phone">
-            <PhoneLoginForm 
-              handlePhoneLogin={handlePhoneLogin} 
+            <PhoneLoginForm
+              handlePhoneLogin={handlePhoneLogin}
               loading={loading}
               error={error}
             />
           </TabsContent>
         </Tabs>
 
-        <DemoAccountsSection 
+        <DemoAccountsSection
           loginWithDemoAccount={loginWithDemoAccount}
           loading={loading}
         />

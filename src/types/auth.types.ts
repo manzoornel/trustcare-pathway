@@ -10,6 +10,7 @@ export type AuthState = {
   rewardPoints?: number;
   userId?: string;
   role?: string;
+  patient_id?: any;
 };
 
 export type DemoPatient = {

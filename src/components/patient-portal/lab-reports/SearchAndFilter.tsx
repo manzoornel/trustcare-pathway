@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -23,26 +22,31 @@ const SearchAndFilter: React.FC<SearchAndFilterProps> = ({
 }) => {
   return (
     <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-      <div className="w-full md:w-1/3">
+      {/* Search Input */}
+      <div className="w-full md:w-1/3 min-w-[200px]">
         <Input
           placeholder="Search reports..."
           value={searchTerm}
           onChange={onSearchChange}
+          className="w-full"
         />
       </div>
-      <div className="flex items-center gap-2">
+
+      {/* Buttons */}
+      <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
         <Button
           variant={isComparing ? "default" : "outline"}
           onClick={onToggleCompare}
-          className="whitespace-nowrap"
+          className="whitespace-nowrap w-full sm:w-auto"
         >
           {isComparing ? "Cancel Compare" : "Compare Reports"}
         </Button>
+
         {isComparing && (
           <Button
             onClick={onCompare}
             disabled={selectedCount < 2}
-            className="whitespace-nowrap"
+            className="whitespace-nowrap w-full sm:w-auto"
           >
             <LineChart className="h-4 w-4 mr-2" />
             Compare Selected ({selectedCount})
