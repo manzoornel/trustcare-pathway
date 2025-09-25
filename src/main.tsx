@@ -6,13 +6,16 @@ import './index.css'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { ThemeProvider } from '@/contexts/ThemeContext'
 import { FestivalProvider } from '@/contexts/FestivalContext'
+import { LanguageProvider } from '@/contexts/LanguageContext'
 
 createRoot(document.getElementById("root")!).render(
   <BrowserRouter>
     <AuthProvider>
       <ThemeProvider>
         <FestivalProvider>
-          <App />
+          <LanguageProvider>
+            <App />
+          </LanguageProvider>
         </FestivalProvider>
       </ThemeProvider>
     </AuthProvider>

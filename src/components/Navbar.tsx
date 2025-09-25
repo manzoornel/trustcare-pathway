@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Menu, X, LogIn, UserRound, LogOut } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { LanguageToggle } from "@/components/common/LanguageToggle";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -76,23 +77,27 @@ const Navbar = () => {
           </div>
 
           {/* Desktop menu */}
-          <div className="hidden md:flex items-center space-x-8">
-            {menuItems.map((item) => (
-              <Link
-                key={item.name}
-                to={item.href}
-                className={`${
-                  isActive(item.href)
-                    ? "text-primary font-semibold"
-                    : "text-gray-600 hover:text-primary"
-                } transition-colors duration-200 font-display`}
-              >
-                {item.icon && (
-                  <item.icon className="inline-block mr-1 h-4 w-4" />
-                )}{" "}
-                {item.name}
-              </Link>
-            ))}
+          <div className="hidden md:flex items-center space-x-6">
+            <div className="flex items-center space-x-8">
+              {menuItems.map((item) => (
+                <Link
+                  key={item.name}
+                  to={item.href}
+                  className={`${
+                    isActive(item.href)
+                      ? "text-primary font-semibold"
+                      : "text-gray-600 hover:text-primary"
+                  } transition-colors duration-200 font-display`}
+                >
+                  {item.icon && (
+                    <item.icon className="inline-block mr-1 h-4 w-4" />
+                  )}{" "}
+                  {item.name}
+                </Link>
+              ))}
+            </div>
+
+            <LanguageToggle />
 
             {auth.isAuthenticated ? (
               <div className="flex items-center gap-3">
@@ -141,6 +146,10 @@ const Navbar = () => {
       {isOpen && (
         <div className="md:hidden animate-fade-in">
           <div className="px-2 pt-2 pb-3 space-y-1 bg-white">
+            <div className="px-3 py-2">
+              <LanguageToggle />
+            </div>
+            
             {menuItems.map((item) => (
               <Link
                 key={item.name}
