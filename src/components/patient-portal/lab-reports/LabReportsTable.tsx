@@ -7,6 +7,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useLanguage } from "@/contexts/LanguageContext";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -39,6 +40,7 @@ const LabReportsTable: React.FC<LabReportsTableProps> = ({
   isLoading = false,
   onToggleSelectAll,
 }) => {
+  const { t } = useLanguage();
   const visibleVisitIds = new Set(reports.map((r) => r.visitId));
   const selectedVisitIds = new Set(selectedReports.map((r) => r.visitId));
   const allVisibleSelected =
@@ -69,9 +71,9 @@ const LabReportsTable: React.FC<LabReportsTableProps> = ({
                   />
                 </TableHead>
               )}
-              <TableHead>Date</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead>Ordered By</TableHead>
+              <TableHead>{t('common.date')}</TableHead>
+              <TableHead>{t('lab.table.type')}</TableHead>
+              <TableHead>{t('lab.table.ordered_by')}</TableHead>
               <TableHead className="w-16"></TableHead>
             </TableRow>
           </TableHeader>
@@ -85,8 +87,8 @@ const LabReportsTable: React.FC<LabReportsTableProps> = ({
                   <div className="flex justify-center">
                     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
                   </div>
-                  <div className="mt-2 text-sm text-gray-500">
-                    Loading lab reports...
+                  <div className="mt-2 text-sm text-muted-foreground">
+                    {t('common.loading')}
                   </div>
                 </TableCell>
               </TableRow>
@@ -96,7 +98,7 @@ const LabReportsTable: React.FC<LabReportsTableProps> = ({
                   colSpan={isComparing ? 5 : 4}
                   className="text-center py-8"
                 >
-                  No lab reports found.
+                  {t('lab.table.no_reports')}
                 </TableCell>
               </TableRow>
             ) : (
@@ -132,13 +134,13 @@ const LabReportsTable: React.FC<LabReportsTableProps> = ({
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                          <DropdownMenuLabel>{t('lab.table.actions')}</DropdownMenuLabel>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem
                             onClick={() => onViewReport(report)}
                           >
                             <FileText className="h-4 w-4 mr-2" />
-                            View Report
+                            {t('lab.table.view_report')}
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>

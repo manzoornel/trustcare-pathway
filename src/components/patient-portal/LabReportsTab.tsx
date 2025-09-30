@@ -4,10 +4,11 @@ import { useAuth } from "@/contexts/auth";
 import SearchAndFilter from "./lab-reports/SearchAndFilter";
 import LabReportsTable from "./lab-reports/LabReportsTable";
 import ReportViewDialog from "./lab-reports/ReportViewDialog";
-import ReportComparisonDialog from "./lab-reports/ReportComparisonDialog";
+import { EnhancedReportComparisonDialog } from "./lab-reports/EnhancedReportComparisonDialog";
 import { AlertCircle, Edit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 type LabReportsTabProps = {
   openPatientInfoEdit?: () => void;
@@ -17,6 +18,7 @@ const LabReportsTab: React.FC<LabReportsTabProps> = ({
   openPatientInfoEdit,
 }) => {
   const { auth } = useAuth();
+  const { t } = useLanguage();
   const [searchTerm, setSearchTerm] = useState("");
   const [viewingReport, setViewingReport] = useState<any | null>(null);
   const [isComparing, setIsComparing] = useState(false);
@@ -141,11 +143,11 @@ const LabReportsTab: React.FC<LabReportsTabProps> = ({
     <div className="relative">
       {!isEmailVerified && (
         <div className="absolute inset-0 bg-white bg-opacity-80 z-10 flex flex-col items-center justify-center text-center p-6 rounded-md">
-          <h2 className="text-xl font-semibold mb-2 text-red-600">
-            Email Not Verified
+          <h2 className="text-xl font-semibold mb-2 text-destructive">
+            {t('lab.verification.title')}
           </h2>
-          <p className="text-gray-700 mb-4">
-            Please verify your email to access lab reports.
+          <p className="text-muted-foreground mb-4">
+            {t('lab.verification.message')}
           </p>
           <Button
             onClick={() => {
@@ -153,7 +155,7 @@ const LabReportsTab: React.FC<LabReportsTabProps> = ({
               window.scrollTo(250, 250);
             }}
           >
-            Verify email
+            {t('lab.verification.button')}
           </Button>
         </div>
       )}
@@ -165,9 +167,9 @@ const LabReportsTab: React.FC<LabReportsTabProps> = ({
       >
         {/* Mobile-friendly heading */}
         <div className="md:hidden mb-6">
-          <h2 className="text-xl font-semibold mb-2">Lab Reports</h2>
-          <p className="text-sm text-gray-600">
-            View and compare your medical test results
+          <h2 className="text-xl font-semibold mb-2">{t('lab.reports.title')}</h2>
+          <p className="text-sm text-muted-foreground">
+            {t('lab.reports.subtitle')}
           </p>
         </div>
 
@@ -235,7 +237,7 @@ const LabReportsTab: React.FC<LabReportsTabProps> = ({
           onOpenChange={handleCloseDialog}
         />
 
-        <ReportComparisonDialog
+        <EnhancedReportComparisonDialog
           selectedReports={selectedReports}
           reports={labReports}
           open={showCompareDialog}
