@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import LoginTabs from "@/components/login/LoginTabs";
+import DemoAccountsSection from "@/components/login/DemoAccountsSection";
 import { instance } from "../axios";
 import { toast } from "react-toastify";
 
@@ -198,6 +199,11 @@ const Login = () => {
                   loginWithDemoAccount={loginWithDemoAccount}
                   seterror={setError}
                   error={error}
+                  loading={loading}
+                />
+                
+                <DemoAccountsSection
+                  loginWithDemoAccount={loginWithDemoAccount}
                   loading={loading}
                 />
               </CardContent>
