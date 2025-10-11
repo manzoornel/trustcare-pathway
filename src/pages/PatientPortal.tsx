@@ -18,6 +18,14 @@ const PatientPortal: React.FC = () => {
   const [activeTab, setActiveTab] = useState("labReports");
   const [showGrid, setShowGrid] = useState(true);
 
+  // Mock user data for demo (when no auth)
+  const demoUser = {
+    name: auth?.name || "Demo Patient",
+    hospitalId: auth?.hospitalId || "H12345",
+    email: auth?.email || "demo@example.com",
+    phone: auth?.phone || "1234567890",
+  };
+
   // Handle incoming state for tab navigation
   useEffect(() => {
     const state = location.state as { activeTab?: string };
@@ -109,7 +117,7 @@ const PatientPortal: React.FC = () => {
             </h2>
 
             <p className="text-[var(--du-muted)] text-sm mb-6 text-center">
-              {auth.name || "User"}
+              {demoUser.name}
             </p>
 
             <Button

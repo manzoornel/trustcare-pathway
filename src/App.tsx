@@ -61,14 +61,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/verify-otp" element={<Verify />} />
         <Route path="/verify" element={<Verify />} />
-        <Route
-          path="/patient-portal"
-          element={
-            <PrivateRoute>
-              <PatientPortal />
-            </PrivateRoute>
-          }
-        />
+        <Route path="/patient-portal" element={<PatientPortal />} />
       
         {/* Admin Routes */}
         <Route path="/admin" element={<Admin />} />

@@ -32,6 +32,10 @@ const Navbar = () => {
       href: "/ai-chat",
     },
     {
+      name: "Patient Portal",
+      href: "/patient-portal",
+    },
+    {
       name: "Blog",
       href: "/blog",
     },

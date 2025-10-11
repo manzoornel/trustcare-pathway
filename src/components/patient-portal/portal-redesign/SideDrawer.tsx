@@ -109,15 +109,15 @@ const SideDrawer: React.FC<SideDrawerProps> = ({ isOpen, onClose }) => {
             <div className="flex items-center gap-3">
               <Avatar className="h-14 w-14 border-2 border-[var(--du-teal)]">
                 <AvatarFallback className="bg-[var(--du-teal)] text-white text-lg">
-                  {auth.name?.charAt(0).toUpperCase() || "U"}
+                  {auth?.name?.charAt(0).toUpperCase() || "D"}
                 </AvatarFallback>
               </Avatar>
               <div>
                 <p className="text-[var(--du-text)] font-semibold text-base">
-                  {auth.name || "User"}
+                  {auth?.name || "Demo Patient"}
                 </p>
                 <p className="text-[var(--du-muted)] text-sm">
-                  UHID: {auth.hospitalId || "N/A"}
+                  UHID: {auth?.hospitalId || "H12345"}
                 </p>
               </div>
             </div>
