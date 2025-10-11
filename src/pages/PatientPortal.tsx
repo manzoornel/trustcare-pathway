@@ -1,21 +1,35 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/auth";
-import PatientInfoCard from "@/components/patient-portal/PatientInfoCard";
-import PortalTabsSection from "@/components/patient-portal/PortalTabsSection";
-import { useNavigate } from "react-router-dom";
-import { toast, ToastContainer } from "react-toastify";
-import { FileDown, Home } from "lucide-react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import { LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { toast } from "react-toastify";
+import PortalTopBar from "@/components/patient-portal/portal-redesign/PortalTopBar";
+import SideDrawer from "@/components/patient-portal/portal-redesign/SideDrawer";
+import PortalGrid from "@/components/patient-portal/portal-redesign/PortalGrid";
+import PortalTabsSection from "@/components/patient-portal/PortalTabsSection";
 
 const PatientPortal: React.FC = () => {
   const { auth } = useAuth();
-  const [activeTab, setActiveTab] = useState("labReports");
-  const [openPatientInfoEdit, setOpenPatientInfoEdit] = useState<
-    (() => void) | null
-  >(null);
   const navigate = useNavigate();
+  const location = useLocation();
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("labReports");
+  const [showGrid, setShowGrid] = useState(true);
 
-  const handleClick = () => {
+  // Handle incoming state for tab navigation
+  useEffect(() => {
+    const state = location.state as { activeTab?: string };
+    if (state?.activeTab) {
+      setActiveTab(state.activeTab);
+      setShowGrid(false);
+      // Clear the state
+      navigate(location.pathname, { replace: true });
+    }
+  }, [location.state, navigate, location.pathname]);
+
+  const handleLogout = () => {
     toast.info(
       ({ closeToast }) => (
         <div className="flex flex-col">
@@ -48,55 +62,86 @@ const PatientPortal: React.FC = () => {
     );
   };
 
-  return (
-    <div className="container mx-auto py-6 px-4">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 gap-4">
-        <h1 className="text-2xl md:text-3xl font-bold text-center md:text-left">
-          Welcome to Patient Portal
-        </h1>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => navigate("/")}
-          className="flex items-center gap-2"
-        >
-          <Home className="h-4 w-4" />
-          Home
-        </Button>
-        <button
-          onClick={handleClick}
-          className="px-4 py-2 border border-red-500 text-red-500 rounded hover:bg-red-50 transition"
-        >
-          Log out
-        </button>
-      </div>
+  const handleFeatureClick = (feature: string) => {
+    setShowGrid(false);
+  };
 
+  return (
+    <div
+      className="du-portal-container min-h-screen"
+      style={{
+        backgroundColor: "var(--du-bg)",
+        "--du-bg": "#203238",
+        "--du-surface": "#253943",
+        "--du-teal": "#34C9C7",
+        "--du-teal-2": "#58D7D6",
+        "--du-text": "#FFFFFF",
+        "--du-muted": "#94A3B8",
+        "--du-radius": "20px",
+        "--du-shadow": "0 8px 24px rgba(0,0,0,.35)",
+      } as React.CSSProperties}
+    >
       <ToastContainer />
 
-      {/* Grid Layout */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Left Column */}
-        <div className="space-y-6">
-          <PatientInfoCard
-            patientName={auth.name || ""}
-            hospitalId={auth.hospitalId}
-            phone={auth.phone}
-            email={auth.email}
-            onRegisterOpenEdit={(fn) => setOpenPatientInfoEdit(() => fn)}
-          />
-          {/* Optional future components like RewardsCard */}
-        </div>
+      {/* Top Bar */}
+      <PortalTopBar
+        onMenuClick={() => setIsDrawerOpen(true)}
+        notificationCount={3}
+      />
 
-        {/* Right Column */}
-        <div className="md:col-span-2">
+      {/* Side Drawer */}
+      <SideDrawer
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+      />
+
+      {showGrid ? (
+        <>
+          {/* Hero Section */}
+          <div className="flex flex-col items-center py-8 px-4">
+            {/* Logo placeholder - replace with actual Doctor Uncle logo */}
+            <div className="w-24 h-24 mb-4 rounded-full bg-[var(--du-teal)] flex items-center justify-center">
+              <div className="text-white text-4xl font-bold">DU</div>
+            </div>
+
+            <h2 className="text-2xl font-bold text-[var(--du-text)] mb-2 text-center">
+              Welcome to Patient Portal
+            </h2>
+
+            <p className="text-[var(--du-muted)] text-sm mb-6 text-center">
+              {auth.name || "User"}
+            </p>
+
+            <Button
+              onClick={handleLogout}
+              className="bg-[var(--du-teal)] hover:bg-[var(--du-teal-2)] text-white font-semibold px-8 py-6 rounded-full transition-all hover:shadow-[0_0_20px_rgba(52,201,199,0.4)]"
+            >
+              <LogOut className="mr-2 h-5 w-5" />
+              Log out
+            </Button>
+          </div>
+
+          {/* Feature Grid */}
+          <PortalGrid onFeatureClick={handleFeatureClick} />
+        </>
+      ) : (
+        <div className="container mx-auto py-6 px-4">
+          {/* Back button */}
+          <Button
+            variant="ghost"
+            onClick={() => setShowGrid(true)}
+            className="mb-4 text-[var(--du-text)] hover:bg-[var(--du-teal)]/10"
+          >
+            ← Back to Dashboard
+          </Button>
+
+          {/* Tabs Section */}
           <PortalTabsSection
             activeTab={activeTab}
             setActiveTab={setActiveTab}
-            openPatientInfoEdit={openPatientInfoEdit || undefined}
           />
         </div>
-      </div>
+      )}
     </div>
   );
 };
