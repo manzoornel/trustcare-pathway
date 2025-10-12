@@ -1,5 +1,6 @@
 import axios from "axios";
 const baseURL = "https://clinictrial.grandissolutions.in/patientApp/";
+const pbaseURL = "https://druncle.grandissolutions.in/patientApp/";
 
 export const instancetoken = axios.create({
   baseURL,

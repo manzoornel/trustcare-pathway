@@ -36,13 +36,13 @@ const LoginTabs = ({
 }: LoginTabsProps) => {
   return (
     <Tabs
-      defaultValue="email"
+      defaultValue="phone"
       value={activeTab}
       onValueChange={(value) => handlechange(value, setActiveTab, seterror)}
     >
       <TabsList className="grid w-full grid-cols-2 mb-4">
-        <TabsTrigger value="email">Email</TabsTrigger>
         <TabsTrigger value="phone">Phone</TabsTrigger>
+        <TabsTrigger value="email">Email</TabsTrigger>
       </TabsList>
 
       <TabsContent value="phone">

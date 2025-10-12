@@ -20,7 +20,7 @@ const Login = () => {
   const navigate = useNavigate();
   const { auth, login, loginWithOTP } = useAuth();
 
-  const [activeTab, setActiveTab] = useState("email");
+  const [activeTab, setActiveTab] = useState("phone");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -26,7 +25,7 @@ const Careers = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
-      
+
       <div className="pt-20 pb-12">
         {/* Hero Section */}
         <HeroSection />
@@ -35,7 +34,7 @@ const Careers = () => {
         <BenefitsSection />
 
         {/* Job Listings Section */}
-        <JobListingSection 
+        <JobListingSection
           jobCategories={jobCategories}
           selectedCategory={selectedCategory}
           setSelectedCategory={setSelectedCategory}
@@ -44,7 +43,7 @@ const Careers = () => {
         />
 
         {/* Application Form - displayed when a position is selected */}
-        {selectedCategory && selectedPosition && (
+        {/* {selectedCategory && selectedPosition && (
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
             <ApplicationForm 
               selectedCategory={selectedCategory} 
@@ -52,9 +51,9 @@ const Careers = () => {
               jobCategories={jobCategories}
             />
           </div>
-        )}
+        )} */}
       </div>
-      
+
       <Footer />
     </div>
   );
