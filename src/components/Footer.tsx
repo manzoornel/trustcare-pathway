@@ -41,9 +41,9 @@ const Footer = () => {
         <div className="flex flex-col items-center space-y-6">
           {/* Logo */}
           <img
-            src="/logo.png"
+            src="/doctoruncle-logo.png"
             alt="Doctor Uncle Family Clinic"
-            className="h-12"
+            className="h-16 w-16 object-contain"
           />
 
           {/* Social Icons */}
