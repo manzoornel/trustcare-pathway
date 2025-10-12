@@ -107,10 +107,12 @@ const PatientPortal: React.FC = () => {
         <>
           {/* Hero Section */}
           <div className="flex flex-col items-center py-8 px-4">
-            {/* Logo placeholder - replace with actual Doctor Uncle logo */}
-            <div className="w-24 h-24 mb-4 rounded-full bg-[var(--du-teal)] flex items-center justify-center">
-              <div className="text-white text-4xl font-bold">DU</div>
-            </div>
+            {/* Doctor Uncle Logo */}
+            <img 
+              src="/doctoruncle-logo.png" 
+              alt="Doctor Uncle Logo" 
+              className="w-32 h-32 mb-4 object-contain"
+            />
 
             <h2 className="text-2xl font-bold text-[var(--du-text)] mb-2 text-center">
               Welcome to Patient Portal

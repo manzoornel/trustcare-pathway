@@ -104,6 +104,15 @@ const SideDrawer: React.FC<SideDrawerProps> = ({ isOpen, onClose }) => {
             </Button>
           </div>
 
+          {/* Doctor Uncle Logo */}
+          <div className="px-6 pb-4 flex justify-center">
+            <img 
+              src="/doctoruncle-logo.png" 
+              alt="Doctor Uncle" 
+              className="w-20 h-20 object-contain"
+            />
+          </div>
+
           {/* Profile section */}
           <div className="px-6 pb-6 border-b border-[var(--du-teal-2)]/20">
             <div className="flex items-center gap-3">
