@@ -9,6 +9,7 @@ import {
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { instance } from "../../axios";
+import { ClipboardList, User, Calendar, FileText, Pill } from "lucide-react";
 
 type Medication = {
   item_desc: string;
@@ -45,7 +46,7 @@ const MedicalSummaryTab = () => {
       );
 
       if (data.code === 1) {
-        const summaries = Object.values(data.data); // ✅ Fix object-to-array
+        const summaries = Object.values(data.data);
         setMedicalSummaries(summaries as EncounterData[]);
       } else if (
         data.code === 0 &&
@@ -70,50 +71,84 @@ const MedicalSummaryTab = () => {
 
   const formatDate = (datetimeStr: string) => {
     const date = new Date(datetimeStr);
-    return date.toLocaleDateString("en-GB"); // DD/MM/YYYY
+    return date.toLocaleDateString("en-US", {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Medical Summary</CardTitle>
-        <CardDescription>
-          Summary of your past visits and consultations
+    <Card className="border-none shadow-sm bg-card">
+      <CardHeader className="space-y-1">
+        <CardTitle className="text-2xl font-bold flex items-center gap-2">
+          <ClipboardList className="h-6 w-6 text-primary" />
+          Medical Summary
+        </CardTitle>
+        <CardDescription className="text-base">
+          Comprehensive overview of your past consultations and treatments
         </CardDescription>
       </CardHeader>
       <CardContent>
         {isLoading ? (
-          <div className="py-8 text-center text-gray-500">
-            Loading medical summaries...
+          <div className="flex flex-col items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-10 w-10 border-4 border-primary border-t-transparent mb-4"></div>
+            <p className="text-muted-foreground">Loading medical summaries...</p>
           </div>
         ) : medicalSummaries.length === 0 ? (
-          <div className="py-8 text-center text-gray-500">
-            No medical summaries found
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <ClipboardList className="h-16 w-16 text-muted-foreground/30 mb-4" />
+            <h3 className="font-semibold text-lg mb-2">No Medical Records</h3>
+            <p className="text-muted-foreground text-sm max-w-sm">
+              Your consultation history and medical summaries will appear here
+            </p>
           </div>
         ) : (
           <div className="space-y-4">
             {medicalSummaries.map((summary) => (
-              <div key={summary.encounter_id} className="p-4 border rounded-lg">
-                <div className="flex justify-between mb-2">
-                  <h3 className="font-medium">
-                    Visit ID: {summary.encounter_id}
-                  </h3>
-                  <span className="text-sm text-gray-500">
-                    {formatDate(summary.encounter_date_time)}
-                  </span>
+              <div key={summary.encounter_id} className="p-5 border border-border rounded-lg bg-card hover:bg-accent/30 transition-colors">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 mb-4">
+                  <div className="space-y-1">
+                    <h3 className="font-semibold text-lg flex items-center gap-2">
+                      <FileText className="h-5 w-5 text-primary" />
+                      Visit #{summary.encounter_id}
+                    </h3>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <User className="h-4 w-4" />
+                      <span>Dr. {summary.doctor_name}</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Calendar className="h-4 w-4" />
+                    <span>{formatDate(summary.encounter_date_time)}</span>
+                  </div>
                 </div>
-                <p className="text-sm text-gray-700 mb-2">
-                  Doctor: {summary.doctor_name}
-                </p>
-                <p className="text-sm font-semibold">Medications:</p>
-                <ul className="list-disc list-inside text-sm text-gray-800">
-                  {summary.patient_medication?.map((med, idx) => (
-                    <li key={idx}>
-                      {med.item_desc}
-                      {med.notes ? ` - ${med.notes}` : ""}
-                    </li>
-                  ))}
-                </ul>
+                
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Pill className="h-4 w-4 text-primary" />
+                    <p className="text-sm font-semibold text-foreground">Prescribed Medications</p>
+                  </div>
+                  {summary.patient_medication && summary.patient_medication.length > 0 ? (
+                    <ul className="space-y-2 ml-6">
+                      {summary.patient_medication.map((med, idx) => (
+                        <li key={idx} className="text-sm flex items-start gap-2">
+                          <span className="text-primary mt-1">•</span>
+                          <div className="flex-1">
+                            <p className="font-medium text-foreground">{med.item_desc}</p>
+                            {med.notes && (
+                              <p className="text-muted-foreground text-xs mt-1">{med.notes}</p>
+                            )}
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-sm text-muted-foreground ml-6">No medications prescribed</p>
+                  )}
+                </div>
               </div>
             ))}
           </div>

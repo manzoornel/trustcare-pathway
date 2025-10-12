@@ -12,7 +12,7 @@ import { instance } from "../../axios";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { Eye } from "lucide-react";
+import { Eye, Pill, CalendarDays, User } from "lucide-react";
 
 type Medication = {
   id: string;
@@ -67,34 +67,54 @@ const MedicationsTab = () => {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Medication History</CardTitle>
-        <CardDescription>
-          Your current and past medication details
+    <Card className="border-none shadow-sm bg-card">
+      <CardHeader className="space-y-1">
+        <CardTitle className="text-2xl font-bold flex items-center gap-2">
+          <Pill className="h-6 w-6 text-primary" />
+          Medication History
+        </CardTitle>
+        <CardDescription className="text-base">
+          View your current and past medication prescriptions
         </CardDescription>
       </CardHeader>
       <CardContent>
         {isLoading ? (
-          <div className="py-8 text-center text-gray-500">
-            Loading medications...
+          <div className="flex flex-col items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-10 w-10 border-4 border-primary border-t-transparent mb-4"></div>
+            <p className="text-muted-foreground">Loading medications...</p>
           </div>
         ) : medications.length === 0 ? (
-          <div className="py-8 text-center text-gray-500">
-            No medications found.
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <Pill className="h-16 w-16 text-muted-foreground/30 mb-4" />
+            <h3 className="font-semibold text-lg mb-2">No Medications Found</h3>
+            <p className="text-muted-foreground text-sm">
+              Your medication history will appear here once prescribed
+            </p>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {medications.map((med, index) => (
               <div
                 key={med.id || index}
-                className="flex items-center justify-between border p-3 rounded-md shadow-sm"
+                className="flex items-center justify-between p-4 rounded-lg border border-border bg-card hover:bg-accent/50 transition-colors"
               >
-                <div>
-                  <p className="text-sm text-gray-600">Date:{med.visit_date}</p>
-                  <p className="text-sm text-gray-600">
-                    Doctor: {med.doctor_name}
-                  </p>
+                <div className="flex-1 space-y-1">
+                  <div className="flex items-center gap-2">
+                    <CalendarDays className="h-4 w-4 text-muted-foreground" />
+                    <p className="font-medium text-foreground">
+                      {new Date(med.visit_date).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <User className="h-4 w-4 text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">
+                      Dr. {med.doctor_name}
+                    </p>
+                  </div>
                 </div>
 
                 {med.pdf_url && (
@@ -102,20 +122,29 @@ const MedicationsTab = () => {
                     <DialogTrigger asChild>
                       <Button
                         variant="outline"
-                        size="icon"
+                        size="sm"
+                        className="ml-4"
                         onClick={() => setSelectedPdf(med.pdf_url)}
                       >
-                        <Eye className="h-4 w-4" />
+                        <Eye className="h-4 w-4 mr-2" />
+                        View
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="w-full max-w-3xl h-[80vh]">
-                      <iframe
-                        src={selectedPdf}
-                        title="Medication Report"
-                        width="100%"
-                        height="100%"
-                        style={{ border: "none" }}
-                      />
+                    <DialogContent className="w-full max-w-4xl h-[85vh] p-0">
+                      <div className="h-full flex flex-col">
+                        <div className="p-4 border-b bg-muted/30">
+                          <h3 className="font-semibold">Medication Prescription</h3>
+                          <p className="text-sm text-muted-foreground">
+                            {new Date(med.visit_date).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <iframe
+                          src={selectedPdf}
+                          title="Medication Report"
+                          className="flex-1 w-full"
+                          style={{ border: "none" }}
+                        />
+                      </div>
                     </DialogContent>
                   </Dialog>
                 )}

@@ -217,29 +217,64 @@ const VitalsReportsTab: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center p-8">
-        <div className="animate-spin rounded-full h-10 w-10 border-4 border-blue-500 border-t-transparent"></div>
-        <span className="ml-3 text-gray-600">Loading vitals...</span>
-      </div>
+      <Card className="border-none shadow-sm bg-card">
+        <CardContent className="pt-6">
+          <div className="flex flex-col items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-10 w-10 border-4 border-primary border-t-transparent mb-4"></div>
+            <p className="text-muted-foreground">Loading vital signs...</p>
+          </div>
+        </CardContent>
+      </Card>
     );
   }
 
   if (Object.keys(pivotedData).length === 0) {
-    return <div className="p-4 text-center text-gray-500">No vitals found</div>;
+    return (
+      <Card className="border-none shadow-sm bg-card">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl font-bold flex items-center gap-2">
+            <Activity className="h-6 w-6 text-primary" />
+            Vital Signs
+          </CardTitle>
+          <CardDescription className="text-base">
+            Track your health metrics and vital signs over time
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <Activity className="h-16 w-16 text-muted-foreground/30 mb-4" />
+            <h3 className="font-semibold text-lg mb-2">No Vital Signs Recorded</h3>
+            <p className="text-muted-foreground text-sm max-w-sm">
+              Your vital signs measurements will appear here once recorded
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
-    <div className="h-[600px] flex flex-col overflow-hidden border rounded-lg">
-      {/* Mobile-friendly heading */}
-      <div className="md:hidden flex-shrink-0 p-4 border-b bg-gray-50">
-        <h2 className="text-xl font-semibold mb-2">Vital Signs</h2>
-        <p className="text-sm text-gray-600">
-          Monitor your health metrics over time
+    <Card className="border-none shadow-sm bg-card">
+      <CardHeader className="space-y-1">
+        <CardTitle className="text-2xl font-bold flex items-center gap-2">
+          <Activity className="h-6 w-6 text-primary" />
+          Vital Signs
+        </CardTitle>
+        <CardDescription className="text-base">
+          Monitor your health metrics and trends over time
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="p-0">
+        <div className="h-[600px] flex flex-col overflow-hidden border-t">{/* Mobile-friendly heading */}
+      <div className="md:hidden flex-shrink-0 p-4 border-b bg-muted/30">
+        <h3 className="text-lg font-semibold mb-1">Your Vital Metrics</h3>
+        <p className="text-sm text-muted-foreground">
+          Select a vital sign to view history
         </p>
       </div>
 
       {/* Vital Type Selection Buttons - Fixed at top */}
-      <div className="flex-shrink-0 p-4 border-b bg-white">
+      <div className="flex-shrink-0 p-4 border-b bg-card">
         <div className="flex flex-wrap gap-2 overflow-x-auto pb-2">
           {availableVitalTypes.map((vitalName) => {
             const config = vitalTypeConfigs[
@@ -276,7 +311,7 @@ const VitalsReportsTab: React.FC = () => {
         {selectedVitalType && (
           <div className="h-full flex flex-col">
             {/* Card Header - Fixed */}
-            <div className="flex-shrink-0 p-4 border-b bg-white">
+            <div className="flex-shrink-0 p-4 border-b bg-muted/30">
               <div className="flex items-center gap-2 mb-1">
                 {(() => {
                   const config = vitalTypeConfigs[
@@ -311,12 +346,12 @@ const VitalsReportsTab: React.FC = () => {
               {selectedVitalData.length > 0 ? (
                 <div className="h-full overflow-y-auto">
                   <Table>
-                    <TableHeader className="sticky top-0 bg-white z-10 border-b">
+                    <TableHeader className="sticky top-0 bg-muted z-10 border-b">
                       <TableRow>
-                        <TableHead className="bg-gray-50 font-semibold">
+                        <TableHead className="bg-muted font-semibold">
                           Date
                         </TableHead>
-                        <TableHead className="bg-gray-50 font-semibold">
+                        <TableHead className="bg-muted font-semibold">
                           Value
                         </TableHead>
                       </TableRow>
@@ -327,16 +362,16 @@ const VitalsReportsTab: React.FC = () => {
                         const normal = isWithinRange(value, selectedVitalType);
 
                         return (
-                          <TableRow key={index} className="hover:bg-gray-50">
-                            <TableCell className="font-medium">
+                          <TableRow key={index} className="hover:bg-accent/30 transition-colors">
+                            <TableCell className="font-medium text-foreground">
                               {item.date}
                             </TableCell>
                             <TableCell>
                               <span
                                 className={
                                   normal
-                                    ? "text-gray-900"
-                                    : "text-red-600 font-semibold"
+                                    ? "text-foreground font-medium"
+                                    : "text-destructive font-semibold"
                                 }
                               >
                                 {value}
@@ -350,12 +385,13 @@ const VitalsReportsTab: React.FC = () => {
                 </div>
               ) : (
                 <div className="h-full flex items-center justify-center">
-                  <div className="text-center text-gray-500">
-                    <p className="text-lg font-medium mb-2">
-                      No data available
+                  <div className="text-center text-muted-foreground">
+                    <Activity className="h-12 w-12 mx-auto mb-3 opacity-30" />
+                    <p className="text-base font-medium mb-1">
+                      No Data Available
                     </p>
                     <p className="text-sm">
-                      No valid {selectedVitalType.toLowerCase()} records found
+                      No {selectedVitalType.toLowerCase()} measurements recorded yet
                     </p>
                   </div>
                 </div>
@@ -370,7 +406,9 @@ const VitalsReportsTab: React.FC = () => {
         open={showComparisonDialog}
         onOpenChange={setShowComparisonDialog}
       />
-    </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 

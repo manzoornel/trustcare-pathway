@@ -7,7 +7,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CalendarDays, Clock, MapPin, User, PlusCircle } from "lucide-react";
+import { CalendarDays, Clock, MapPin, User, PlusCircle, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { instance } from "../../axios";
 import { useNavigate } from "react-router-dom";
@@ -267,46 +267,63 @@ const AppointmentsTab = () => {
   };
 
   return (
-    <Card>
-      <CardHeader className="flex justify-between items-center">
-        <div>
-          <CardTitle className="flex items-center gap-2">
-            <CalendarDays className="h-5 w-5 text-primary" />
-            Appointments
-          </CardTitle>
+    <Card className="border-none shadow-sm bg-card">
+      <CardHeader className="space-y-1">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <CardTitle className="text-2xl font-bold flex items-center gap-2">
+              <CalendarDays className="h-6 w-6 text-primary" />
+              Appointments
+            </CardTitle>
+            <CardDescription className="text-base mt-1">
+              Manage your upcoming and past appointments
+            </CardDescription>
+          </div>
+          <Button
+            type="primary"
+            onClick={handleOpenModal}
+            icon={<PlusCircle className="h-4 w-4" />}
+            className="w-full sm:w-auto"
+          >
+            Book Appointment
+          </Button>
         </div>
-        <Button
-          type="primary"
-          onClick={handleOpenModal}
-          style={{ marginLeft: "auto", marginTop: "10px" }}
-          icon={<PlusCircle className="mr-2" />}
-        >
-          Create Appointment
-        </Button>
       </CardHeader>
 
       <CardContent>
         {isLoading ? (
-          <div className="py-8 text-center text-gray-500">
-            Loading appointments...
+          <div className="flex flex-col items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-10 w-10 border-4 border-primary border-t-transparent mb-4"></div>
+            <p className="text-muted-foreground">Loading appointments...</p>
           </div>
         ) : appointments.length === 0 ? (
-          <div className="py-8 text-center text-gray-500">
-            No appointments found
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <CalendarDays className="h-16 w-16 text-muted-foreground/30 mb-4" />
+            <h3 className="font-semibold text-lg mb-2">No Appointments Yet</h3>
+            <p className="text-muted-foreground text-sm max-w-sm mb-4">
+              Schedule your first appointment with our healthcare professionals
+            </p>
+            <Button onClick={handleOpenModal} size="small">
+              <PlusCircle className="h-4 w-4 mr-2" />
+              Book Now
+            </Button>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {appointments.map((appointment) => (
               <div
                 key={appointment.appointment_no}
-                className={`p-4 rounded-lg border ${
+                className={`p-5 rounded-lg border transition-all hover:shadow-md ${
                   appointment.status === 1
-                    ? "border-blue-100 bg-blue-50"
-                    : "border-gray-100 bg-gray-50"
+                    ? "border-primary/20 bg-primary/5"
+                    : appointment.status === 2
+                    ? "border-green-200 bg-green-50/50"
+                    : "border-border bg-card"
                 }`}
               >
-                <div className="flex justify-between items-start mb-2">
-                  <h3 className="font-medium text-gray-900">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 mb-3">
+                  <h3 className="font-semibold text-lg flex items-center gap-2">
+                    <FileText className="h-5 w-5 text-primary" />
                     Appointment #{appointment.appointment_no}
                   </h3>
                   <Badge className={getBadgeStyle(appointment.status)}>
@@ -314,24 +331,24 @@ const AppointmentsTab = () => {
                   </Badge>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-                  <div className="flex items-center gap-2">
-                    <CalendarDays className="h-4 w-4 text-gray-500" />
-                    <span>{appointment.timeslot}</span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <CalendarDays className="h-4 w-4 text-primary" />
+                    <span className="font-medium">{appointment.timeslot}</span>
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-4 w-4 text-gray-500" />
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Clock className="h-4 w-4 text-primary" />
                     <span>{appointment.booked_at}</span>
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    <User className="h-4 w-4 text-gray-500" />
-                    <span>{appointment.doctor_name}</span>
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <User className="h-4 w-4 text-primary" />
+                    <span>Dr. {appointment.doctor_name}</span>
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    <MapPin className="h-4 w-4 text-gray-500" />
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <MapPin className="h-4 w-4 text-primary" />
                     <span>UHID: {appointment.uhid}</span>
                   </div>
                 </div>
