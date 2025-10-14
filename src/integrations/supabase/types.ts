@@ -7,13 +7,34 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "12.2.3 (519615d)"
+    PostgrestVersion: "13.0.5"
   }
   public: {
     Tables: {
+      admin_profiles: {
+        Row: {
+          created_at: string | null
+          id: string
+          last_login: string | null
+          username: string
+        }
+        Insert: {
+          created_at?: string | null
+          id: string
+          last_login?: string | null
+          username: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          last_login?: string | null
+          username?: string
+        }
+        Relationships: []
+      }
       appointments: {
         Row: {
           created_at: string | null
@@ -112,6 +133,36 @@ export type Database = {
           patient_id?: string | null
           status?: string
           timestamp?: string
+        }
+        Relationships: []
+      }
+      jobs: {
+        Row: {
+          created_at: string
+          email: string | null
+          file_url: string | null
+          full_name: string | null
+          id: number
+          phone: string | null
+          position: string | null
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          file_url?: string | null
+          full_name?: string | null
+          id?: number
+          phone?: string | null
+          position?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          file_url?: string | null
+          full_name?: string | null
+          id?: number
+          phone?: string | null
+          position?: string | null
         }
         Relationships: []
       }
@@ -374,6 +425,30 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -391,9 +466,16 @@ export type Database = {
         }
         Returns: boolean
       }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "hr" | "manager" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -520,6 +602,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "hr", "manager", "user"],
+    },
   },
 } as const

@@ -5,39 +5,49 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-
-// Mock admin accounts
-const adminUsers = [
-  { username: "admin", password: "admin123", role: "admin" },
-  { username: "manager", password: "manager123", role: "manager" },
-  { username: "staff", password: "staff123", role: "staff" }
-];
+import { supabase } from "@/integrations/supabase/client";
 
 const AdminLogin = () => {
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simple authentication check - in a real app, this would be a backend call
-    const user = adminUsers.find(
-      user => user.username === username && user.password === password
-    );
+    try {
+      // Authenticate with Supabase
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-    if (user) {
-      // Set authenticated in localStorage with the user's role
-      localStorage.setItem("adminAuthenticated", "true");
-      localStorage.setItem("adminRole", user.role);
-      localStorage.setItem("adminUsername", user.username);
-      
-      toast.success(`Login successful. Welcome, ${user.username}!`);
+      if (authError) throw authError;
+
+      // Check if user has admin role
+      const { data: roles, error: rolesError } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', authData.user.id);
+
+      if (rolesError) throw rolesError;
+
+      const hasAdminRole = roles?.some(r => ['admin', 'hr', 'manager'].includes(r.role));
+
+      if (!hasAdminRole) {
+        await supabase.auth.signOut();
+        toast.error("You don't have admin access");
+        setIsLoading(false);
+        return;
+      }
+
+      toast.success("Login successful!");
       navigate("/admin/dashboard");
-    } else {
-      toast.error("Invalid credentials");
+    } catch (error: any) {
+      console.error("Login error:", error);
+      toast.error(error.message || "Invalid credentials");
       setIsLoading(false);
     }
   };
@@ -57,12 +67,12 @@ const AdminLogin = () => {
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
           <form className="space-y-6" onSubmit={handleLogin}>
             <div>
-              <Label htmlFor="username">Username</Label>
+              <Label htmlFor="email">Email</Label>
               <Input
-                id="username"
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
                 className="mt-1"
               />
@@ -99,12 +109,8 @@ const AdminLogin = () => {
             </div>
             
             <div className="mt-4 text-sm text-gray-500">
-              <p>Demo accounts:</p>
-              <ul className="mt-1 list-disc pl-5">
-                <li>Username: admin / Password: admin123</li>
-                <li>Username: manager / Password: manager123</li>
-                <li>Username: staff / Password: staff123</li>
-              </ul>
+              <p>Use your admin account credentials to login.</p>
+              <p className="mt-2">Don't have an account? Contact your system administrator to create one with admin privileges.</p>
             </div>
           </form>
         </div>

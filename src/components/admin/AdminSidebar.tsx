@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { LayoutDashboard, FileText, Briefcase, LogOut, Users, Settings, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 const AdminSidebar = () => {
   const navigate = useNavigate();
@@ -12,17 +13,15 @@ const AdminSidebar = () => {
     return location.pathname === path;
   };
 
-  const handleLogout = () => {
-    // Clear all admin-related localStorage items
-    localStorage.removeItem("adminAuthenticated");
-    localStorage.removeItem("adminRole");
-    localStorage.removeItem("adminUsername");
-    
-    // Show success toast
-    toast.success("Logged out successfully");
-    
-    // Navigate to admin login page
-    navigate("/admin");
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      toast.success("Logged out successfully");
+      navigate("/admin");
+    } catch (error) {
+      console.error("Logout error:", error);
+      toast.error("Error logging out");
+    }
   };
 
   const menuItems = [

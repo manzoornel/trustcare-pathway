@@ -5,7 +5,7 @@ import AdminGuard from "./AdminGuard";
 interface AdminLayoutProps {
   children: React.ReactNode;
   title: string;
-  requiredRole?: "admin" | "manager" | "staff";
+  requiredRole?: "admin" | "manager" | "hr";
 }
 
 const AdminLayout = ({ children, title, requiredRole }: AdminLayoutProps) => {
