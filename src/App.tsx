@@ -20,6 +20,7 @@ import ThemeSwitcher from '@/components/ThemeSwitcher';
 import FestivalDecorations from '@/components/FestivalDecorations';
 import { useTheme } from '@/contexts/ThemeContext';
 import GoogleAnalytics from '@/components/GoogleAnalytics';
+import { Toaster } from '@/components/ui/sonner';
 
 // Admin components
 import Admin from "@/pages/Admin";
@@ -38,6 +39,7 @@ function App() {
     <>
       <GoogleAnalytics />
       <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} newestOnTop closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />
+      <Toaster />
       
       {/* Theme fade transition */}
       {isThemeChanging && (
