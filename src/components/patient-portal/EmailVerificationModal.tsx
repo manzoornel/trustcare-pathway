@@ -4,8 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import OTPInput from "@/components/OTPInput";
-import { Mail, CheckCircle2, Loader2 } from "lucide-react";
+import { Mail, CheckCircle2, Loader2, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
+import doctorUncleLogo from "@/assets/doctor-uncle-logo.jpg";
 
 interface EmailVerificationModalProps {
   open: boolean;
@@ -55,6 +56,7 @@ export const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({
       // Simulate API call to verify OTP
       await new Promise((resolve) => setTimeout(resolve, 1000));
       setStep("success");
+      toast.success("Email verified successfully!");
       setTimeout(() => {
         onClose();
         // Reset state after modal closes
@@ -84,38 +86,37 @@ export const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md bg-white">
+      <DialogContent className="sm:max-w-lg bg-white/95 backdrop-blur-xl border-2 shadow-2xl rounded-2xl overflow-hidden" style={{ borderColor: "hsl(var(--color-primary) / 0.3)" }}>
         {/* Logo Watermark */}
-        <div className="absolute inset-0 flex items-center justify-center opacity-5 pointer-events-none">
-          <div className="text-9xl font-bold" style={{ color: "hsl(var(--color-primary))" }}>
-            DU
-          </div>
+        <div className="absolute top-4 right-4 opacity-10 pointer-events-none">
+          <img src={doctorUncleLogo} alt="Doctor Uncle" className="h-24 w-24 rounded-full" />
         </div>
 
         <DialogHeader className="relative z-10">
-          <div className="flex items-center justify-center mb-4">
-            <div
-              className="w-12 h-12 rounded-full flex items-center justify-center"
-              style={{ backgroundColor: "hsl(var(--color-primary))" }}
-            >
-              <Mail className="w-6 h-6 text-white" />
+          <div className="flex justify-center mb-4">
+            <div className="h-16 w-16 rounded-full flex items-center justify-center shadow-lg" style={{ background: "linear-gradient(135deg, hsl(var(--color-primary)), hsl(var(--color-accent)))" }}>
+              <Mail className="h-8 w-8 text-white" />
             </div>
           </div>
-          <DialogTitle className="text-center text-2xl font-display">
-            Verify Your Email
+          <DialogTitle className="text-center text-2xl font-bold text-foreground">
+            {step === "email" && "Verify Your Email"}
+            {step === "otp" && "Enter OTP Code"}
+            {step === "success" && "Successfully Verified!"}
           </DialogTitle>
+          <p className="text-center text-sm text-muted-foreground mt-2">
+            {step === "email" && "ഇമെയിൽ പരിശോധിക്കുക"}
+            {step === "otp" && "OTP കോഡ് നൽകുക"}
+            {step === "success" && "വിജയകരമായി പരിശോധിച്ചു"}
+          </p>
         </DialogHeader>
 
-        <div className="relative z-10 space-y-6 py-4">
+        <div className="relative z-10 space-y-6 py-6">
           {/* Step 1: Email Input */}
           {step === "email" && (
             <div className="space-y-4 animate-fade-in">
-              <p className="text-center text-muted-foreground">
-                Enter your email address to receive a verification code
-              </p>
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-foreground font-medium">
-                  Email Address
+                <Label htmlFor="email" className="text-sm font-semibold">
+                  Email Address / ഇമെയിൽ വിലാസം
                 </Label>
                 <Input
                   id="email"
@@ -123,25 +124,28 @@ export const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({
                   placeholder="your.email@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="h-12"
+                  className="h-12 text-base border-2 focus:border-primary rounded-xl"
                   disabled={loading}
                 />
               </div>
               <Button
                 onClick={handleSendOTP}
-                disabled={loading}
-                className="w-full h-12 text-base font-medium rounded-lg"
+                disabled={!email || loading}
+                className="w-full h-12 text-base font-semibold rounded-xl hover:shadow-lg transition-all"
                 style={{
                   background: "linear-gradient(135deg, hsl(var(--color-primary)) 0%, hsl(var(--color-accent)) 100%)",
                 }}
               >
                 {loading ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                     Sending...
                   </>
                 ) : (
-                  "Send OTP"
+                  <>
+                    Send OTP Code
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </>
                 )}
               </Button>
             </div>
@@ -150,71 +154,91 @@ export const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({
           {/* Step 2: OTP Input */}
           {step === "otp" && (
             <div className="space-y-6 animate-fade-in">
-              <div className="text-center space-y-2">
-                <p className="text-muted-foreground">
-                  We've sent a 6-digit code to
+              <div className="text-center p-4 rounded-xl border" style={{ backgroundColor: "hsl(var(--color-primary) / 0.05)", borderColor: "hsl(var(--color-primary) / 0.2)" }}>
+                <p className="text-sm text-muted-foreground mb-1">
+                  Verification code sent to / സ്ഥിരീകരണ കോഡ് അയച്ചു
                 </p>
-                <p className="font-medium text-foreground">{email}</p>
+                <p className="font-bold text-foreground text-lg">{email}</p>
               </div>
-              <div className="space-y-2">
-                <Label className="text-center block text-foreground font-medium">
-                  Enter Verification Code
+
+              <div>
+                <Label className="text-sm font-semibold mb-3 block text-center">
+                  Enter 6-digit OTP / 6 അക്കങ്ങളുള്ള OTP നൽകുക
                 </Label>
-                <OTPInput length={6} onComplete={setOtp} value={otp} />
+                <div className="flex justify-center">
+                  <OTPInput
+                    length={6}
+                    value={otp}
+                    onComplete={(value) => setOtp(value)}
+                  />
+                </div>
               </div>
+
               <div className="space-y-3">
                 <Button
                   onClick={handleVerifyOTP}
-                  disabled={loading || otp.length !== 6}
-                  className="w-full h-12 text-base font-medium rounded-lg"
+                  disabled={otp.length !== 6 || loading}
+                  className="w-full h-12 text-base font-semibold rounded-xl hover:shadow-lg transition-all"
                   style={{
                     background: "linear-gradient(135deg, hsl(var(--color-primary)) 0%, hsl(var(--color-accent)) 100%)",
                   }}
                 >
                   {loading ? (
                     <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                       Verifying...
                     </>
                   ) : (
-                    "Verify Email"
+                    <>
+                      Verify Now
+                      <CheckCircle2 className="ml-2 h-5 w-5" />
+                    </>
                   )}
                 </Button>
-                <Button
-                  variant="ghost"
-                  onClick={handleResendOTP}
-                  disabled={loading}
-                  className="w-full text-sm"
-                  style={{ color: "hsl(var(--color-primary))" }}
-                >
-                  Didn't receive code? Resend OTP
-                </Button>
+                
+                <div className="text-center pt-2">
+                  <button
+                    onClick={handleResendOTP}
+                    disabled={loading}
+                    className="text-sm font-medium hover:underline disabled:opacity-50 transition-colors"
+                    style={{ color: "hsl(var(--color-primary))" }}
+                  >
+                    Didn't receive code? Resend OTP
+                  </button>
+                </div>
               </div>
             </div>
           )}
 
           {/* Step 3: Success */}
           {step === "success" && (
-            <div className="space-y-6 animate-fade-in text-center py-6">
+            <div className="text-center space-y-6 py-8 animate-scale-in">
               <div className="flex justify-center">
-                <div
-                  className="w-20 h-20 rounded-full flex items-center justify-center animate-scale-in"
-                  style={{ backgroundColor: "hsl(var(--color-success) / 0.1)" }}
-                >
-                  <CheckCircle2
-                    className="w-12 h-12"
-                    style={{ color: "hsl(var(--color-success))" }}
-                  />
+                <div className="h-24 w-24 rounded-full flex items-center justify-center shadow-2xl animate-pulse-soft" style={{ backgroundColor: "hsl(var(--color-success) / 0.2)" }}>
+                  <CheckCircle2 className="h-14 w-14" style={{ color: "hsl(var(--color-success))" }} />
                 </div>
               </div>
               <div className="space-y-2">
-                <h3 className="text-xl font-display font-semibold text-foreground">
+                <h3 className="text-2xl font-bold text-foreground">
                   Email Verified Successfully!
                 </h3>
-                <p className="text-muted-foreground">
-                  Your email has been verified. You can now access all features.
+                <p className="text-base font-semibold" style={{ color: "hsl(var(--color-success))" }}>
+                  വിജയകരമായി പരിശോധിച്ചു
+                </p>
+                <p className="text-sm text-muted-foreground pt-2">
+                  Your email has been verified. You now have full access to all portal features.
                 </p>
               </div>
+              <Button 
+                onClick={onClose} 
+                className="w-full h-12 text-base font-semibold rounded-xl hover:shadow-lg transition-all"
+                style={{
+                  background: "linear-gradient(135deg, hsl(var(--color-success)), hsl(152 80% 40%))",
+                }}
+              >
+                Continue to Portal
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
             </div>
           )}
         </div>

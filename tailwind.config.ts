@@ -42,6 +42,12 @@ export default {
         warning: {
           DEFAULT: "hsl(var(--color-warning))",
         },
+        sidebar: {
+          DEFAULT: "hsl(var(--color-sidebar))",
+        },
+        darkBg: {
+          DEFAULT: "hsl(var(--color-dark-bg))",
+        },
         // Festival theme specific colors
         festival: {
           primary: "var(--festival-primary)",

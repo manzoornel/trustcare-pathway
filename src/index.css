@@ -7,17 +7,20 @@
 
 @layer base {
   :root {
-    /* Doctor Uncle Brand Colors */
-    --color-primary: 180 100% 33%; /* #00A6A6 - Teal Blue */
+    /* Doctor Uncle Official Brand Colors */
+    --color-primary: 184 69% 47%; /* #25becb - Official Teal */
     --color-primary-foreground: 0 0% 100%; /* White */
-    --color-secondary: 210 15% 90%; /* #F8F9FA - Light Grey */
-    --color-secondary-foreground: 210 11% 15%; /* Dark Grey */
-    --color-accent: 195 100% 38%; /* Gradient Blue */
+    --color-secondary: 195 17% 22%; /* #2d4047 - Official Dark Blue-Grey */
+    --color-secondary-foreground: 0 0% 100%; /* White */
+    --color-accent: 184 80% 55%; /* Lighter Teal for accents */
     --color-accent-foreground: 0 0% 100%; /* White */
+    --color-dark-bg: 210 30% 12%; /* #1a2332 - Dark Navy Background */
+    --color-sidebar: 185 40% 18%; /* #1a4d4f - Dark Teal Sidebar */
     --color-muted: 210 17% 98%; /* Very Light Grey */
     --color-muted-foreground: 215 14% 34%; /* Medium Grey */
     --color-success: 152 69% 31%; /* Green for success states */
     --color-warning: 38 92% 50%; /* Amber for warnings */
+    --color-card-border: 184 69% 47%; /* Teal border for cards */
 
     /* Festival colors */
     --festival-primary: #00C6C6;

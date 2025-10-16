@@ -93,11 +93,13 @@ const OTPInput: React.FC<OTPInputProps> = ({ length = 6, onComplete, value = "" 
           onKeyDown={(e) => handleKeyDown(e, index)}
           onPaste={index === 0 ? handlePaste : undefined}
           maxLength={1}
-          className="w-12 h-12 text-center text-xl font-semibold border-2 rounded-lg focus:outline-none focus:ring-2 transition-all duration-200"
-          style={{
-            borderColor: digit ? "hsl(var(--color-primary))" : "hsl(var(--border))",
-            color: "hsl(var(--foreground))",
-          }}
+          inputMode="numeric"
+          className={`w-12 h-14 text-center text-2xl font-bold rounded-xl border-2 focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 ${
+            digit
+              ? "border-primary bg-primary/5 text-foreground focus:ring-primary"
+              : "border-muted-foreground/30 bg-white text-foreground focus:border-primary focus:ring-primary"
+          }`}
+          aria-label={`OTP digit ${index + 1}`}
           autoFocus={index === 0 && !value}
         />
       ))}
