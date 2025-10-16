@@ -93,7 +93,11 @@ const OTPInput: React.FC<OTPInputProps> = ({ length = 6, onComplete, value = "" 
           onKeyDown={(e) => handleKeyDown(e, index)}
           onPaste={index === 0 ? handlePaste : undefined}
           maxLength={1}
-          className="w-12 h-12 text-center text-xl font-semibold border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+          className="w-12 h-12 text-center text-xl font-semibold border-2 rounded-lg focus:outline-none focus:ring-2 transition-all duration-200"
+          style={{
+            borderColor: digit ? "hsl(var(--color-primary))" : "hsl(var(--border))",
+            color: "hsl(var(--foreground))",
+          }}
           autoFocus={index === 0 && !value}
         />
       ))}

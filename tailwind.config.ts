@@ -21,20 +21,26 @@ export default {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "var(--color-primary)", // Changed to CSS variable for theme switching
-          foreground: "var(--color-primary-foreground)",
+          DEFAULT: "hsl(var(--color-primary))",
+          foreground: "hsl(var(--color-primary-foreground))",
         },
         secondary: {
-          DEFAULT: "var(--color-secondary)", // Changed to CSS variable
-          foreground: "var(--color-secondary-foreground)",
+          DEFAULT: "hsl(var(--color-secondary))",
+          foreground: "hsl(var(--color-secondary-foreground))",
         },
         accent: {
-          DEFAULT: "var(--color-accent)", // Changed to CSS variable
-          foreground: "var(--color-accent-foreground)",
+          DEFAULT: "hsl(var(--color-accent))",
+          foreground: "hsl(var(--color-accent-foreground))",
         },
         muted: {
-          DEFAULT: "var(--color-muted)", // Changed to CSS variable
-          foreground: "var(--color-muted-foreground)",
+          DEFAULT: "hsl(var(--color-muted))",
+          foreground: "hsl(var(--color-muted-foreground))",
+        },
+        success: {
+          DEFAULT: "hsl(var(--color-success))",
+        },
+        warning: {
+          DEFAULT: "hsl(var(--color-warning))",
         },
         // Festival theme specific colors
         festival: {
@@ -84,12 +90,23 @@ export default {
             opacity: "0.8",
           },
         },
+        "scale-in": {
+          "0%": {
+            transform: "scale(0.8)",
+            opacity: "0",
+          },
+          "100%": {
+            transform: "scale(1)",
+            opacity: "1",
+          },
+        },
       },
       animation: {
         "fade-up": "fade-up 0.5s ease-out",
         "fade-in": "fade-in 0.5s ease-out",
         "float": "float 3s ease-in-out infinite",
         "pulse-soft": "pulse-soft 2s ease-in-out infinite",
+        "scale-in": "scale-in 0.4s ease-out",
       },
       backgroundImage: {
         "eid-pattern": "url('/lovable-uploads/eid-pattern.png')",

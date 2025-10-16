@@ -7,15 +7,17 @@
 
 @layer base {
   :root {
-    /* Default theme colors */
-    --color-primary: #00C6C6;
-    --color-primary-foreground: #FFFFFF;
-    --color-secondary: #2D3B41;
-    --color-secondary-foreground: #FFFFFF;
-    --color-accent: #004F9F;
-    --color-accent-foreground: #FFFFFF;
-    --color-muted: #F0F0F0;
-    --color-muted-foreground: #666666;
+    /* Doctor Uncle Brand Colors */
+    --color-primary: 180 100% 33%; /* #00A6A6 - Teal Blue */
+    --color-primary-foreground: 0 0% 100%; /* White */
+    --color-secondary: 210 15% 90%; /* #F8F9FA - Light Grey */
+    --color-secondary-foreground: 210 11% 15%; /* Dark Grey */
+    --color-accent: 195 100% 38%; /* Gradient Blue */
+    --color-accent-foreground: 0 0% 100%; /* White */
+    --color-muted: 210 17% 98%; /* Very Light Grey */
+    --color-muted-foreground: 215 14% 34%; /* Medium Grey */
+    --color-success: 152 69% 31%; /* Green for success states */
+    --color-warning: 38 92% 50%; /* Amber for warnings */
 
     /* Festival colors */
     --festival-primary: #00C6C6;
