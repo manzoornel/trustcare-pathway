@@ -54,7 +54,6 @@ export function getMockLabReports(): LabReport[] {
   return [
     {
       ehrReferenceId: 'EHR-LAB-12345',
-      id: 'EHR-LAB-12345',
       date: '2023-11-15',
       type: 'Blood Test',
       doctor: 'Dr. Sharma',
@@ -67,7 +66,6 @@ export function getMockLabReports(): LabReport[] {
     },
     {
       ehrReferenceId: 'EHR-LAB-12346',
-      id: 'EHR-LAB-12346',
       date: '2023-09-03',
       type: 'Blood Test',
       doctor: 'Dr. Patel',
@@ -81,7 +79,6 @@ export function getMockLabReports(): LabReport[] {
     },
     {
       ehrReferenceId: 'EHR-LAB-12347',
-      id: 'EHR-LAB-12347',
       date: '2023-06-22',
       type: 'Lipid Panel',
       doctor: 'Dr. Sharma',
@@ -95,7 +92,6 @@ export function getMockLabReports(): LabReport[] {
     },
     {
       ehrReferenceId: 'EHR-LAB-12348',
-      id: 'EHR-LAB-12348',
       date: '2023-02-10',
       type: 'Blood Test',
       doctor: 'Dr. Kumar',
