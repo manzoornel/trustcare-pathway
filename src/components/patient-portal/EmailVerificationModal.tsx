@@ -80,11 +80,16 @@ export const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({
 
       if (error) {
         console.error("Error verifying OTP:", error);
-        throw new Error(error.message || "Failed to verify OTP");
+        toast.error("❌ Invalid OTP. Please check and try again.");
+        setLoading(false);
+        return;
       }
 
       if (!data?.success) {
-        throw new Error(data?.message || "Invalid OTP");
+        console.error("OTP verification failed:", data?.message);
+        toast.error(`❌ ${data?.message || "Invalid OTP. Please try again."}`);
+        setLoading(false);
+        return;
       }
 
       console.log("OTP verified successfully:", data);
