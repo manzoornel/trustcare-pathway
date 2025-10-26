@@ -7,7 +7,7 @@ import OTPInput from "@/components/OTPInput";
 import { Mail, CheckCircle2, Loader2, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import doctorUncleLogo from "@/assets/doctor-uncle-logo.jpg";
-import { supabase } from "@/integrations/supabase/client";
+import { instance } from "@/axios";
 
 interface EmailVerificationModalProps {
   open: boolean;
@@ -36,29 +36,23 @@ export const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({
     setLoading(true);
     try {
       console.log("Sending OTP to:", email);
+      const patient_id = localStorage.getItem("patient_id");
       
-      const { data, error } = await supabase.functions.invoke('send-email-otp', {
-        body: { email }
-      });
+      const response = await instance.post(
+        `sendOtpEmail?patient_id=${patient_id}&email=${email}`,
+        {}
+      );
 
-      if (error) {
-        console.error("Error sending OTP:", error);
-        throw new Error(error.message || "Failed to send OTP");
-      }
-
-      console.log("OTP sent successfully:", data);
-      
-      // Show test OTP in development mode
-      if (data?.testOtp) {
-        toast.success(`OTP sent successfully! Test OTP: ${data.testOtp}`);
+      if (response.data.code === 1) {
+        console.log("OTP sent successfully:", response.data);
+        toast.success(`✅ OTP sent successfully to ${email}`);
+        setStep("otp");
       } else {
-        toast.success("✅ OTP sent successfully to your email!");
+        throw new Error(response.data.message || "Failed to send OTP");
       }
-      
-      setStep("otp");
     } catch (error: any) {
       console.error("Exception sending OTP:", error);
-      toast.error(error.message || "❌ Failed to send OTP. Please try again.");
+      toast.error(error.response?.data?.message || "❌ Failed to send OTP. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -73,46 +67,37 @@ export const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({
     setLoading(true);
     try {
       console.log("Verifying OTP for:", email);
+      const patient_id = localStorage.getItem("patient_id");
       
-      const { data, error } = await supabase.functions.invoke('verify-email-otp', {
-        body: { email, otp }
-      });
+      const response = await instance.post(
+        `verifyOtpEmail?email=${email}&otp=${otp}&patient_id=${patient_id}`
+      );
 
-      if (error) {
-        console.error("Error verifying OTP:", error);
-        toast.error("❌ Invalid OTP. Please check and try again.");
-        setLoading(false);
-        return;
-      }
-
-      if (!data?.success) {
-        console.error("OTP verification failed:", data?.message);
-        toast.error(`❌ ${data?.message || "Invalid OTP. Please try again."}`);
-        setLoading(false);
-        return;
-      }
-
-      console.log("OTP verified successfully:", data);
-      
-      setStep("success");
-      toast.success("✅ Email verified successfully!");
-      
-      // Update user's email verification status in localStorage
-      localStorage.setItem("is_email_verified", "true");
-      
-      setTimeout(() => {
-        onClose();
-        // Reset state after modal closes
+      if (response.data.code === 1) {
+        console.log("OTP verified successfully:", response.data);
+        
+        setStep("success");
+        toast.success("✅ Email verified successfully!");
+        
+        // Update user's email verification status in localStorage
+        localStorage.setItem("is_email_verified", "1");
+        
         setTimeout(() => {
-          setStep("email");
-          setOtp("");
-          // Reload page to reflect verification status
-          window.location.reload();
-        }, 300);
-      }, 2000);
+          onClose();
+          // Reset state after modal closes
+          setTimeout(() => {
+            setStep("email");
+            setOtp("");
+            // Reload page to reflect verification status
+            window.location.reload();
+          }, 300);
+        }, 2000);
+      } else {
+        toast.error(response.data.message || "❌ Invalid OTP. Please try again.");
+      }
     } catch (error: any) {
       console.error("Exception verifying OTP:", error);
-      toast.error(error.message || "❌ Invalid OTP. Please try again.");
+      toast.error(error.response?.data?.message || "❌ Failed to verify OTP. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -122,27 +107,22 @@ export const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({
     setLoading(true);
     try {
       console.log("Resending OTP to:", email);
+      const patient_id = localStorage.getItem("patient_id");
       
-      const { data, error } = await supabase.functions.invoke('send-email-otp', {
-        body: { email }
-      });
+      const response = await instance.post(
+        `sendOtpEmail?patient_id=${patient_id}&email=${email}`,
+        {}
+      );
 
-      if (error) {
-        console.error("Error resending OTP:", error);
-        throw new Error(error.message || "Failed to resend OTP");
-      }
-
-      console.log("OTP resent successfully:", data);
-      
-      // Show test OTP in development mode
-      if (data?.testOtp) {
-        toast.success(`OTP resent! Test OTP: ${data.testOtp}`);
-      } else {
+      if (response.data.code === 1) {
+        console.log("OTP resent successfully:", response.data);
         toast.success("✅ OTP resent successfully!");
+      } else {
+        throw new Error(response.data.message || "Failed to resend OTP");
       }
     } catch (error: any) {
       console.error("Exception resending OTP:", error);
-      toast.error(error.message || "❌ Failed to resend OTP");
+      toast.error(error.response?.data?.message || "❌ Failed to resend OTP");
     } finally {
       setLoading(false);
     }
