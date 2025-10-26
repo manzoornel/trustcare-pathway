@@ -76,11 +76,21 @@ export const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({
       if (response.data.code === 1) {
         console.log("OTP verified successfully:", response.data);
         
+        // Save all patient data from API response to localStorage
+        const data = response.data.data;
+        if (data) {
+          localStorage.setItem("token", data.token || localStorage.getItem("token") || "");
+          localStorage.setItem("patient_id", String(data.patient_id || localStorage.getItem("patient_id") || ""));
+          localStorage.setItem("patient_name", data.patient_name || localStorage.getItem("patient_name") || "");
+          localStorage.setItem("email", data.email || "");
+          localStorage.setItem("is_email_verified", data.is_email_verified ? "1" : "0");
+          localStorage.setItem("uhid", data.uhid || localStorage.getItem("uhid") || "");
+          localStorage.setItem("phone", data.phone || localStorage.getItem("phone") || "");
+          if (data.address) localStorage.setItem("address", data.address);
+        }
+        
         setStep("success");
         toast.success("✅ Email verified successfully!");
-        
-        // Update user's email verification status in localStorage
-        localStorage.setItem("is_email_verified", "1");
         
         setTimeout(() => {
           onClose();
@@ -88,7 +98,7 @@ export const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({
           setTimeout(() => {
             setStep("email");
             setOtp("");
-            // Reload page to reflect verification status
+            // Reload page to reflect verification status and updated patient data
             window.location.reload();
           }, 300);
         }, 2000);
