@@ -32,8 +32,17 @@ const PatientPortal: React.FC = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
 
-  // Mock email verification status - replace with actual auth state
-  const isEmailVerified = false;
+  // Read email verification status from localStorage
+  const isEmailVerified = localStorage.getItem("is_email_verified") === "1" || 
+                           localStorage.getItem("is_email_verified") === "true";
+  
+  // Read patient data from localStorage (fallback if auth context doesn't have it)
+  const patientData = {
+    name: auth.name || localStorage.getItem("patient_name") || "User",
+    hospitalId: auth.hospitalId || localStorage.getItem("uhid") || "Not Set",
+    phone: auth.phone || localStorage.getItem("phone") || "Not provided",
+    email: auth.email || localStorage.getItem("email") || "Not provided"
+  };
 
   const dashboardItems = [
     { icon: FlaskConical, title: "Lab Reports", titleMl: "ലാബ് റിപ്പോർട്ടുകൾ", tab: "labReports" },
@@ -138,11 +147,11 @@ const PatientPortal: React.FC = () => {
             {/* User Info Card */}
             <div className="hidden md:flex items-center gap-4 px-4 py-3 rounded-xl bg-white/10 backdrop-blur-md border border-white/20">
               <div className="h-12 w-12 rounded-full bg-primary flex items-center justify-center text-white font-bold text-lg">
-                {auth.name ? auth.name.charAt(0).toUpperCase() : "U"}
+                {patientData.name ? patientData.name.charAt(0).toUpperCase() : "U"}
               </div>
               <div>
-                <p className="text-sm font-bold text-white">{auth.name || "User"}</p>
-                <p className="text-xs text-white/60">ID: {auth.hospitalId || "Not Set"}</p>
+                <p className="text-sm font-bold text-white">{patientData.name}</p>
+                <p className="text-xs text-white/60">ID: {patientData.hospitalId}</p>
               </div>
             </div>
           </div>
@@ -186,28 +195,28 @@ const PatientPortal: React.FC = () => {
                     <User className="h-5 w-5 text-primary" />
                     <div>
                       <p className="text-xs text-white/60">Name</p>
-                      <p className="text-sm font-semibold text-white">{auth.name || "Not provided"}</p>
+                      <p className="text-sm font-semibold text-white">{patientData.name}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3 p-3 rounded-lg bg-white/5">
                     <Hash className="h-5 w-5 text-primary" />
                     <div>
                       <p className="text-xs text-white/60">Hospital ID</p>
-                      <p className="text-sm font-semibold text-white">{auth.hospitalId || "Not set"}</p>
+                      <p className="text-sm font-semibold text-white">{patientData.hospitalId}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3 p-3 rounded-lg bg-white/5">
                     <Phone className="h-5 w-5 text-primary" />
                     <div>
                       <p className="text-xs text-white/60">Phone</p>
-                      <p className="text-sm font-semibold text-white">{auth.phone || "Not provided"}</p>
+                      <p className="text-sm font-semibold text-white">{patientData.phone}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3 p-3 rounded-lg bg-white/5">
                     <Mail className="h-5 w-5 text-primary" />
                     <div>
                       <p className="text-xs text-white/60">Email</p>
-                      <p className="text-sm font-semibold text-white">{auth.email || "Not provided"}</p>
+                      <p className="text-sm font-semibold text-white">{patientData.email}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3 p-3 rounded-lg bg-white/5">
@@ -251,7 +260,7 @@ const PatientPortal: React.FC = () => {
       <EmailVerificationModal
         open={showVerificationModal}
         onClose={() => setShowVerificationModal(false)}
-        defaultEmail={auth.email}
+        defaultEmail={patientData.email}
       />
     </div>
   );
