@@ -23,7 +23,7 @@ export const DashboardCard: React.FC<DashboardCardProps> = ({
       className={`relative group p-6 rounded-2xl border-2 transition-all duration-300 ${
         comingSoon
           ? "border-muted-foreground/20 bg-muted/30 cursor-not-allowed opacity-50"
-          : "border-primary bg-transparent hover:bg-primary/5 hover:border-primary hover:shadow-xl hover:shadow-primary/20 hover:-translate-y-1"
+          : "border-primary bg-white/10 backdrop-blur-md hover:bg-primary/20 hover:border-primary hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-1"
       }`}
       style={{ 
         borderColor: comingSoon ? undefined : "hsl(var(--color-card-border))",
@@ -47,10 +47,10 @@ export const DashboardCard: React.FC<DashboardCardProps> = ({
       </div>
 
       {/* Title */}
-      <h3 className="text-base font-bold text-foreground text-center mb-1 uppercase tracking-wide">
+      <h3 className="text-base font-bold text-white text-center mb-1 uppercase tracking-wide">
         {title}
       </h3>
-      <p className="text-xs text-muted-foreground text-center">{titleMl}</p>
+      <p className="text-xs text-white/70 text-center">{titleMl}</p>
 
       {comingSoon && (
         <div className="absolute top-3 right-3 px-2 py-1 bg-muted rounded text-xs font-medium text-muted-foreground">

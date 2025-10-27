@@ -102,20 +102,20 @@ export const PatientSwitcher: React.FC<PatientSwitcherProps> = ({
             <ChevronDown className="h-4 w-4 opacity-50" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-[300px]">
-          <DropdownMenuLabel className="flex items-center gap-2">
-            <Users className="h-4 w-4" />
+        <DropdownMenuContent className="w-[300px] bg-background border-primary/30 shadow-xl z-50">
+          <DropdownMenuLabel className="flex items-center gap-2 text-foreground font-semibold">
+            <Users className="h-4 w-4 text-primary" />
             Switch Patient Profile
           </DropdownMenuLabel>
-          <DropdownMenuSeparator />
+          <DropdownMenuSeparator className="bg-border" />
           {availablePatients.map((patient) => (
             <DropdownMenuItem
               key={patient.patient_id}
               onClick={() => handlePatientSwitch(patient)}
-              className={`cursor-pointer ${
+              className={`cursor-pointer hover:bg-primary/20 transition-colors ${
                 patient.patient_id === currentPatientId
-                  ? "bg-primary/10 font-semibold"
-                  : ""
+                  ? "bg-primary/10 font-semibold text-foreground"
+                  : "text-foreground"
               }`}
             >
               <div className="flex flex-col w-full">
