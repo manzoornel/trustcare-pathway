@@ -13,8 +13,17 @@ import {
 } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import LoginTabs from "@/components/login/LoginTabs";
+import PatientSelectionDialog from "@/components/login/PatientSelectionDialog";
 import { instance } from "../axios";
 import { toast } from "react-toastify";
+
+interface Patient {
+  patient_id: string;
+  patient_name: string;
+  uhid?: string;
+  phone?: string;
+  email?: string;
+}
 
 const Login = () => {
   const navigate = useNavigate();
@@ -23,6 +32,10 @@ const Login = () => {
   const [activeTab, setActiveTab] = useState("phone");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showPatientSelection, setShowPatientSelection] = useState(false);
+  const [availablePatients, setAvailablePatients] = useState<Patient[]>([]);
+  const [loginType, setLoginType] = useState<"phone" | "email">("phone");
+  const [contactInfo, setContactInfo] = useState("");
 
   useEffect(() => {
     // Redirect if already authenticated
@@ -53,19 +66,27 @@ const Login = () => {
       if (responsefirst?.data?.code === 1) {
         if (responsefirst?.data?.data?.length === 0) {
           toast.error("No patients are there with this email");
-          navigate("/login");
+          setLoading(false);
+          return;
+        }
+        
+        // Check if multiple patients exist
+        if (responsefirst?.data?.data?.length > 1) {
+          setAvailablePatients(responsefirst?.data?.data);
+          setLoginType("email");
+          setContactInfo(email);
+          setShowPatientSelection(true);
           setLoading(false);
           return;
         }
       } else if (responsefirst?.data?.code === 0) {
         setError("No patients are there with this email");
         toast.error("No patients are there with this email");
-        navigate("/login");
         setLoading(false);
-
         return;
       }
 
+      // Single patient found - proceed with OTP
       const response = await instance.post(
         `sendOtpEmail?patient_id=${responsefirst?.data?.data[0]?.patient_id}&email=${email}`,
         {} // empty body
@@ -74,7 +95,7 @@ const Login = () => {
       if (response.data.code === 1) {
         console.log(response);
 
-        toast.success(`OTP sent successfully to:${email}`);
+        toast.success(`OTP sent successfully to: ${email}`);
         auth.email = email;
         auth.patient_id = responsefirst?.data?.data[0]?.patient_id;
         navigate("/verify-otp", {
@@ -109,19 +130,26 @@ const Login = () => {
       if (responsefirst?.data?.code === 1) {
         if (responsefirst?.data?.data?.length === 0) {
           toast.error("No patients are there with this number");
-          navigate("/login");
+          setLoading(false);
+          return;
+        }
+        
+        // Check if multiple patients exist
+        if (responsefirst?.data?.data?.length > 1) {
+          setAvailablePatients(responsefirst?.data?.data);
+          setLoginType("phone");
+          setContactInfo(phone);
+          setShowPatientSelection(true);
           setLoading(false);
           return;
         }
       } else if (responsefirst?.data?.code === 0) {
         setError("No patients are there with this number");
-
-        navigate("/login");
         setLoading(false);
-
         return;
       }
 
+      // Single patient found - proceed with OTP
       const response = await instance.post(
         `getLoginOTP?patient_id=${responsefirst?.data?.data[0]?.patient_id}`,
         {} // empty body
@@ -130,7 +158,7 @@ const Login = () => {
       if (response.data.code === 1) {
         console.log(response);
 
-        toast.success(`OTP sent successfully to:${phone}`);
+        toast.success(`OTP sent successfully to: ${phone}`);
         auth.phone = phone;
         auth.patient_id = responsefirst?.data?.data[0]?.patient_id;
         navigate("/verify-otp", {
@@ -143,6 +171,57 @@ const Login = () => {
       }
     } catch (error) {
       console.error("OTP request failed:", error);
+      setLoading(false);
+    }
+  };
+
+  // Handle patient selection
+  const handlePatientSelection = async (patient: Patient) => {
+    setShowPatientSelection(false);
+    setLoading(true);
+
+    try {
+      if (loginType === "email") {
+        // Send OTP for selected patient via email
+        const response = await instance.post(
+          `sendOtpEmail?patient_id=${patient.patient_id}&email=${contactInfo}`,
+          {}
+        );
+
+        if (response.data.code === 1) {
+          toast.success(`OTP sent successfully to: ${contactInfo}`);
+          auth.email = contactInfo;
+          auth.patient_id = patient.patient_id;
+          navigate("/verify-otp", {
+            state: {
+              email: contactInfo,
+              patient_id: patient.patient_id,
+            },
+          });
+        }
+      } else {
+        // Send OTP for selected patient via phone
+        const response = await instance.post(
+          `getLoginOTP?patient_id=${patient.patient_id}`,
+          {}
+        );
+
+        if (response.data.code === 1) {
+          toast.success(`OTP sent successfully to: ${contactInfo}`);
+          auth.phone = contactInfo;
+          auth.patient_id = patient.patient_id;
+          navigate("/verify-otp", {
+            state: {
+              phone: contactInfo,
+              patient_id: patient.patient_id,
+            },
+          });
+        }
+      }
+    } catch (error) {
+      console.error("OTP request failed:", error);
+      toast.error("Failed to send OTP. Please try again.");
+    } finally {
       setLoading(false);
     }
   };
@@ -160,6 +239,7 @@ const Login = () => {
       setLoading(false);
     }
   };
+
   return (
     <>
       <Helmet>
@@ -207,6 +287,17 @@ const Login = () => {
 
         <Footer />
       </div>
+
+      {/* Patient Selection Dialog */}
+      <PatientSelectionDialog
+        open={showPatientSelection}
+        patients={availablePatients}
+        onSelectPatient={handlePatientSelection}
+        onClose={() => {
+          setShowPatientSelection(false);
+          setLoading(false);
+        }}
+      />
     </>
   );
 };
