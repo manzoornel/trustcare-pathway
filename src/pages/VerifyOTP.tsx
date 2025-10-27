@@ -80,6 +80,12 @@ const Verify = () => {
         );
 
         localStorage.setItem("patient_id", response?.data?.data?.patient_id);
+        
+        // Store all patients from location state if available (for switching)
+        if (location.state?.allPatients) {
+          localStorage.setItem("available_patients", JSON.stringify(location.state.allPatients));
+        }
+        
         auth.name = response?.data?.data?.patient_name;
         auth.email = response?.data?.data?.email;
 

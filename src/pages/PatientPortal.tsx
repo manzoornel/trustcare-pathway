@@ -8,6 +8,7 @@ import { EmailVerificationModal } from "@/components/patient-portal/EmailVerific
 import { PortalSidebar } from "@/components/patient-portal/PortalSidebar";
 import { DashboardCard } from "@/components/patient-portal/DashboardCard";
 import PortalTabsSection from "@/components/patient-portal/PortalTabsSection";
+import { PatientSwitcher } from "@/components/patient-portal/PatientSwitcher";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
@@ -182,6 +183,11 @@ const PatientPortal: React.FC = () => {
 
         {/* Content Area */}
         <div className="p-4 md:p-8">
+          {/* Patient Switcher - Allow switching between family members */}
+          <PatientSwitcher 
+            currentPatientId={localStorage.getItem("patient_id") || ""}
+          />
+          
           {activeTab === "dashboard" ? (
             <>
               {/* Patient Info Card */}

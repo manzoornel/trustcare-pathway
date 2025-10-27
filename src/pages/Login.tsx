@@ -98,10 +98,15 @@ const Login = () => {
         toast.success(`OTP sent successfully to: ${email}`);
         auth.email = email;
         auth.patient_id = responsefirst?.data?.data[0]?.patient_id;
+        
+        // Store all patients for this email for later switching
+        localStorage.setItem("available_patients", JSON.stringify(responsefirst?.data?.data));
+        
         navigate("/verify-otp", {
           state: {
             email: email,
             patient_id: responsefirst?.data?.data[0]?.patient_id,
+            allPatients: responsefirst?.data?.data,
           },
         });
         setLoading(false);
@@ -161,10 +166,15 @@ const Login = () => {
         toast.success(`OTP sent successfully to: ${phone}`);
         auth.phone = phone;
         auth.patient_id = responsefirst?.data?.data[0]?.patient_id;
+        
+        // Store all patients for this phone for later switching
+        localStorage.setItem("available_patients", JSON.stringify(responsefirst?.data?.data));
+        
         navigate("/verify-otp", {
           state: {
             phone: phone,
             patient_id: responsefirst?.data?.data[0]?.patient_id,
+            allPatients: responsefirst?.data?.data,
           },
         });
         setLoading(false);
@@ -192,10 +202,15 @@ const Login = () => {
           toast.success(`OTP sent successfully to: ${contactInfo}`);
           auth.email = contactInfo;
           auth.patient_id = patient.patient_id;
+          
+          // Store all patients for later switching
+          localStorage.setItem("available_patients", JSON.stringify(availablePatients));
+          
           navigate("/verify-otp", {
             state: {
               email: contactInfo,
               patient_id: patient.patient_id,
+              allPatients: availablePatients,
             },
           });
         }
@@ -210,10 +225,15 @@ const Login = () => {
           toast.success(`OTP sent successfully to: ${contactInfo}`);
           auth.phone = contactInfo;
           auth.patient_id = patient.patient_id;
+          
+          // Store all patients for later switching
+          localStorage.setItem("available_patients", JSON.stringify(availablePatients));
+          
           navigate("/verify-otp", {
             state: {
               phone: contactInfo,
               patient_id: patient.patient_id,
+              allPatients: availablePatients,
             },
           });
         }
