@@ -21,7 +21,7 @@ const DoctorProfiles = ({ featuredOnly = true }: DoctorProfilesProps) => {
         setError(null);
 
         const response = await axios.post(
-          "https://clinictrial.grandissolutions.in/patientApp/listDoctors"
+          "https://druncle.grandissolutions.in/patientApp/listDoctors"
         );
 
         const { data } = response.data;

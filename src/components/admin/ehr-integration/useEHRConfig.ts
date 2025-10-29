@@ -42,7 +42,7 @@ export const useEHRConfig = () => {
       } else {
         // Default config for first-time setup
         setConfig({
-          apiEndpoint: "https://clinictrial.grandissolutions.in/patientApp/",
+          apiEndpoint: "https://druncle.grandissolutions.in/patientApp/",
           apiKey: "",
           isActive: false,
         });

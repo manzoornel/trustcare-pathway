@@ -36,7 +36,7 @@ const EHRGeneralSettings = () => {
     if (config) {
       setApiEndpoint(
         config.apiEndpoint ||
-          "https://clinictrial.grandissolutions.in/patientApp/"
+          "https://druncle.grandissolutions.in/patientApp/"
       );
       setApiKey(config.apiKey || "");
       setIsActive(config.isActive || false);
@@ -119,7 +119,7 @@ const EHRGeneralSettings = () => {
           />
           <p className="text-xs text-gray-500">
             The base URL for the EHR API (example:
-            https://clinictrial.grandissolutions.in/patientApp/)
+            https://druncle.grandissolutions.in/patientApp/)
           </p>
         </div>
 

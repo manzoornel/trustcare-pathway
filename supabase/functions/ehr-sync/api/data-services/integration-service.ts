@@ -57,7 +57,7 @@ export async function activateEHRIntegration(
         "create_ehr_integration",
         {
           api_endpoint_param:
-            "https://clinictrial.grandissolutions.in/patientApp/",
+            "https://druncle.grandissolutions.in/patientApp/",
           api_key_param: "default-key",
           user_id: userId,
         }

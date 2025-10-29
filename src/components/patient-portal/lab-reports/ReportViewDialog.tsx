@@ -7,7 +7,7 @@ const ReportViewDialog: React.FC<{
 
   const fullPdfUrl = report.pdfUrl.replace(
     "/var/www/html/mirrors/Dr_Mirror/public",
-    "https://clinictrial.grandissolutions.in/patientApp/"
+    "https://druncle.grandissolutions.in/patientApp/"
   );
 
   const downloadPdf = async () => {

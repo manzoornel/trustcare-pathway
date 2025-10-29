@@ -38,7 +38,7 @@ const LabReportsTab: React.FC<LabReportsTabProps> = ({
       if (!token) throw new Error("User not authenticated");
 
       const response = await axios.post(
-        "https://clinictrial.grandissolutions.in/patientApp/fetchLabReports",
+        "https://druncle.grandissolutions.in/patientApp/fetchLabReports",
         {},
         {
           headers: {
