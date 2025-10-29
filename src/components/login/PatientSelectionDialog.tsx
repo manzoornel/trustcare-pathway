@@ -48,7 +48,7 @@ const PatientSelectionDialog: React.FC<PatientSelectionDialogProps> = ({
             <Card
               key={patient.patient_id}
               className="p-4 hover:border-primary hover:shadow-md transition-all cursor-pointer"
-              onClick={() => onSelectPatient(patient)}
+              
             >
               <div className="flex items-start justify-between">
                 <div className="flex-1 space-y-2">

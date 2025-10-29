@@ -10,6 +10,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { User, ChevronDown, Users } from "lucide-react";
 import { toast } from "react-toastify";
+import { instance } from "../../axios";
+import { useNavigate } from "react-router-dom";
 
 interface Patient {
   patient_id: string;
@@ -50,25 +52,57 @@ export const PatientSwitcher: React.FC<PatientSwitcherProps> = ({
     }
   }, [currentPatientId]);
 
-  const handlePatientSwitch = (patient: Patient) => {
+  const navigate = useNavigate()
+  const handlePatientSwitch = async (patient: Patient) => {
     if (patient.patient_id === currentPatientId) {
       return; // Already viewing this patient
     }
 
-    // Update localStorage with new patient data
-    localStorage.setItem("patient_id", patient.patient_id);
-    localStorage.setItem("patient_name", patient.patient_name);
-    localStorage.setItem("uhid", patient.uhid || "");
-    if (patient.phone) localStorage.setItem("phone", patient.phone);
-    if (patient.email) localStorage.setItem("email", patient.email);
+   try { 
+      const response = await instance.post(
+        `switchPatientAccount`,
+        {
+          patient_id: patient.patient_id,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
 
-    toast.success(`Switched to ${patient.patient_name}'s profile`);
-    
-    // Reload the page to fetch new patient's data
-    if (onPatientSwitch) {
-      onPatientSwitch();
-    } else {
-      window.location.reload();
+      if (response.data.code === 1) {
+        toast.success("Profile updated successfully");
+        localStorage.setItem("email", response?.data?.data?.email);
+        localStorage.setItem(
+          "is_email_verified",
+          response?.data?.data?.is_email_verified
+        );
+        localStorage.setItem("patient_id", response?.data?.data?.patient_id);
+        localStorage.setItem(
+          "patient_name",
+          response?.data?.data?.patient_name
+        );
+        setCurrentPatient(response?.data?.data?.patient_name);
+        localStorage.setItem("token", response?.data?.data?.token);
+        localStorage.setItem("uhid", response?.data?.data?.uhid);
+        localStorage.setItem("email", response?.data?.data?.email);
+        window.location.reload();
+      } else if (
+        response.data.code === 0 &&
+        (response.data.status === "Invalid token payload." ||
+          response.data.status === "Wrong token")
+      ) {
+        toast.error("Invalid token. Please log in again.");
+        localStorage.clear();
+        navigate("/login", { replace: true });
+      } else {
+        toast.error("Failed to verify OTP");
+      }
+    } catch (error) {
+      toast.error("Failed to update profile");
+      console.error("Error updating profile:", error);
+    } finally { 
     }
   };
 
