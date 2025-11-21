@@ -351,140 +351,146 @@ export const ReportComparisonDialog: React.FC<ReportComparisonDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl h-[90vh] flex flex-col">
-        <DialogHeader className="flex-shrink-0">
-          <div className="flex justify-between items-start">
-            <div>
-              <DialogTitle>Report Comparison</DialogTitle>
-              <DialogDescription>
-                Comparing {selectedData.length} reports by date
-              </DialogDescription>
-            </div>
-          </div>
+  <DialogContent className=" max-w-5xl h-[90vh] flex flex-col overflow-auto">
+    <DialogHeader className="flex-shrink-0">
+      <div className="flex justify-between items-start">
+        <div>
+          <DialogTitle>Report Comparison</DialogTitle>
+          <DialogDescription>
+            Comparing {selectedData.length} reports by date
+          </DialogDescription>
+        </div>
+      </div>
 
-          <div className="mt-3 flex flex-col gap-4">
-            {/* Parameter Selection Buttons */}
-            <div className="flex flex-wrap gap-2">
-              {validParameters.map((param) => (
-                <Button
-                  key={param}
-                  variant={selectedParam === param ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setSelectedParam(param)}
-                  className="text-sm"
-                >
-                  {param}
-                </Button>
-              ))}
-            </div>
+      <div className="mt-3 flex flex-col gap-4">
+        {/* Parameter Selection Buttons */}
+        <div className="flex flex-wrap gap-2">
+          {validParameters.map((param) => (
+            <Button
+              key={param}
+              variant={selectedParam === param ? "default" : "outline"}
+              size="sm"
+              onClick={() => setSelectedParam(param)}
+              className="text-sm"
+            >
+              {param}
+            </Button>
+          ))}
+        </div>
 
-            {/* Download Button */}
-            <div className="flex justify-end">
-              <Button
-                variant="default"
-                size="sm"
-                onClick={downloadPDF}
-                disabled={
-                  selectedData.length === 0 ||
-                  (displayParams.length === 0 && allParameters.length === 0)
-                }
-              >
-                <FileDown className="h-4 w-4 mr-2" /> Download PDF
-              </Button>
-            </div>
-          </div>
-        </DialogHeader>
+        {/* Download Button */}
+        <div className="flex justify-end">
+          <Button
+            variant="default"
+            size="sm"
+            onClick={downloadPDF}
+            disabled={
+              selectedData.length === 0 ||
+              (displayParams.length === 0 && allParameters.length === 0)
+            }
+          >
+            <FileDown className="h-4 w-4 mr-2" /> Download PDF
+          </Button>
+        </div>
+      </div>
+    </DialogHeader>
 
-        <div className="flex-1 overflow-hidden">
-          <Card className="h-full flex flex-col">
-            <CardHeader className="flex-shrink-0">
-              <CardTitle>Report Comparison</CardTitle>
-              <CardDescription>
-                {displayParams[0]
-                  ? `Parameter: ${displayParams[0]}`
-                  : "Select a parameter to compare"}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex-1 overflow-hidden">
-              {displayParams.length > 0 ? (
-                <div className="h-full flex flex-col">
-                  <div className="flex-shrink-0 mb-4">
-                    <h3 className="text-lg font-semibold text-center mb-2">
-                      {displayParams[0]}
-                    </h3>
-                    {(() => {
-                      // Get the first valid result to extract normal range
-                      const firstValidResult = selectedData
-                        .map((report) => ({
-                          date: report.date,
-                          value: report.result.find(
-                            (r) => r.detail_description === displayParams[0]
-                          ),
-                        }))
-                        .filter(
-                          (item) =>
-                            item.value &&
-                            item.value.actual_result !== "-" &&
-                            !isNaN(Number(item.value.actual_result))
-                        )[0];
+    {/* MAIN SCROLLABLE BOX */}
+    <div className="flex-1   mt-2">
+      <Card className="h-auto min-h-full flex flex-col">
+        <CardHeader className="flex-shrink-0">
+          <CardTitle>Report Comparison</CardTitle>
+          <CardDescription>
+            {displayParams[0]
+              ? `Parameter: ${displayParams[0]}`
+              : "Select a parameter to compare"}
+          </CardDescription>
+        </CardHeader>
 
-                      if (
-                        firstValidResult?.value?.min_value &&
-                        firstValidResult?.value?.max_value
-                      ) {
-                        return (
-                          <p className="text-sm text-gray-600 text-center">
-                            Normal Range: {firstValidResult.value.min_value} -{" "}
-                            {firstValidResult.value.max_value}
-                          </p>
-                        );
-                      }
-                      return null;
-                    })()}
-                  </div>
-                  <div className="flex-1 overflow-y-auto">
-                    <Table>
-                      <TableHeader className="sticky top-0 bg-white z-10 border-b">
-                        <TableRow>
-                          <TableHead className="bg-gray-50 font-semibold">
-                            Date
-                          </TableHead>
-                          <TableHead className="bg-gray-50 font-semibold">
-                            Value
-                          </TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {(() => {
-                          const values = selectedData
-                            .map((report) => ({
-                              date: report.date,
-                              value: report.result.find(
-                                (r) => r.detail_description === displayParams[0]
-                              ),
-                            }))
-                            .filter(
-                              (item) =>
-                                item.value &&
-                                item.value.actual_result !== "-" &&
-                                !isNaN(Number(item.value.actual_result))
-                            );
+        <CardContent className="flex-1 ">
+          {displayParams.length > 0 ? (
+            <div className="h-full flex flex-col">
+              <div className="flex-shrink-0 mb-4">
+                <h3 className="text-lg font-semibold text-center mb-2">
+                  {displayParams[0]}
+                </h3>
 
-                          return values.map((item, index) => {
-                            const result = Number(item.value.actual_result);
-                            const min = Number(item.value.min_value);
-                            const max = Number(item.value.max_value);
-                            const normal = isWithinRange(result, min, max);
+                {/* Normal range */}
+                {(() => {
+                  const firstValidResult = selectedData
+                    .map((report) => ({
+                      date: report.date,
+                      value: report.result.find(
+                        (r) => r.detail_description === displayParams[0]
+                      ),
+                    }))
+                    .filter(
+                      (item) =>
+                        item.value &&
+                        item.value.actual_result !== "-" &&
+                        !isNaN(Number(item.value.actual_result))
+                    )[0];
 
-                            return (
-                              <TableRow
-                                key={index}
-                                className="hover:bg-gray-50"
-                              >
-                                <TableCell className="font-medium">
-                                  {item.date}
-                                </TableCell>
-                                <TableCell>
+                  if (
+                    firstValidResult?.value?.min_value &&
+                    firstValidResult?.value?.max_value
+                  ) {
+                    return (
+                      <p className="text-sm text-gray-600 text-center">
+                        Normal Range: {firstValidResult.value.min_value} -{" "}
+                        {firstValidResult.value.max_value}
+                      </p>
+                    );
+                  }
+                  return null;
+                })()}
+              </div>
+
+              {/* TABLE SCROLL */}
+              <div className="flex-1 overflow-y-auto">
+                <div className="w-full overflow-x-auto">
+                  <Table className="min-w-[480px]">
+                    <TableHeader className="sticky top-0 bg-white z-10 border-b">
+                      <TableRow>
+                        <TableHead className="bg-gray-50 font-semibold w-1/2 md:w-1/3">
+                          Date
+                        </TableHead>
+                        <TableHead className="bg-gray-50 font-semibold w-1/2 md:w-1/3">
+                          Value
+                        </TableHead>
+                      </TableRow>
+                    </TableHeader>
+
+                    <TableBody>
+                      {(() => {
+                        const values = selectedData
+                          .map((report) => ({
+                            date: report.date,
+                            value: report.result.find(
+                              (r) =>
+                                r.detail_description === displayParams[0]
+                            ),
+                          }))
+                          .filter(
+                            (item) =>
+                              item.value &&
+                              item.value.actual_result !== "-" &&
+                              !isNaN(Number(item.value.actual_result))
+                          );
+
+                        return values.map((item, index) => {
+                          const result = Number(item.value.actual_result);
+                          const min = Number(item.value.min_value);
+                          const max = Number(item.value.max_value);
+                          const normal = isWithinRange(result, min, max);
+
+                          return (
+                            <TableRow key={index} className="hover:bg-gray-50">
+                              <TableCell className="font-medium w-1/2 md:w-1/3">
+                                <div className="truncate">{item.date}</div>
+                              </TableCell>
+                              <TableCell className="w-1/2 md:w-1/3">
+                                <div className="text-right md:text-left">
                                   <span
                                     className={
                                       normal
@@ -494,32 +500,33 @@ export const ReportComparisonDialog: React.FC<ReportComparisonDialogProps> = ({
                                   >
                                     {result}
                                   </span>
-                                </TableCell>
-                              </TableRow>
-                            );
-                          });
-                        })()}
-                      </TableBody>
-                    </Table>
-                  </div>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          );
+                        });
+                      })()}
+                    </TableBody>
+                  </Table>
                 </div>
-              ) : (
-                <div className="h-full flex items-center justify-center">
-                  <div className="text-center text-gray-500">
-                    <p className="text-lg font-medium mb-2">
-                      No data available
-                    </p>
-                    <p className="text-sm">
-                      Select a parameter to view comparison
-                    </p>
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-      </DialogContent>
-    </Dialog>
+              </div>
+            </div>
+          ) : (
+            <div className="h-full flex items-center justify-center">
+              <div className="text-center text-gray-500">
+                <p className="text-lg font-medium mb-2">No data available</p>
+                <p className="text-sm">
+                  Select a parameter to view comparison
+                </p>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  </DialogContent>
+</Dialog>
+
   );
 };
 

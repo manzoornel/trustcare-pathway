@@ -72,14 +72,14 @@ function App() {
           }
         />
       
-        {/* Admin Routes */}
+        {/* Admin Routes
         <Route path="/admin" element={<Admin />} />
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route path="/admin/doctors" element={<DoctorsManager />} />
         <Route path="/admin/blog" element={<BlogManager />} />
         <Route path="/admin/careers" element={<CareersManager />} />
         <Route path="/admin/applications" element={<ApplicationsManager />} />
-        <Route path="/admin/settings" element={<SettingsManager />} />
+        <Route path="/admin/settings" element={<SettingsManager />} /> */}
         
         {/* 404 Route */}
         <Route path="*" element={<NotFound />} />
