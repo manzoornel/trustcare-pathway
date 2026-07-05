@@ -18,7 +18,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Activity, Heart, Thermometer } from "lucide-react";
+import { Activity, Heart, Thermometer, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import {
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
+  Tooltip as RechartsTooltip,
+} from "recharts";
 import VitalsComparisonDialog from "./VitalsComparisonDialog";
 
 interface Vital {
@@ -265,7 +273,7 @@ const VitalsReportsTab: React.FC = () => {
         </CardDescription>
       </CardHeader>
       <CardContent className="p-0">
-        <div className="h-[600px] flex flex-col overflow-hidden border-t">{/* Mobile-friendly heading */}
+        <div className="flex flex-col border-t">{/* Mobile-friendly heading */}
       <div className="md:hidden flex-shrink-0 p-4 border-b bg-muted/30">
         <h3 className="text-lg font-semibold mb-1">Your Vital Metrics</h3>
         <p className="text-sm text-muted-foreground">
@@ -341,10 +349,61 @@ const VitalsReportsTab: React.FC = () => {
               </p>
             </div>
 
-            {/* Scrollable Table Area */}
-            <div className="flex-1 overflow-hidden">
+            {/* Trend chart + change since last visit */}
+            {selectedVitalData.length > 1 && (() => {
+              const chrono = [...selectedVitalData].reverse(); // oldest → newest
+              const points = chrono.map((d) => ({
+                date: d.date,
+                value: Number(d.value),
+              }));
+              const latest = points[points.length - 1];
+              const previous = points[points.length - 2];
+              const change = latest.value - previous.value;
+              const TrendIcon = change > 0 ? TrendingUp : change < 0 ? TrendingDown : Minus;
+              return (
+                <div className="p-4 space-y-3 border-b bg-white">
+                  <div className="rounded-xl border p-4 flex items-center justify-between">
+                    <div>
+                      <div className="text-xs text-muted-foreground mb-1">
+                        Change since last visit ({previous.date})
+                      </div>
+                      <div className="text-3xl font-extrabold">
+                        {latest.value}
+                      </div>
+                    </div>
+                    <div className={`flex flex-col items-center gap-1 ${
+                      change === 0 ? "text-gray-500" : change > 0 ? "text-orange-600" : "text-blue-600"
+                    }`}>
+                      <TrendIcon className="h-7 w-7" />
+                      <div className="text-sm font-bold">
+                        {change > 0 ? "+" : ""}{Math.round(change * 100) / 100}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="h-[240px] md:h-[300px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={points} margin={{ top: 8, right: 12, bottom: 0, left: -15 }}>
+                        <XAxis dataKey="date" tick={{ fontSize: 10 }} />
+                        <YAxis tick={{ fontSize: 10 }} domain={["auto", "auto"]} />
+                        <RechartsTooltip />
+                        <Line
+                          type="monotone"
+                          dataKey="value"
+                          stroke="#0ea5e9"
+                          strokeWidth={3}
+                          dot={{ r: 4, fill: "#0ea5e9" }}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* Table Area */}
+            <div className="flex-1">
               {selectedVitalData.length > 0 ? (
-                <div className="h-full overflow-y-auto">
+                <div className="max-h-[50vh] overflow-y-auto">
                   <Table>
                     <TableHeader className="sticky top-0 bg-muted z-10 border-b">
                       <TableRow>
