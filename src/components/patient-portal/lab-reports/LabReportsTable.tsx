@@ -1,159 +1,289 @@
-import React from "react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { useLanguage } from "@/contexts/LanguageContext";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { useAuth } from "@/contexts/auth";
+import SearchAndFilter from "./lab-reports/SearchAndFilter";
+import LabReportsTable from "./lab-reports/LabReportsTable";
+import ReportViewDialog from "./lab-reports/ReportViewDialog";
+import FullScreenCompare from "./lab-reports/FullScreenCompare";
+import { AlertCircle, Edit } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { MoreHorizontal, FileText, Download } from "lucide-react";
-import { LabReport } from "./mockData";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useLanguage } from "@/contexts/LanguageContext";
 
-interface LabReportsTableProps {
-  reports: LabReport[];
-  isComparing: boolean;
-  selectedReports: LabReport[];
-  onReportSelect: (report: LabReport) => void;
-  onViewReport: (report: LabReport) => void;
-  isLoading?: boolean;
-  onToggleSelectAll?: (selectAll: boolean) => void;
-}
+type LabReportsTabProps = {
+  openPatientInfoEdit?: () => void;
+};
 
-const LabReportsTable: React.FC<LabReportsTableProps> = ({
-  reports,
-  isComparing,
-  selectedReports,
-  onReportSelect,
-  onViewReport,
-  isLoading = false,
-  onToggleSelectAll,
+const LabReportsTab: React.FC<LabReportsTabProps> = ({
+  openPatientInfoEdit,
 }) => {
+  const { auth } = useAuth();
   const { t } = useLanguage();
-  const visibleVisitIds = new Set(reports.map((r) => r.visitId));
-  const selectedVisitIds = new Set(selectedReports.map((r) => r.visitId));
-  const allVisibleSelected =
-    reports.length > 0 && reports.every((r) => selectedVisitIds.has(r.visitId));
-  const someVisibleSelected =
-    !allVisibleSelected && reports.some((r) => selectedVisitIds.has(r.visitId));
-  return (
-    <div className="bg-white rounded-lg border overflow-hidden">
-      {/* Horizontal scroll container for mobile */}
-      <div className="overflow-x-auto">
-        <Table className="min-w-full">
-          <TableHeader>
-            <TableRow>
-              {isComparing && (
-                <TableHead className="w-12">
-                  <Checkbox
-                    checked={
-                      allVisibleSelected
-                        ? true
-                        : someVisibleSelected
-                        ? "indeterminate"
-                        : false
-                    }
-                    onCheckedChange={(checked) =>
-                      onToggleSelectAll && onToggleSelectAll(checked === true)
-                    }
-                    aria-label="Select all visible lab reports"
-                  />
-                </TableHead>
-              )}
-              <TableHead>{t('common.date')}</TableHead>
-              <TableHead>{t('lab.table.type')}</TableHead>
-              <TableHead>{t('lab.table.ordered_by')}</TableHead>
-              <TableHead className="w-16"></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoading ? (
-              <TableRow>
-                <TableCell
-                  colSpan={isComparing ? 5 : 4}
-                  className="text-center py-8"
-                >
-                  <div className="flex justify-center">
-                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-                  </div>
-                  <div className="mt-2 text-sm text-muted-foreground">
-                    {t('common.loading')}
-                  </div>
-                </TableCell>
-              </TableRow>
-            ) : reports.length === 0 ? (
-              <TableRow>
-                <TableCell
-                  colSpan={isComparing ? 5 : 4}
-                  className="text-center py-8"
-                >
-                  {t('lab.table.no_reports')}
-                </TableCell>
-              </TableRow>
-            ) : (
-              reports.map((report) => {
-                const isSelected = selectedReports.some(
-                  (r) => r.visitId === report.visitId
-                );
+  const [searchTerm, setSearchTerm] = useState("");
+  const [viewingReport, setViewingReport] = useState<any | null>(null);
+  // Selection is always available — no separate "compare mode" step
+  const [isComparing, setIsComparing] = useState(true);
+  const [selectedReports, setSelectedReports] = useState<any[]>([]);
+  const [selectedReportsids, setSelectedReportsids] = useState<any[]>([]);
 
-                return (
-                  <TableRow key={report.id}>
-                    {isComparing && (
-                      <TableCell>
-                        <Checkbox
-                          checked={isSelected}
-                          onCheckedChange={() => onReportSelect(report)}
-                        />
-                      </TableCell>
-                    )}
-                    <TableCell className="whitespace-nowrap">
-                      {report.date}
-                    </TableCell>
-                    <TableCell className="whitespace-nowrap">
-                      {report.type}
-                    </TableCell>
-                    <TableCell className="whitespace-nowrap">
-                      {report.doctor}
-                    </TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>{t('lab.table.actions')}</DropdownMenuLabel>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            onClick={() => onViewReport(report)}
-                          >
-                            <FileText className="h-4 w-4 mr-2" />
-                            {t('lab.table.view_report')}
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                );
-              })
+  const [showCompareDialog, setShowCompareDialog] = useState(false);
+  const [labReports, setLabReports] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isEmailVerified, setIsEmailVerified] = useState<boolean>(true);
+
+  const fetchLabReports = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("User not authenticated");
+
+      const response = await axios.post(
+        "https://clinictrial.grandissolutions.in/patientApp/fetchLabReports",
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log(response, "called");
+
+      const { data } = response.data;
+
+      if (data != null) {
+        const formattedData = data.map((report: any, index: number) => ({
+          id: `${index}`,
+          visitId: report.visit_id,
+          doctor: report.doctor_name,
+          date: report.visit_date,
+          pdfUrl: report.lab_reports?.fullPath || "",
+          type: report.type || "General",
+          // Align with API response structure for comparison dialog
+          result: report.lab_reports?.result || [],
+        }));
+
+        // Sort the formatted data by date in descending order (newest first)
+        const sortedData = formattedData.sort((a, b) => {
+          const dateA = new Date(a.date);
+          const dateB = new Date(b.date);
+          return dateB.getTime() - dateA.getTime();
+        });
+
+        setLabReports(sortedData);
+      }
+    } catch (error: any) {
+      console.error("Error fetching lab reports:", error);
+      setError(error.message || "Failed to load lab reports");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const emailVerified = localStorage.getItem("is_email_verified");
+    setIsEmailVerified(emailVerified === "1" || emailVerified === "true");
+  }, []);
+
+  useEffect(() => {
+    if (isEmailVerified) {
+      fetchLabReports();
+    }
+  }, [auth.userId, isEmailVerified]);
+
+  const filteredReports = labReports
+    .filter(
+      (report) =>
+        report.doctor.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        report.date.includes(searchTerm)
+    )
+    .sort((a, b) => {
+      // Sort by date in descending order (newest first)
+      const dateA = new Date(a.date);
+      const dateB = new Date(b.date);
+      return dateB.getTime() - dateA.getTime();
+    });
+
+  const handleViewReport = (report: any) => {
+    setViewingReport(report);
+  };
+
+  const handleCloseDialog = () => {
+    setViewingReport(null);
+  };
+
+  const handleToggleCompare = () => {
+    // Selection stays always-on; toggling just clears current selection
+    setSelectedReports([]);
+    setSelectedReportsids([]);
+  };
+
+  // One-tap quick compare: latest N reports, no selection needed
+  const quickCompare = (n: number) => {
+    const latest = labReports.slice(0, n);
+    if (latest.length < 2) return;
+    setSelectedReports(latest);
+    setSelectedReportsids(latest.map((r) => r.visitId));
+    setShowCompareDialog(true);
+  };
+  const handleReportSelect = (report: any) => {
+    const isSelected = selectedReportsids.includes(report.visitId);
+    if (isSelected) {
+      // Deselect
+      setSelectedReportsids((prev) =>
+        prev.filter((id) => id !== report.visitId)
+      );
+      setSelectedReports((prev) =>
+        prev.filter((r) => r.visitId !== report.visitId)
+      );
+    } else {
+      // Select
+      setSelectedReportsids((prev) => [...prev, report.visitId]);
+      setSelectedReports((prev) => [...prev, report]);
+    }
+  };
+
+  const handleCompare = () => {
+    if (selectedReports.length < 2) return;
+    setShowCompareDialog(true);
+  };
+
+  return (
+    <div className="relative">
+      {!isEmailVerified && (
+        <div className="absolute inset-0 bg-white bg-opacity-80 z-10 flex flex-col items-center justify-center text-center p-6 rounded-md">
+          <h2 className="text-xl font-semibold mb-2 text-destructive">
+            {t('lab.verification.title')}
+          </h2>
+          <p className="text-muted-foreground mb-4">
+            {t('lab.verification.message')}
+          </p>
+          <Button
+            onClick={() => {
+              openPatientInfoEdit && openPatientInfoEdit();
+              window.scrollTo(250, 250);
+            }}
+          >
+            {t('lab.verification.button')}
+          </Button>
+        </div>
+      )}
+
+      <div
+        className={`${
+          !isEmailVerified ? "blur-sm pointer-events-none select-none" : ""
+        }`}
+      >
+        {/* Mobile-friendly heading */}
+        <div className="md:hidden mb-6">
+          <h2 className="text-xl font-semibold mb-2">{t('lab.reports.title')}</h2>
+          <p className="text-sm text-muted-foreground">
+            {t('lab.reports.subtitle')}
+          </p>
+        </div>
+
+        {error && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertCircle className="h-4 w-4 mr-2" />
+            <AlertDescription>
+              {error}
+              <div className="mt-2">
+                <Button size="sm" variant="secondary" onClick={fetchLabReports}>
+                  Retry
+                </Button>
+              </div>
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* One-tap quick compare */}
+        {labReports.length >= 2 && (
+          <div className="flex gap-2 mb-3">
+            <Button size="sm" variant="outline" onClick={() => quickCompare(2)}>
+              Compare last 2
+            </Button>
+            {labReports.length >= 3 && (
+              <Button size="sm" variant="outline" onClick={() => quickCompare(3)}>
+                Compare last 3
+              </Button>
             )}
-          </TableBody>
-        </Table>
+          </div>
+        )}
+
+        <SearchAndFilter
+          searchTerm={searchTerm}
+          onSearchChange={(e) => setSearchTerm(e.target.value)}
+          isComparing={isComparing}
+          onToggleCompare={handleToggleCompare}
+          onCompare={handleCompare}
+          selectedCount={selectedReports.length}
+        />
+
+        <LabReportsTable
+          reports={filteredReports}
+          isComparing={isComparing}
+          selectedReports={selectedReports}
+          onReportSelect={handleReportSelect}
+          onViewReport={handleViewReport}
+          isLoading={isLoading}
+          onToggleSelectAll={(selectAll) => {
+            if (selectAll) {
+              // Select all currently visible filtered reports
+              const newIds = filteredReports.map((r) => r.visitId);
+              setSelectedReportsids((prev) =>
+                Array.from(new Set([...prev, ...newIds]))
+              );
+              // Add full report objects, avoid duplicates by visitId
+              setSelectedReports((prev) => {
+                const existingById = new Map(
+                  prev.map((r: any) => [r.visitId, r])
+                );
+                filteredReports.forEach((r) => existingById.set(r.visitId, r));
+                return Array.from(existingById.values());
+              });
+            } else {
+              // Deselect all currently visible filtered reports
+              const visibleIds = new Set(filteredReports.map((r) => r.visitId));
+              setSelectedReportsids((prev) =>
+                prev.filter((id) => !visibleIds.has(id))
+              );
+              setSelectedReports((prev) =>
+                prev.filter((r) => !visibleIds.has(r.visitId))
+              );
+            }
+          }}
+        />
+
+        <ReportViewDialog
+          report={viewingReport}
+          open={!!viewingReport}
+          onOpenChange={handleCloseDialog}
+        />
+
+        <FullScreenCompare
+          selectedReports={selectedReports}
+          reports={labReports}
+          open={showCompareDialog}
+          onOpenChange={setShowCompareDialog}
+        />
+
+        {/* Floating compare bar — appears the moment 2+ reports are ticked */}
+        {selectedReports.length >= 2 && !showCompareDialog && (
+          <div className="fixed bottom-4 left-0 right-0 z-40 flex justify-center px-4">
+            <Button
+              className="shadow-lg rounded-full px-8 py-6 text-base font-bold"
+              onClick={() => setShowCompareDialog(true)}
+            >
+              Compare {selectedReports.length} reports →
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );
 };
 
-export default LabReportsTable;
+export default LabReportsTab;
