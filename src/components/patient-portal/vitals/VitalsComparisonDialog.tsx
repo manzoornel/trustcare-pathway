@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useEffect } from "react";
 import {
   Dialog,
@@ -108,7 +109,7 @@ const VitalsComparisonDialog: React.FC<VitalsComparisonDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl">
+      <DialogContent className="max-w-none w-screen h-[100dvh] rounded-none flex flex-col">
         <DialogHeader>
           <DialogTitle>Vitals Comparison</DialogTitle>
           <DialogDescription>
@@ -135,7 +136,7 @@ const VitalsComparisonDialog: React.FC<VitalsComparisonDialogProps> = ({
           </div>
         </DialogHeader>
 
-        <div className="overflow-y-auto max-h-[70vh]">
+        <div className="overflow-y-auto flex-1">
           {selectedVitalType && selectedVitalInfo ? (
             <Card>
               <CardHeader>
