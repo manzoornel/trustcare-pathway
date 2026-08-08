@@ -5,6 +5,7 @@ import {
   FaYoutube,
   FaWhatsapp,
 } from "react-icons/fa";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
   const socialLinks = [
@@ -106,6 +107,13 @@ const Footer = () => {
               Email: contact@doctoruncle.in
             </p>
           </div>
+
+          <Link
+            to="/privacy-policy"
+            className="text-sm text-gray-600 hover:text-primary hover:underline transition-colors"
+          >
+            Privacy Policy
+          </Link>
 
           {/* Copyright */}
           <p className="text-gray-500 text-sm text-center">
