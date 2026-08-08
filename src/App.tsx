@@ -30,6 +30,7 @@ import CareersManager from "@/pages/admin/CareersManager";
 import ApplicationsManager from "@/pages/admin/ApplicationsManager";
 import SettingsManager from "@/pages/admin/SettingsManager";
 import NotFound from '@/pages/NotFound';
+import PrivacyPolicy from '@/pages/PrivacyPolicy';
 
 function App() {
   const { isThemeChanging } = useTheme();
@@ -57,6 +58,7 @@ function App() {
         <Route path="/appointments" element={<Appointments />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/careers" element={<Careers />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/login" element={<Login />} />
         <Route path="/verify-otp" element={<Verify />} />
