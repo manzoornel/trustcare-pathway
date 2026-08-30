@@ -41,28 +41,30 @@ export const PortalSidebar: React.FC<PortalSidebarProps> = ({
   const navigate = useNavigate();
 
   return (
-    <div className="h-screen w-72 flex flex-col border-r" style={{ backgroundColor: "hsl(var(--color-sidebar))" }}>
+    <div className="h-screen w-72 flex flex-col border-r border-neutral-200 bg-white">
       {/* Logo Section */}
-      <div className="p-6 border-b border-white/10">
+      <div className="p-6 border-b border-neutral-200">
         <div className="flex items-center gap-3 mb-2">
           <img
             src={doctorUncleLogo}
             alt="Doctor Uncle"
-            className="h-16 w-16 rounded-full object-contain bg-white/10 p-1"
+            className="h-14 w-14 rounded-full object-contain border border-neutral-200 p-1"
           />
+          <div>
+            <h1 className="text-lg font-display font-bold text-neutral-900 leading-tight">
+              DOCTOR UNCLE
+            </h1>
+            <p className="text-[11px] text-neutral-500 uppercase tracking-wide">
+              The Complete Family Clinic
+            </p>
+          </div>
         </div>
-        <h1 className="text-2xl font-display font-bold text-white">
-          DOCTOR UNCLE
-        </h1>
-        <p className="text-xs text-white/70 mt-1 uppercase tracking-wide">
-          The Complete Family Clinic
-        </p>
       </div>
 
       {/* Navigation Menu */}
       <ScrollArea className="flex-1 px-3 py-4">
         <div className="space-y-1">
-          <div className="px-3 py-2 text-xs font-semibold text-white/50 uppercase tracking-wider">
+          <div className="px-3 py-2 text-xs font-semibold text-neutral-400 uppercase tracking-wider">
             Patient Portal
           </div>
           {menuItems.map((item) => {
@@ -74,16 +76,16 @@ export const PortalSidebar: React.FC<PortalSidebarProps> = ({
                 onClick={() => onTabChange(item.id)}
                 className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200 group ${
                   isActive
-                    ? "bg-primary text-white shadow-lg"
-                    : "text-white/70 hover:bg-white/10 hover:text-white"
+                    ? "bg-teal-600 text-white shadow-sm"
+                    : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900"
                 }`}
               >
-                <Icon className={`h-5 w-5 ${isActive ? "text-white" : "text-primary"}`} />
-                <div className="flex-1 text-left">
-                  <div className={`text-sm font-medium ${isActive ? "text-white" : ""}`}>
+                <Icon className={`h-5 w-5 shrink-0 ${isActive ? "text-white" : "text-teal-600"}`} />
+                <div className="flex-1 text-left min-w-0">
+                  <div className={`text-sm font-medium truncate ${isActive ? "text-white" : ""}`}>
                     {item.label}
                   </div>
-                  <div className="text-xs text-white/50">{item.labelMl}</div>
+                  <div className={`text-xs truncate ${isActive ? "text-white/70" : "text-neutral-400"}`}>{item.labelMl}</div>
                 </div>
               </button>
             );
@@ -92,10 +94,10 @@ export const PortalSidebar: React.FC<PortalSidebarProps> = ({
       </ScrollArea>
 
       {/* Bottom Actions */}
-      <div className="p-3 border-t border-white/10 space-y-2">
+      <div className="p-3 border-t border-neutral-200 space-y-1">
         <Button
           variant="ghost"
-          className="w-full justify-start text-white/70 hover:text-white hover:bg-white/10"
+          className="w-full justify-start text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100"
           onClick={() => navigate("/")}
         >
           <Home className="h-4 w-4 mr-3" />
@@ -103,7 +105,7 @@ export const PortalSidebar: React.FC<PortalSidebarProps> = ({
         </Button>
         <Button
           variant="ghost"
-          className="w-full justify-start text-red-400 hover:text-red-300 hover:bg-red-500/10"
+          className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
           onClick={onLogout}
         >
           <LogOut className="h-4 w-4 mr-3" />

@@ -83,7 +83,7 @@ const LabReportsTable: React.FC<LabReportsTableProps> = ({
                   className="text-center py-8"
                 >
                   <div className="flex justify-center">
-                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-teal-600"></div>
                   </div>
                   <div className="mt-2 text-sm text-gray-500">
                     Loading lab reports...

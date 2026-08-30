@@ -271,7 +271,7 @@ const AppointmentsTab = () => {
       <CardHeader className="flex justify-between items-center">
         <div>
           <CardTitle className="flex items-center gap-2">
-            <CalendarDays className="h-5 w-5 text-primary" />
+            <CalendarDays className="h-5 w-5 text-teal-600" />
             Appointments
           </CardTitle>
         </div>

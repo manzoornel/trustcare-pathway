@@ -6,9 +6,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { User, Hash, Phone, Mail } from "lucide-react";
-import { Card } from "@/components/ui/card";
+import { User, Hash, Phone, Mail, ChevronRight } from "lucide-react";
 
 interface Patient {
   patient_id: string;
@@ -33,66 +31,52 @@ const PatientSelectionDialog: React.FC<PatientSelectionDialogProps> = ({
 }) => {
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-2xl font-bold">
+      <DialogContent className="max-w-lg max-h-[85vh] flex flex-col p-0 gap-0">
+        <DialogHeader className="px-6 pt-6 pb-4 border-b border-neutral-100">
+          <DialogTitle className="text-xl font-bold text-neutral-900">
             Select Patient Profile
           </DialogTitle>
           <DialogDescription>
-            Multiple patient records found. Please select which patient profile you want to access.
+            {patients.length} profiles found on this number — pick the one you want to view.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-3 mt-4">
-          {patients.map((patient, index) => (
-            <Card
+        <div className="flex-1 overflow-y-auto divide-y divide-neutral-100">
+          {patients.map((patient) => (
+            <button
               key={patient.patient_id}
-              className="p-4 hover:border-primary hover:shadow-md transition-all cursor-pointer"
-              
+              onClick={() => onSelectPatient(patient)}
+              className="w-full flex items-center gap-3 px-6 py-3.5 text-left hover:bg-teal-50 active:bg-teal-100 transition-colors"
             >
-              <div className="flex items-start justify-between">
-                <div className="flex-1 space-y-2">
-                  <div className="flex items-center gap-2">
-                    <User className="h-5 w-5 text-primary" />
-                    <h3 className="font-semibold text-lg">
-                      {patient.patient_name}
-                    </h3>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-                    {patient.uhid && (
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <Hash className="h-4 w-4" />
-                        <span>UHID: {patient.uhid}</span>
-                      </div>
-                    )}
-                    
-                    {patient.phone && (
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <Phone className="h-4 w-4" />
-                        <span>{patient.phone}</span>
-                      </div>
-                    )}
-                    
-                    {patient.email && (
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <Mail className="h-4 w-4" />
-                        <span>{patient.email}</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onSelectPatient(patient)}
-                  className="ml-4"
-                >
-                  Select
-                </Button>
+              <div className="h-9 w-9 rounded-full bg-teal-50 flex items-center justify-center shrink-0">
+                <User className="h-4.5 w-4.5 text-teal-600" />
               </div>
-            </Card>
+              <div className="flex-1 min-w-0">
+                <div className="font-semibold text-sm text-neutral-900 truncate">
+                  {patient.patient_name}
+                </div>
+                {(patient.uhid || patient.phone || patient.email) && (
+                  <div className="flex flex-wrap gap-x-3 text-xs text-neutral-500 mt-0.5">
+                    {patient.uhid && (
+                      <span className="flex items-center gap-1">
+                        <Hash className="h-3 w-3" /> {patient.uhid}
+                      </span>
+                    )}
+                    {patient.phone && (
+                      <span className="flex items-center gap-1">
+                        <Phone className="h-3 w-3" /> {patient.phone}
+                      </span>
+                    )}
+                    {patient.email && (
+                      <span className="flex items-center gap-1 truncate">
+                        <Mail className="h-3 w-3 shrink-0" /> {patient.email}
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+              <ChevronRight className="h-4 w-4 text-neutral-300 shrink-0" />
+            </button>
           ))}
         </div>
       </DialogContent>

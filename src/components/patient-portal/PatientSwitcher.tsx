@@ -112,58 +112,59 @@ export const PatientSwitcher: React.FC<PatientSwitcherProps> = ({
   }
 
   return (
-    <div className="mb-4">
+    <div className="mb-6">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
             variant="outline"
-            className="w-full justify-between"
-            size="lg"
+            className="w-full justify-between h-auto py-3 bg-white border-neutral-200 hover:bg-neutral-50 hover:border-teal-300"
           >
-            <div className="flex items-center gap-2">
-              <User className="h-5 w-5" />
+            <div className="flex items-center gap-3">
+              <div className="h-9 w-9 rounded-full bg-teal-50 flex items-center justify-center shrink-0">
+                <User className="h-4.5 w-4.5 text-teal-600" />
+              </div>
               <div className="text-left">
-                <div className="font-semibold">
+                <div className="font-semibold text-neutral-900 text-sm">
                   {currentPatient?.patient_name || "Select Patient"}
                 </div>
-                {currentPatient?.uhid && (
-                  <div className="text-xs text-muted-foreground">
-                    UHID: {currentPatient.uhid}
-                  </div>
-                )}
+                <div className="text-xs text-neutral-500">
+                  {currentPatient?.uhid
+                    ? `UHID: ${currentPatient.uhid}`
+                    : `${availablePatients.length} profiles on this number`}
+                </div>
               </div>
             </div>
-            <ChevronDown className="h-4 w-4 opacity-50" />
+            <ChevronDown className="h-4 w-4 text-neutral-400 shrink-0" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-[300px] bg-background border-primary/30 shadow-xl z-50">
-          <DropdownMenuLabel className="flex items-center gap-2 text-foreground font-semibold">
-            <Users className="h-4 w-4 text-primary" />
+        <DropdownMenuContent className="w-[--radix-dropdown-menu-trigger-width] min-w-[300px] max-h-[60vh] overflow-y-auto bg-white border-neutral-200 shadow-xl z-50">
+          <DropdownMenuLabel className="flex items-center gap-2 text-neutral-900 font-semibold">
+            <Users className="h-4 w-4 text-teal-600" />
             Switch Patient Profile
           </DropdownMenuLabel>
-          <DropdownMenuSeparator className="bg-border" />
+          <DropdownMenuSeparator />
           {availablePatients.map((patient) => (
             <DropdownMenuItem
               key={patient.patient_id}
               onClick={() => handlePatientSwitch(patient)}
-              className={`cursor-pointer hover:bg-primary/20 transition-colors ${
+              className={`cursor-pointer py-2.5 transition-colors ${
                 patient.patient_id === currentPatientId
-                  ? "bg-primary/10 font-semibold text-foreground"
-                  : "text-foreground"
+                  ? "bg-teal-50 font-semibold text-neutral-900"
+                  : "text-neutral-700 hover:bg-neutral-50"
               }`}
             >
               <div className="flex flex-col w-full">
                 <div className="flex items-center gap-2">
-                  <User className="h-4 w-4" />
+                  <User className="h-4 w-4 text-neutral-400 shrink-0" />
                   <span>{patient.patient_name}</span>
                   {patient.patient_id === currentPatientId && (
-                    <span className="ml-auto text-xs text-primary">
+                    <span className="ml-auto text-xs text-teal-700 font-medium">
                       Current
                     </span>
                   )}
                 </div>
                 {patient.uhid && (
-                  <div className="text-xs text-muted-foreground ml-6">
+                  <div className="text-xs text-neutral-500 ml-6">
                     UHID: {patient.uhid}
                   </div>
                 )}
@@ -172,7 +173,7 @@ export const PatientSwitcher: React.FC<PatientSwitcherProps> = ({
           ))}
         </DropdownMenuContent>
       </DropdownMenu>
-      <p className="text-xs text-muted-foreground mt-2 text-center">
+      <p className="text-xs text-neutral-500 mt-2 text-center">
         Tap to switch between family members
       </p>
     </div>

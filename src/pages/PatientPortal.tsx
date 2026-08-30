@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useAuth } from "@/contexts/auth";
 import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
-import { AlertCircle, Mail, User, Phone, Hash, CheckCircle, Menu } from "lucide-react";
+import { AlertCircle, Mail, User, Phone, Hash, CheckCircle, Menu, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmailVerificationModal } from "@/components/patient-portal/EmailVerificationModal";
 import { PortalSidebar } from "@/components/patient-portal/PortalSidebar";
@@ -96,9 +96,9 @@ const PatientPortal: React.FC = () => {
   };
 
   return (
-    <div className="flex min-h-screen" style={{ backgroundColor: "hsl(var(--color-dark-bg))" }}>
+    <div className="flex min-h-screen bg-neutral-50">
       <ToastContainer />
-      
+
       {/* Desktop Sidebar */}
       {!isMobile && (
         <PortalSidebar
@@ -124,7 +124,7 @@ const PatientPortal: React.FC = () => {
       {/* Main Content */}
       <div className="flex-1 overflow-auto">
         {/* Top Bar */}
-        <div className="bg-white/5 backdrop-blur-sm border-b border-white/10 sticky top-0 z-10">
+        <div className="bg-white border-b border-neutral-200 sticky top-0 z-10">
           <div className="px-4 md:px-8 py-4 flex items-center justify-between">
             {/* Mobile Menu Button */}
             {isMobile && (
@@ -132,47 +132,47 @@ const PatientPortal: React.FC = () => {
                 variant="ghost"
                 size="icon"
                 onClick={() => setMobileMenuOpen(true)}
-                className="mr-3 text-white hover:bg-white/10"
+                className="mr-3 text-neutral-700 hover:bg-neutral-100"
               >
                 <Menu className="h-6 w-6" />
               </Button>
             )}
             {/* Welcome Message */}
             <div className="flex-1">
-              <h1 className="text-lg md:text-2xl font-display font-bold text-white">
-                Welcome to Patient Portal
+              <h1 className="text-lg md:text-2xl font-display font-bold text-neutral-900">
+                Welcome, {patientData.name.split(" ")[0]}
               </h1>
-              <p className="text-xs md:text-sm text-white/60">രോഗി പോർട്ടലിലേക്ക് സ്വാഗതം</p>
+              <p className="text-xs md:text-sm text-neutral-500">രോഗി പോർട്ടലിലേക്ക് സ്വാഗതം</p>
             </div>
 
             {/* User Info Card */}
-            <div className="hidden md:flex items-center gap-4 px-4 py-3 rounded-xl bg-white/10 backdrop-blur-md border border-white/20">
-              <div className="h-12 w-12 rounded-full bg-primary flex items-center justify-center text-white font-bold text-lg">
+            <div className="hidden md:flex items-center gap-3 px-4 py-2.5 rounded-full bg-teal-50 border border-teal-100">
+              <div className="h-9 w-9 rounded-full bg-teal-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
                 {patientData.name ? patientData.name.charAt(0).toUpperCase() : "U"}
               </div>
               <div>
-                <p className="text-sm font-bold text-white">{patientData.name}</p>
-                <p className="text-xs text-white/60">ID: {patientData.hospitalId}</p>
+                <p className="text-sm font-semibold text-neutral-900 leading-tight">{patientData.name}</p>
+                <p className="text-xs text-neutral-500 leading-tight">ID: {patientData.hospitalId}</p>
               </div>
             </div>
           </div>
 
           {/* Email Verification Banner */}
           {!isEmailVerified && (
-            <div className="mx-4 md:mx-8 mb-4 p-3 md:p-4 rounded-xl bg-warning/20 backdrop-blur-sm border border-warning/40 flex items-center gap-3 animate-fade-in">
-              <AlertCircle className="h-5 w-5 text-warning flex-shrink-0" />
+            <div className="mx-4 md:mx-8 mb-4 p-3 md:p-4 rounded-xl bg-amber-50 border border-amber-200 flex items-center gap-3 animate-fade-in">
+              <AlertCircle className="h-5 w-5 text-amber-600 flex-shrink-0" />
               <div className="flex-1">
-                <p className="font-semibold text-xs md:text-sm text-white">
+                <p className="font-semibold text-xs md:text-sm text-amber-900">
                   Email Verification Required / ഇമെയിൽ പരിശോധന ആവശ്യമാണ്
                 </p>
-                <p className="text-xs text-white/80 mt-0.5 hidden md:block">
+                <p className="text-xs text-amber-700 mt-0.5 hidden md:block">
                   Please verify your email to access all features
                 </p>
               </div>
               <Button
                 size="sm"
                 onClick={() => setShowVerificationModal(true)}
-                className="rounded-lg bg-warning hover:bg-warning/90 text-white font-semibold text-xs"
+                className="rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-semibold text-xs"
               >
                 <Mail className="h-3 w-3 md:h-4 md:w-4 md:mr-2" />
                 <span className="hidden md:inline">Verify Now</span>
@@ -184,60 +184,60 @@ const PatientPortal: React.FC = () => {
         {/* Content Area */}
         <div className="p-4 md:p-8">
           {/* Patient Switcher - Allow switching between family members */}
-          <PatientSwitcher 
+          <PatientSwitcher
             currentPatientId={localStorage.getItem("patient_id") || ""}
           />
-          
+
           {activeTab === "dashboard" ? (
             <>
               {/* Patient Info Card */}
-              <div className="mb-8 p-6 rounded-2xl bg-white/10 backdrop-blur-md border border-primary/30 shadow-xl">
-                <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                  <User className="h-5 w-5 text-primary" />
+              <div className="mb-6 p-5 md:p-6 rounded-2xl bg-white border border-neutral-200 shadow-sm">
+                <h2 className="text-base font-bold text-neutral-900 mb-4 flex items-center gap-2">
+                  <User className="h-5 w-5 text-teal-600" />
                   Patient Information
                 </h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="flex items-center gap-3 p-3 rounded-lg bg-white/5">
-                    <User className="h-5 w-5 text-primary" />
-                    <div>
-                      <p className="text-xs text-white/60">Name</p>
-                      <p className="text-sm font-semibold text-white">{patientData.name}</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  <div className="flex items-center gap-3 p-3 rounded-xl bg-neutral-50">
+                    <User className="h-5 w-5 text-teal-600 shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-xs text-neutral-500">Name</p>
+                      <p className="text-sm font-semibold text-neutral-900 truncate">{patientData.name}</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3 p-3 rounded-lg bg-white/5">
-                    <Hash className="h-5 w-5 text-primary" />
-                    <div>
-                      <p className="text-xs text-white/60">Hospital ID</p>
-                      <p className="text-sm font-semibold text-white">{patientData.hospitalId}</p>
+                  <div className="flex items-center gap-3 p-3 rounded-xl bg-neutral-50">
+                    <Hash className="h-5 w-5 text-teal-600 shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-xs text-neutral-500">Hospital ID</p>
+                      <p className="text-sm font-semibold text-neutral-900 truncate">{patientData.hospitalId}</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3 p-3 rounded-lg bg-white/5">
-                    <Phone className="h-5 w-5 text-primary" />
-                    <div>
-                      <p className="text-xs text-white/60">Phone</p>
-                      <p className="text-sm font-semibold text-white">{patientData.phone}</p>
+                  <div className="flex items-center gap-3 p-3 rounded-xl bg-neutral-50">
+                    <Phone className="h-5 w-5 text-teal-600 shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-xs text-neutral-500">Phone</p>
+                      <p className="text-sm font-semibold text-neutral-900 truncate">{patientData.phone}</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3 p-3 rounded-lg bg-white/5">
-                    <Mail className="h-5 w-5 text-primary" />
-                    <div>
-                      <p className="text-xs text-white/60">Email</p>
-                      <p className="text-sm font-semibold text-white">{patientData.email}</p>
+                  <div className="flex items-center gap-3 p-3 rounded-xl bg-neutral-50">
+                    <Mail className="h-5 w-5 text-teal-600 shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-xs text-neutral-500">Email</p>
+                      <p className="text-sm font-semibold text-neutral-900 truncate">{patientData.email}</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3 p-3 rounded-lg bg-white/5">
-                    <CheckCircle className="h-5 w-5 text-success" />
-                    <div>
-                      <p className="text-xs text-white/60">Status</p>
-                      <p className="text-sm font-semibold text-success">Active Patient</p>
+                  <div className="flex items-center gap-3 p-3 rounded-xl bg-green-50">
+                    <CheckCircle className="h-5 w-5 text-green-600 shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-xs text-neutral-500">Status</p>
+                      <p className="text-sm font-semibold text-green-700">Active Patient</p>
                     </div>
                   </div>
                 </div>
               </div>
 
               {/* Dashboard Cards Grid */}
-              <h2 className="text-xl font-bold text-white mb-6">Quick Access / പെട്ടെന്നുള്ള പ്രവേശനം</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <h2 className="text-base font-bold text-neutral-900 mb-4">Quick Access / പെട്ടെന്നുള്ള പ്രവേശനം</h2>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
                 {dashboardItems.map((item) => (
                   <DashboardCard
                     key={item.tab}
@@ -251,7 +251,16 @@ const PatientPortal: React.FC = () => {
               </div>
             </>
           ) : (
-            <div className="bg-white rounded-2xl shadow-xl p-6">
+            <div className="bg-white rounded-2xl border border-neutral-200 shadow-sm p-4 md:p-6">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setActiveTab("dashboard")}
+                className="mb-4 -ml-2 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100"
+              >
+                <ArrowLeft className="h-4 w-4 mr-1.5" />
+                Back to Dashboard
+              </Button>
               <PortalTabsSection
                 activeTab={activeTab}
                 setActiveTab={setActiveTab}

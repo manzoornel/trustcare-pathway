@@ -178,7 +178,7 @@ export const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({
                   placeholder="your.email@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="h-12 text-base border-2 focus:border-primary rounded-xl"
+                  className="h-12 text-base border-2 focus:border-teal-500 rounded-xl"
                   disabled={loading}
                 />
               </div>

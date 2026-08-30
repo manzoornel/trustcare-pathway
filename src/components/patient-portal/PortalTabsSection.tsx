@@ -28,44 +28,51 @@ const PortalTabsSection = ({
 }: PortalTabsSectionProps) => {
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-      <div className="w-full overflow-x-auto">
-        <TabsList className="grid grid-cols-6 min-w-[640px] md:min-w-0 mb-8">
-          <TabsTrigger value="labReports" className="flex items-center gap-2">
-            <FileText className="h-4 w-4" />
-            <span className="hidden sm:inline">Lab Reports</span>
-          </TabsTrigger>
-          <TabsTrigger value="medications" className="flex items-center gap-2">
-            <Pill className="h-4 w-4" />
-            <span className="hidden sm:inline">Medications</span>
-          </TabsTrigger>
-          <TabsTrigger
-            value="vitalsReports"
-            className="flex items-center gap-2"
-          >
-            <Activity className="h-4 w-4" />
-            <span className="hidden sm:inline">Vitals</span>
-          </TabsTrigger>
-          <TabsTrigger
-            value="medicalSummary"
-            className="flex items-center gap-2"
-          >
-            <ClipboardList className="h-4 w-4" />
-            <span className="hidden sm:inline">Medical Summary</span>
-          </TabsTrigger>
-          <TabsTrigger value="appointments" className="flex items-center gap-2">
-            <Calendar className="h-4 w-4" />
-            <span className="hidden sm:inline">Appointments</span>
-          </TabsTrigger>
-          <TabsTrigger
-            disabled={true}
-            value="aiChat"
-            className="flex items-center gap-2"
-          >
-            <MessageSquare className="h-4 w-4" />
-            <span className="hidden sm:inline">AI Chat</span>
-          </TabsTrigger>
-        </TabsList>
-      </div>
+      <TabsList className="grid grid-cols-3 md:grid-cols-6 h-auto gap-1.5 bg-neutral-100 p-1.5 mb-6 rounded-xl">
+        <TabsTrigger
+          value="labReports"
+          className="flex flex-col md:flex-row items-center gap-1 md:gap-2 py-2.5 px-1 rounded-lg text-neutral-600 data-[state=active]:bg-white data-[state=active]:text-teal-700 data-[state=active]:shadow-sm"
+        >
+          <FileText className="h-4 w-4 shrink-0" />
+          <span className="text-[11px] md:text-sm leading-tight">Lab Reports</span>
+        </TabsTrigger>
+        <TabsTrigger
+          value="medications"
+          className="flex flex-col md:flex-row items-center gap-1 md:gap-2 py-2.5 px-1 rounded-lg text-neutral-600 data-[state=active]:bg-white data-[state=active]:text-teal-700 data-[state=active]:shadow-sm"
+        >
+          <Pill className="h-4 w-4 shrink-0" />
+          <span className="text-[11px] md:text-sm leading-tight">Medications</span>
+        </TabsTrigger>
+        <TabsTrigger
+          value="vitalsReports"
+          className="flex flex-col md:flex-row items-center gap-1 md:gap-2 py-2.5 px-1 rounded-lg text-neutral-600 data-[state=active]:bg-white data-[state=active]:text-teal-700 data-[state=active]:shadow-sm"
+        >
+          <Activity className="h-4 w-4 shrink-0" />
+          <span className="text-[11px] md:text-sm leading-tight">Vitals</span>
+        </TabsTrigger>
+        <TabsTrigger
+          value="medicalSummary"
+          className="flex flex-col md:flex-row items-center gap-1 md:gap-2 py-2.5 px-1 rounded-lg text-neutral-600 data-[state=active]:bg-white data-[state=active]:text-teal-700 data-[state=active]:shadow-sm"
+        >
+          <ClipboardList className="h-4 w-4 shrink-0" />
+          <span className="text-[11px] md:text-sm leading-tight text-center">Medical Summary</span>
+        </TabsTrigger>
+        <TabsTrigger
+          value="appointments"
+          className="flex flex-col md:flex-row items-center gap-1 md:gap-2 py-2.5 px-1 rounded-lg text-neutral-600 data-[state=active]:bg-white data-[state=active]:text-teal-700 data-[state=active]:shadow-sm"
+        >
+          <Calendar className="h-4 w-4 shrink-0" />
+          <span className="text-[11px] md:text-sm leading-tight">Appointments</span>
+        </TabsTrigger>
+        <TabsTrigger
+          disabled={true}
+          value="aiChat"
+          className="flex flex-col md:flex-row items-center gap-1 md:gap-2 py-2.5 px-1 rounded-lg text-neutral-400 data-[state=active]:bg-white data-[state=active]:text-teal-700 data-[state=active]:shadow-sm"
+        >
+          <MessageSquare className="h-4 w-4 shrink-0" />
+          <span className="text-[11px] md:text-sm leading-tight">AI Chat</span>
+        </TabsTrigger>
+      </TabsList>
 
       <TabsContent value="labReports" className="space-y-4">
         <LabReportsTab openPatientInfoEdit={openPatientInfoEdit} />

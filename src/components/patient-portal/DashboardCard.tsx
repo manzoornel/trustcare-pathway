@@ -20,41 +20,33 @@ export const DashboardCard: React.FC<DashboardCardProps> = ({
     <button
       onClick={onClick}
       disabled={comingSoon}
-      className={`relative group p-6 rounded-2xl border-2 transition-all duration-300 ${
+      className={`relative group flex flex-col items-center text-center p-4 md:p-5 rounded-2xl border transition-all duration-200 ${
         comingSoon
-          ? "border-muted-foreground/20 bg-muted/30 cursor-not-allowed opacity-50"
-          : "border-primary bg-white/10 backdrop-blur-md hover:bg-primary/20 hover:border-primary hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-1"
+          ? "border-neutral-200 bg-neutral-50 cursor-not-allowed opacity-60"
+          : "border-neutral-200 bg-white hover:border-teal-300 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:shadow-sm"
       }`}
-      style={{ 
-        borderColor: comingSoon ? undefined : "hsl(var(--color-card-border))",
-      }}
     >
       {/* Icon */}
-      <div className="flex justify-center mb-4">
-        <div
-          className={`p-4 rounded-xl ${
-            comingSoon ? "bg-muted" : "bg-transparent"
-          }`}
-        >
-          <Icon
-            className="h-12 w-12"
-            style={{ 
-              color: comingSoon ? "hsl(var(--muted-foreground))" : "hsl(var(--color-primary))",
-              strokeWidth: 1.5,
-            }}
-          />
-        </div>
+      <div
+        className={`flex items-center justify-center h-12 w-12 md:h-14 md:w-14 rounded-xl mb-2.5 ${
+          comingSoon ? "bg-neutral-200" : "bg-teal-50 group-hover:bg-teal-100"
+        }`}
+      >
+        <Icon
+          className={`h-6 w-6 md:h-7 md:w-7 ${comingSoon ? "text-neutral-400" : "text-teal-600"}`}
+          strokeWidth={1.75}
+        />
       </div>
 
       {/* Title */}
-      <h3 className="text-base font-bold text-white text-center mb-1 uppercase tracking-wide">
+      <h3 className="text-xs md:text-sm font-bold text-neutral-900 leading-tight">
         {title}
       </h3>
-      <p className="text-xs text-white/70 text-center">{titleMl}</p>
+      <p className="text-[11px] text-neutral-500 mt-0.5">{titleMl}</p>
 
       {comingSoon && (
-        <div className="absolute top-3 right-3 px-2 py-1 bg-muted rounded text-xs font-medium text-muted-foreground">
-          Coming Soon
+        <div className="absolute top-2 right-2 px-1.5 py-0.5 bg-neutral-200 rounded text-[10px] font-semibold text-neutral-500">
+          SOON
         </div>
       )}
     </button>
