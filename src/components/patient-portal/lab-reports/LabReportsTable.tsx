@@ -106,7 +106,13 @@ const LabReportsTable: React.FC<LabReportsTableProps> = ({
                 );
 
                 return (
-                  <TableRow key={report.id}>
+                  <TableRow
+                    key={report.id}
+                    className={!isComparing ? "cursor-pointer" : undefined}
+                    onClick={
+                      !isComparing ? () => onViewReport(report) : undefined
+                    }
+                  >
                     {isComparing && (
                       <TableCell>
                         <Checkbox
@@ -115,7 +121,7 @@ const LabReportsTable: React.FC<LabReportsTableProps> = ({
                         />
                       </TableCell>
                     )}
-                    <TableCell className="whitespace-nowrap">
+                    <TableCell className="whitespace-nowrap font-medium">
                       {report.date}
                     </TableCell>
                     <TableCell className="whitespace-nowrap">
@@ -124,7 +130,7 @@ const LabReportsTable: React.FC<LabReportsTableProps> = ({
                     <TableCell className="whitespace-nowrap">
                       {report.doctor}
                     </TableCell>
-                    <TableCell>
+                    <TableCell onClick={(e) => e.stopPropagation()}>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="sm">

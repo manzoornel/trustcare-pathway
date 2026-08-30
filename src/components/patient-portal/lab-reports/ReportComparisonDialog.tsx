@@ -1,29 +1,21 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileDown, Home } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Badge } from "@/components/ui/badge";
+import {
+  FileDown,
+  TrendingUp,
+  TrendingDown,
+  Minus,
+  CheckCircle2,
+  AlertTriangle,
+} from "lucide-react";
 
 interface LabResult {
   detail_description: string;
@@ -43,19 +35,14 @@ interface RawReport {
 }
 
 interface ReportComparisonDialogProps {
-  // Can be an array of visit IDs or report objects containing visitId
   selectedReports: any[];
   reports: RawReport[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-const getPercentageChange = (latest: number, previous: number): number => {
-  if (previous === 0) return 0;
-  return ((latest - previous) / Math.abs(previous)) * 100;
-};
-
 const isWithinRange = (value: number, min: number, max: number): boolean => {
+  if (Number.isNaN(min) || Number.isNaN(max)) return true;
   return value >= min && value <= max;
 };
 
@@ -82,73 +69,133 @@ const parseDateString = (input: string): Date => {
   return new Date(year, month - 1, day, hour, minute);
 };
 
+const formatShortDate = (input: string): string => {
+  const d = parseDateString(input);
+  if (Number.isNaN(d.getTime())) return input;
+  return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+};
+
+type RowCell = {
+  date: string;
+  value: number | null;
+  raw: string;
+  isValid: boolean;
+};
+
+type ComparisonRow = {
+  name: string;
+  unit: string;
+  min: number;
+  max: number;
+  cells: RowCell[];
+  latestValue: number | null;
+  latestIsAbnormal: boolean;
+  trend: "up" | "down" | "same" | null;
+  trendPct: number | null;
+};
+
 export const ReportComparisonDialog: React.FC<ReportComparisonDialogProps> = ({
   selectedReports,
   reports,
   open,
   onOpenChange,
 }) => {
-  const navigate = useNavigate();
-  // Sort selected reports by date before processing
-  const sortedSelectedReports = (selectedReports || []).sort(
-    (a: any, b: any) => {
-      const dateA = new Date(a.date);
-      const dateB = new Date(b.date);
-      return dateB.getTime() - dateA.getTime();
-    }
-  );
-
-  const selectedVisitIds = sortedSelectedReports.map((s: any) =>
+  const selectedVisitIds = (selectedReports || []).map((s: any) =>
     typeof s === "object" && s !== null ? s.visitId : s
   );
 
-  const selectedData = (reports || [])
-    .filter((report) => selectedVisitIds.includes(report.visitId))
-    .sort(
-      (a, b) =>
-        parseDateString(b.date).getTime() - parseDateString(a.date).getTime()
-    );
+  // Oldest -> newest, so the table reads left-to-right like a timeline
+  const selectedData = useMemo(
+    () =>
+      (reports || [])
+        .filter((report) => selectedVisitIds.includes(report.visitId))
+        .sort(
+          (a, b) =>
+            parseDateString(a.date).getTime() - parseDateString(b.date).getTime()
+        ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [reports, JSON.stringify(selectedVisitIds)]
+  );
 
-  const allParameters = useMemo(() => {
-    const set = new Set<string>();
-    selectedData.forEach((report) =>
-      report.result.forEach((r) => set.add(r.detail_description))
-    );
-    return Array.from(set);
+  const dates = useMemo(() => selectedData.map((r) => r.date), [selectedData]);
+
+  const rows = useMemo<ComparisonRow[]>(() => {
+    const order: string[] = [];
+    const seen = new Set<string>();
+    selectedData.forEach((report) => {
+      report.result.forEach((r) => {
+        if (!seen.has(r.detail_description)) {
+          seen.add(r.detail_description);
+          order.push(r.detail_description);
+        }
+      });
+    });
+
+    return order
+      .map((paramName): ComparisonRow | null => {
+        let unit = "";
+        let min = NaN;
+        let max = NaN;
+
+        const cells: RowCell[] = selectedData.map((report) => {
+          const found = report.result.find(
+            (r) => r.detail_description === paramName
+          );
+          const numeric = found ? Number(found.actual_result) : NaN;
+          const isValid =
+            !!found && found.actual_result !== "-" && !Number.isNaN(numeric);
+          if (isValid && found) {
+            unit = found.unitdesc || unit;
+            min = Number(found.min_value);
+            max = Number(found.max_value);
+          }
+          return {
+            date: report.date,
+            value: isValid ? numeric : null,
+            raw: found ? String(found.actual_result) : "-",
+            isValid,
+          };
+        });
+
+        const validCells = cells.filter((c) => c.isValid);
+        if (validCells.length === 0) return null;
+
+        const latest = validCells[validCells.length - 1];
+        const previous =
+          validCells.length > 1 ? validCells[validCells.length - 2] : null;
+
+        let trend: ComparisonRow["trend"] = null;
+        let trendPct: number | null = null;
+        if (previous && latest.value !== null && previous.value !== null) {
+          if (latest.value > previous.value) trend = "up";
+          else if (latest.value < previous.value) trend = "down";
+          else trend = "same";
+          trendPct =
+            previous.value === 0
+              ? null
+              : ((latest.value - previous.value) / Math.abs(previous.value)) * 100;
+        }
+
+        return {
+          name: paramName,
+          unit,
+          min,
+          max,
+          cells,
+          latestValue: latest.value,
+          latestIsAbnormal:
+            latest.value !== null ? !isWithinRange(latest.value, min, max) : false,
+          trend,
+          trendPct,
+        };
+      })
+      .filter((r): r is ComparisonRow => r !== null);
   }, [selectedData]);
 
-  // Filter parameters that have valid values
-  const validParameters = useMemo(() => {
-    return allParameters.filter((paramName) => {
-      const hasValidValues = selectedData.some((report) => {
-        const result = report.result.find(
-          (r) => r.detail_description === paramName
-        );
-        return (
-          result &&
-          result.actual_result !== "-" &&
-          !isNaN(Number(result.actual_result))
-        );
-      });
-      return hasValidValues;
-    });
-  }, [allParameters, selectedData]);
-
-  // Single-parameter selection (one-by-one)
-  const [selectedParam, setSelectedParam] = useState<string | null>(null);
-  useEffect(() => {
-    if (validParameters.length > 0) {
-      // Default to the first parameter to force one-by-one view
-      setSelectedParam((prev) => prev ?? validParameters[0]);
-    } else {
-      setSelectedParam(null);
-    }
-  }, [validParameters]);
-
-  const displayParams = useMemo(
-    () => (selectedParam ? [selectedParam] : []),
-    [selectedParam]
-  );
+  const summary = useMemo(() => {
+    const abnormal = rows.filter((r) => r.latestIsAbnormal).length;
+    return { total: rows.length, abnormal, normal: rows.length - abnormal };
+  }, [rows]);
 
   // Dynamically load jsPDF + autotable from CDN and download PDF without opening a new page
   const ensureJsPDF = async (): Promise<any> => {
@@ -172,7 +219,6 @@ export const ReportComparisonDialog: React.FC<ReportComparisonDialogProps> = ({
     return (window as any).jspdf;
   };
 
-  // Header image config and helpers
   const HEADER_IMAGE_PATH =
     "/lovable-uploads/d18bbc61-0f35-4480-9b29-cf9dd88e75d3.png";
   const resolveImageUrl = (pathOrUrl: string): string => {
@@ -200,7 +246,6 @@ export const ReportComparisonDialog: React.FC<ReportComparisonDialogProps> = ({
   };
 
   const getDoctorName = (): string => {
-    // Prefer consulting doctor from results if present
     for (let i = selectedData.length - 1; i >= 0; i -= 1) {
       const rpt = selectedData[i];
       const r0: any = rpt?.result?.[0];
@@ -216,37 +261,7 @@ export const ReportComparisonDialog: React.FC<ReportComparisonDialogProps> = ({
     return initials.join("") || "DR";
   };
 
-  const buildComparisonGrid = () => {
-    const header = ["Date", "Value"];
-
-    const rows = displayParams
-      .map((paramName) => {
-        const values = selectedData
-          .map((report) => ({
-            date: report.date,
-            value: report.result.find(
-              (r) => r.detail_description === paramName
-            ),
-          }))
-          .filter(
-            (item) =>
-              item.value &&
-              item.value.actual_result !== "-" &&
-              !isNaN(Number(item.value.actual_result))
-          );
-
-        return values.map((item) => [
-          item.date,
-          item.value.actual_result.toString(),
-        ]);
-      })
-      .flat();
-
-    return { header, rows };
-  };
-
   const downloadPDF = async () => {
-    const { header, rows } = buildComparisonGrid();
     const { jsPDF } = await ensureJsPDF();
 
     const doc = new jsPDF({
@@ -257,14 +272,12 @@ export const ReportComparisonDialog: React.FC<ReportComparisonDialogProps> = ({
 
     const doctorName = getDoctorName();
     const initials = getDoctorInitials(doctorName);
-    // Header visuals
     const leftMargin = 40;
     const topMargin = 36;
     const circleX = leftMargin + 30;
     const circleY = topMargin + 30;
     const circleR = 26;
 
-    // Try to draw header image; fallback to initials avatar
     let imageDataUrl: string | null = await fetchImageAsDataUrl(
       resolveImageUrl(HEADER_IMAGE_PATH)
     );
@@ -272,17 +285,11 @@ export const ReportComparisonDialog: React.FC<ReportComparisonDialogProps> = ({
       try {
         doc.addImage(imageDataUrl, "PNG", leftMargin, topMargin, 60, 60);
       } catch {
-        doc.setFillColor(66, 133, 244);
-        doc.circle(circleX, circleY, circleR, "F");
-        doc.setTextColor(255, 255, 255);
-        doc.setFontSize(16);
-        doc.text(initials, circleX, circleY + 6, {
-          align: "center",
-          baseline: "middle",
-        } as any);
+        imageDataUrl = null;
       }
-    } else {
-      doc.setFillColor(66, 133, 244);
+    }
+    if (!imageDataUrl) {
+      doc.setFillColor(37, 190, 203);
       doc.circle(circleX, circleY, circleR, "F");
       doc.setTextColor(255, 255, 255);
       doc.setFontSize(16);
@@ -292,19 +299,17 @@ export const ReportComparisonDialog: React.FC<ReportComparisonDialogProps> = ({
       } as any);
     }
 
-    // Header text
     doc.setTextColor(0, 0, 0);
     doc.setFontSize(14);
-    doc.text(`Dr Uncle`, leftMargin + 70, topMargin + 12);
+    doc.text(`Doctor Uncle Family Clinic`, leftMargin + 70, topMargin + 12);
     doc.setFontSize(12);
     doc.text(
-      `Lab Report Comparison - ${displayParams[0] ?? ""}`,
+      `Lab Report Comparison — ${dates.length} visits`,
       leftMargin + 70,
       topMargin + 32
     );
     doc.setTextColor(100);
 
-    // Divider
     doc.setDrawColor(230);
     doc.line(
       leftMargin,
@@ -313,26 +318,30 @@ export const ReportComparisonDialog: React.FC<ReportComparisonDialogProps> = ({
       topMargin + 64
     );
 
-    // Table using autoTable if available
     const startY = topMargin + 80;
     const anyDoc = doc as any;
+    const head = ["Test", ...dates.map(formatShortDate)];
+    const body = rows.map((row) => [
+      row.unit ? `${row.name} (${row.unit})` : row.name,
+      ...row.cells.map((c) => (c.isValid ? c.raw : "—")),
+    ]);
+
     if (anyDoc.autoTable) {
       anyDoc.autoTable({
-        head: [header],
-        body: rows,
+        head: [head],
+        body,
         startY,
-        styles: { fontSize: 10 },
+        styles: { fontSize: 9 },
         headStyles: { fillColor: [243, 244, 246], textColor: [0, 0, 0] },
         alternateRowStyles: { fillColor: [250, 250, 250] },
         margin: { left: leftMargin, right: leftMargin },
       });
     } else {
-      // Fallback: simple text rows
       let y = startY;
       doc.setFontSize(10);
-      doc.text(header.join("  |  "), leftMargin, y);
+      doc.text(head.join("  |  "), leftMargin, y);
       y += 16;
-      rows.forEach((r) => {
+      body.forEach((r) => {
         if (y > doc.internal.pageSize.getHeight() - 40) {
           doc.addPage();
           y = topMargin;
@@ -342,191 +351,164 @@ export const ReportComparisonDialog: React.FC<ReportComparisonDialogProps> = ({
       });
     }
 
-    const safeParam = (displayParams[0] || "comparison").replace(
-      /[^\w-]+/g,
-      "_"
-    );
-    doc.save(`lab-report-${safeParam}.pdf`);
+    doc.save(`lab-report-comparison.pdf`);
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-  <DialogContent className=" max-w-5xl h-[90vh] flex flex-col overflow-auto">
-    <DialogHeader className="flex-shrink-0">
-      <div className="flex justify-between items-start">
-        <div>
+      <DialogContent className="max-w-4xl h-[90vh] flex flex-col overflow-hidden p-0">
+        <DialogHeader className="flex-shrink-0 px-6 pt-6 pb-2">
           <DialogTitle>Report Comparison</DialogTitle>
           <DialogDescription>
-            Comparing {selectedData.length} reports by date
+            റിപ്പോർട്ട് താരതമ്യം &middot; comparing {dates.length} visits, oldest to newest
           </DialogDescription>
-        </div>
-      </div>
+        </DialogHeader>
 
-      <div className="mt-3 flex flex-col gap-4">
-        {/* Parameter Selection Buttons */}
-        <div className="flex flex-wrap gap-2">
-          {validParameters.map((param) => (
-            <Button
-              key={param}
-              variant={selectedParam === param ? "default" : "outline"}
-              size="sm"
-              onClick={() => setSelectedParam(param)}
-              className="text-sm"
-            >
-              {param}
-            </Button>
-          ))}
-        </div>
+        {rows.length === 0 ? (
+          <div className="flex-1 flex items-center justify-center p-6">
+            <div className="text-center text-muted-foreground max-w-sm">
+              <p className="font-medium mb-1">No matching tests found</p>
+              <p className="text-sm">
+                The visits you selected don't share any test with a valid result.
+                Try picking two visits that both include a similar test panel.
+              </p>
+            </div>
+          </div>
+        ) : (
+          <>
+            {/* Summary strip */}
+            <div className="flex-shrink-0 px-6 pb-3 flex flex-wrap items-center gap-2 animate-fade-in">
+              <Badge className="bg-cyan-50 text-cyan-700 border-transparent hover:bg-cyan-50">
+                {summary.total} tests compared
+              </Badge>
+              {summary.normal > 0 && (
+                <Badge className="bg-green-50 text-green-700 border-transparent hover:bg-green-50 gap-1">
+                  <CheckCircle2 className="h-3.5 w-3.5" />
+                  {summary.normal} normal
+                </Badge>
+              )}
+              {summary.abnormal > 0 && (
+                <Badge className="bg-red-50 text-red-600 border-transparent hover:bg-red-50 gap-1 animate-pulse-soft">
+                  <AlertTriangle className="h-3.5 w-3.5" />
+                  {summary.abnormal} need a look
+                </Badge>
+              )}
+              <div className="flex-1" />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={downloadPDF}
+                disabled={rows.length === 0}
+              >
+                <FileDown className="h-4 w-4 mr-2" /> Download PDF
+              </Button>
+            </div>
 
-        {/* Download Button */}
-        <div className="flex justify-end">
-          <Button
-            variant="default"
-            size="sm"
-            onClick={downloadPDF}
-            disabled={
-              selectedData.length === 0 ||
-              (displayParams.length === 0 && allParameters.length === 0)
-            }
-          >
-            <FileDown className="h-4 w-4 mr-2" /> Download PDF
-          </Button>
-        </div>
-      </div>
-    </DialogHeader>
-
-    {/* MAIN SCROLLABLE BOX */}
-    <div className="flex-1   mt-2">
-      <Card className="h-auto min-h-full flex flex-col">
-        <CardHeader className="flex-shrink-0">
-          <CardTitle>Report Comparison</CardTitle>
-          <CardDescription>
-            {displayParams[0]
-              ? `Parameter: ${displayParams[0]}`
-              : "Select a parameter to compare"}
-          </CardDescription>
-        </CardHeader>
-
-        <CardContent className="flex-1 ">
-          {displayParams.length > 0 ? (
-            <div className="h-full flex flex-col">
-              <div className="flex-shrink-0 mb-4">
-                <h3 className="text-lg font-semibold text-center mb-2">
-                  {displayParams[0]}
-                </h3>
-
-                {/* Normal range */}
-                {(() => {
-                  const firstValidResult = selectedData
-                    .map((report) => ({
-                      date: report.date,
-                      value: report.result.find(
-                        (r) => r.detail_description === displayParams[0]
-                      ),
-                    }))
-                    .filter(
-                      (item) =>
-                        item.value &&
-                        item.value.actual_result !== "-" &&
-                        !isNaN(Number(item.value.actual_result))
-                    )[0];
-
-                  if (
-                    firstValidResult?.value?.min_value &&
-                    firstValidResult?.value?.max_value
-                  ) {
-                    return (
-                      <p className="text-sm text-gray-600 text-center">
-                        Normal Range: {firstValidResult.value.min_value} -{" "}
-                        {firstValidResult.value.max_value}
-                      </p>
-                    );
-                  }
-                  return null;
-                })()}
-              </div>
-
-              {/* TABLE SCROLL */}
-              <div className="flex-1 overflow-y-auto">
-                <div className="w-full overflow-x-auto">
-                  <Table className="min-w-[480px]">
-                    <TableHeader className="sticky top-0 bg-white z-10 border-b">
-                      <TableRow>
-                        <TableHead className="bg-gray-50 font-semibold w-1/2 md:w-1/3">
-                          Date
-                        </TableHead>
-                        <TableHead className="bg-gray-50 font-semibold w-1/2 md:w-1/3">
-                          Value
-                        </TableHead>
-                      </TableRow>
-                    </TableHeader>
-
-                    <TableBody>
-                      {(() => {
-                        const values = selectedData
-                          .map((report) => ({
-                            date: report.date,
-                            value: report.result.find(
-                              (r) =>
-                                r.detail_description === displayParams[0]
-                            ),
-                          }))
-                          .filter(
-                            (item) =>
-                              item.value &&
-                              item.value.actual_result !== "-" &&
-                              !isNaN(Number(item.value.actual_result))
-                          );
-
-                        return values.map((item, index) => {
-                          const result = Number(item.value.actual_result);
-                          const min = Number(item.value.min_value);
-                          const max = Number(item.value.max_value);
-                          const normal = isWithinRange(result, min, max);
-
-                          return (
-                            <TableRow key={index} className="hover:bg-gray-50">
-                              <TableCell className="font-medium w-1/2 md:w-1/3">
-                                <div className="truncate">{item.date}</div>
-                              </TableCell>
-                              <TableCell className="w-1/2 md:w-1/3">
-                                <div className="text-right md:text-left">
-                                  <span
-                                    className={
-                                      normal
-                                        ? "text-gray-900"
-                                        : "text-red-600 font-semibold"
-                                    }
-                                  >
-                                    {result}
-                                  </span>
-                                </div>
-                              </TableCell>
-                            </TableRow>
-                          );
-                        });
-                      })()}
-                    </TableBody>
-                  </Table>
-                </div>
+            {/* The horizontal inset lives on this non-scrolling wrapper, not
+                on the overflow-auto element itself — padding on a scroll
+                container's leading edge doesn't stay put once scrolled past,
+                which is what let the sticky column show a gap before */}
+            <div className="flex-1 min-h-0 px-6 pb-6 overflow-hidden">
+              <div className="h-full overflow-auto">
+              <table className="w-full border-separate border-spacing-0 text-sm">
+                <thead>
+                  <tr>
+                    <th className="sticky left-0 z-10 bg-background text-left font-semibold py-2 pr-3 border-b min-w-[160px]">
+                      Test
+                    </th>
+                    {dates.map((d) => (
+                      <th
+                        key={d}
+                        className="bg-background text-center font-semibold py-2 px-3 border-b whitespace-nowrap min-w-[100px]"
+                      >
+                        {formatShortDate(d)}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows.map((row, i) => (
+                    <tr
+                      key={row.name}
+                      className="animate-fade-up group hover:bg-neutral-50"
+                      style={{ animationDelay: `${Math.min(i * 40, 480)}ms`, animationFillMode: "backwards" }}
+                    >
+                      <td className="sticky left-0 z-10 bg-background group-hover:bg-neutral-50 py-2.5 pr-3 align-top border-b transition-colors">
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-medium">{row.name}</span>
+                          {row.trend === "up" && (
+                            <TrendingUp
+                              className={`h-3.5 w-3.5 shrink-0 animate-scale-in ${
+                                row.latestIsAbnormal ? "text-red-600" : "text-muted-foreground"
+                              }`}
+                            />
+                          )}
+                          {row.trend === "down" && (
+                            <TrendingDown
+                              className={`h-3.5 w-3.5 shrink-0 animate-scale-in ${
+                                row.latestIsAbnormal ? "text-red-600" : "text-muted-foreground"
+                              }`}
+                            />
+                          )}
+                          {row.trend === "same" && (
+                            <Minus className="h-3.5 w-3.5 shrink-0 text-muted-foreground animate-scale-in" />
+                          )}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {row.unit || " "}
+                          {Number.isFinite(row.min) && Number.isFinite(row.max)
+                            ? ` · ${row.min}–${row.max}`
+                            : ""}
+                        </div>
+                        {row.trendPct !== null && (
+                          <div
+                            className={`text-xs font-medium ${
+                              row.trend === "up" ? "text-red-600" : "text-green-600"
+                            }`}
+                          >
+                            {row.trend === "up" ? "+" : ""}
+                            {row.trendPct.toFixed(1)}% since last
+                          </div>
+                        )}
+                      </td>
+                      {row.cells.map((cell, ci) => {
+                        const isAbnormal =
+                          cell.isValid && cell.value !== null
+                            ? !isWithinRange(cell.value, row.min, row.max)
+                            : false;
+                        return (
+                          <td
+                            key={ci}
+                            className="text-center py-2.5 px-3 align-top border-b"
+                          >
+                            {cell.isValid ? (
+                              <span
+                                className={
+                                  isAbnormal
+                                    ? "font-semibold text-red-600"
+                                    : "text-foreground"
+                                }
+                              >
+                                {cell.raw}
+                              </span>
+                            ) : (
+                              <span className="text-muted-foreground/50">
+                                not tested
+                              </span>
+                            )}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
               </div>
             </div>
-          ) : (
-            <div className="h-full flex items-center justify-center">
-              <div className="text-center text-gray-500">
-                <p className="text-lg font-medium mb-2">No data available</p>
-                <p className="text-sm">
-                  Select a parameter to view comparison
-                </p>
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
-  </DialogContent>
-</Dialog>
-
+          </>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 };
 

@@ -1,3 +1,13 @@
+import React from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Download, ExternalLink } from "lucide-react";
+
 const ReportViewDialog: React.FC<{
   report: any | null;
   open: boolean;
@@ -28,33 +38,51 @@ const ReportViewDialog: React.FC<{
   };
 
   return (
-    <div className={`fixed inset-0 bg-black/50 ${open ? "block" : "hidden"}`}>
-      <div className="bg-white rounded-lg w-11/12 max-w-4xl mx-auto mt-3 p-4">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">Report from {report.date}</h2>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={downloadPdf}
-              className="px-3 py-1.5 rounded bg-blue-600 text-white hover:bg-blue-700 transition-colors"
-            >
-              Download
-            </button>
-            <button
-              onClick={() => onOpenChange(false)}
-              className="px-3 py-1.5 rounded bg-gray-600 text-white hover:bg-gray-700 transition-colors"
-            >
-              Close
-            </button>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0 gap-0">
+        <DialogHeader className="flex-shrink-0 px-4 py-3 border-b">
+          <div className="flex items-center justify-between gap-2 pr-8">
+            <DialogTitle className="text-base sm:text-lg truncate">
+              Report from {report.date}
+            </DialogTitle>
+            <div className="flex items-center gap-2 shrink-0">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => window.open(fullPdfUrl, "_blank", "noopener")}
+                className="hidden sm:inline-flex"
+              >
+                <ExternalLink className="h-4 w-4 mr-1.5" />
+                Open full size
+              </Button>
+              <Button size="sm" onClick={downloadPdf}>
+                <Download className="h-4 w-4 mr-1.5" />
+                Download
+              </Button>
+            </div>
           </div>
+        </DialogHeader>
+
+        {/* Mobile-only full-size link, since a report PDF is very hard to read
+            inside a small embedded frame on a phone */}
+        <div className="sm:hidden px-4 py-2 border-b bg-neutral-50">
+          <button
+            onClick={() => window.open(fullPdfUrl, "_blank", "noopener")}
+            className="text-sm text-cyan-700 font-medium underline underline-offset-2"
+          >
+            Having trouble reading this? Open it full-size instead →
+          </button>
         </div>
-        <iframe
-          src={fullPdfUrl}
-          width="100%"
-          height="600px"
-          title="Medical Report"
-        />
-      </div>
-    </div>
+
+        <div className="flex-1 min-h-0 bg-neutral-50">
+          <iframe
+            src={fullPdfUrl}
+            className="w-full h-full border-0"
+            title="Medical Report"
+          />
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 
