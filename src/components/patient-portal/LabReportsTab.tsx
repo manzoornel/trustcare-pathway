@@ -5,9 +5,16 @@ import SearchAndFilter from "./lab-reports/SearchAndFilter";
 import LabReportsTable from "./lab-reports/LabReportsTable";
 import ReportViewDialog from "./lab-reports/ReportViewDialog";
 import ReportComparisonDialog from "./lab-reports/ReportComparisonDialog";
-import { AlertCircle, Edit } from "lucide-react";
+import { AlertCircle, Edit, HeartPulse, Droplet, TestTube2, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { LAB_CATEGORIES, testMatchesCategory, LabCategory } from "./lab-reports/labCategories";
+
+const CATEGORY_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
+  lipid: HeartPulse,
+  sugar: Droplet,
+  cbc: TestTube2,
+};
 
 type LabReportsTabProps = {
   openPatientInfoEdit?: () => void;
@@ -24,6 +31,7 @@ const LabReportsTab: React.FC<LabReportsTabProps> = ({
   const [selectedReportsids, setSelectedReportsids] = useState<any[]>([]);
 
   const [showCompareDialog, setShowCompareDialog] = useState(false);
+  const [activeCategory, setActiveCategory] = useState<LabCategory | null>(null);
   const [labReports, setLabReports] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -134,6 +142,28 @@ const LabReportsTab: React.FC<LabReportsTabProps> = ({
 
   const handleCompare = () => {
     if (selectedReports.length < 2) return;
+    setActiveCategory(null);
+    setShowCompareDialog(true);
+  };
+
+  // Which quick-compare panels actually have data for this patient — no
+  // point showing "Blood Sugar" if it was never tested.
+  const availableCategories = LAB_CATEGORIES.filter((category) =>
+    labReports.some((report) =>
+      (report.result || []).some((r: any) =>
+        testMatchesCategory(r.detail_description, category)
+      )
+    )
+  );
+
+  const handleQuickCompare = (category: LabCategory) => {
+    const matchingReports = labReports.filter((report) =>
+      (report.result || []).some((r: any) =>
+        testMatchesCategory(r.detail_description, category)
+      )
+    );
+    setActiveCategory(category);
+    setSelectedReports(matchingReports);
     setShowCompareDialog(true);
   };
 
@@ -183,6 +213,30 @@ const LabReportsTab: React.FC<LabReportsTabProps> = ({
               </div>
             </AlertDescription>
           </Alert>
+        )}
+
+        {availableCategories.length > 0 && (
+          <div className="mb-4">
+            <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-2">
+              Quick Compare / പെട്ടെന്ന് താരതമ്യം ചെയ്യുക
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {availableCategories.map((category) => {
+                const Icon = CATEGORY_ICONS[category.id] ?? TestTube2;
+                return (
+                  <button
+                    key={category.id}
+                    onClick={() => handleQuickCompare(category)}
+                    className="group flex items-center gap-2 pl-3 pr-2 py-2 rounded-full border border-teal-200 bg-teal-50 hover:bg-teal-100 hover:border-teal-300 transition-colors text-left"
+                  >
+                    <Icon className="h-4 w-4 text-teal-600 shrink-0" />
+                    <span className="text-sm font-medium text-neutral-900">{category.label}</span>
+                    <ArrowRight className="h-3.5 w-3.5 text-teal-500 shrink-0 transition-transform group-hover:translate-x-0.5" />
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         )}
 
         <SearchAndFilter
@@ -240,6 +294,8 @@ const LabReportsTab: React.FC<LabReportsTabProps> = ({
           reports={labReports}
           open={showCompareDialog}
           onOpenChange={setShowCompareDialog}
+          categoryKeywords={activeCategory?.keywords}
+          categoryLabel={activeCategory?.label}
         />
       </div>
     </div>

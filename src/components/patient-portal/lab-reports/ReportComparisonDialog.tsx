@@ -16,6 +16,7 @@ import {
   CheckCircle2,
   AlertTriangle,
 } from "lucide-react";
+import { testMatchesAnyKeyword } from "./labCategories";
 
 interface LabResult {
   detail_description: string;
@@ -39,6 +40,10 @@ interface ReportComparisonDialogProps {
   reports: RawReport[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /** When set, only tests matching one of these keywords are shown — e.g. a
+   * "Lipid Profile" quick-compare instead of every test the visit included. */
+  categoryKeywords?: string[];
+  categoryLabel?: string;
 }
 
 const isWithinRange = (value: number, min: number, max: number): boolean => {
@@ -99,6 +104,8 @@ export const ReportComparisonDialog: React.FC<ReportComparisonDialogProps> = ({
   reports,
   open,
   onOpenChange,
+  categoryKeywords,
+  categoryLabel,
 }) => {
   const selectedVisitIds = (selectedReports || []).map((s: any) =>
     typeof s === "object" && s !== null ? s.visitId : s
@@ -124,7 +131,10 @@ export const ReportComparisonDialog: React.FC<ReportComparisonDialogProps> = ({
     const seen = new Set<string>();
     selectedData.forEach((report) => {
       report.result.forEach((r) => {
-        if (!seen.has(r.detail_description)) {
+        if (
+          !seen.has(r.detail_description) &&
+          (!categoryKeywords || testMatchesAnyKeyword(r.detail_description, categoryKeywords))
+        ) {
           seen.add(r.detail_description);
           order.push(r.detail_description);
         }
@@ -190,7 +200,8 @@ export const ReportComparisonDialog: React.FC<ReportComparisonDialogProps> = ({
         };
       })
       .filter((r): r is ComparisonRow => r !== null);
-  }, [selectedData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedData, JSON.stringify(categoryKeywords)]);
 
   const summary = useMemo(() => {
     const abnormal = rows.filter((r) => r.latestIsAbnormal).length;
@@ -358,7 +369,7 @@ export const ReportComparisonDialog: React.FC<ReportComparisonDialogProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl h-[90vh] flex flex-col overflow-hidden p-0">
         <DialogHeader className="flex-shrink-0 px-6 pt-6 pb-2">
-          <DialogTitle>Report Comparison</DialogTitle>
+          <DialogTitle>{categoryLabel ? `${categoryLabel} — Trend` : "Report Comparison"}</DialogTitle>
           <DialogDescription>
             റിപ്പോർട്ട് താരതമ്യം &middot; comparing {dates.length} visits, oldest to newest
           </DialogDescription>
@@ -369,8 +380,9 @@ export const ReportComparisonDialog: React.FC<ReportComparisonDialogProps> = ({
             <div className="text-center text-muted-foreground max-w-sm">
               <p className="font-medium mb-1">No matching tests found</p>
               <p className="text-sm">
-                The visits you selected don't share any test with a valid result.
-                Try picking two visits that both include a similar test panel.
+                {categoryKeywords
+                  ? "None of the selected visits include a test from this panel yet."
+                  : "The visits you selected don't share any test with a valid result. Try picking two visits that both include a similar test panel."}
               </p>
             </div>
           </div>
