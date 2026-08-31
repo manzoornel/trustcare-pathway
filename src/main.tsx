@@ -14,6 +14,15 @@ if (!rootElement) {
   throw new Error("Failed to find the root element");
 }
 
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js").catch(() => {
+      // Installability is a nice-to-have, not a hard requirement — if
+      // registration fails for any reason, the site still works normally.
+    });
+  });
+}
+
 createRoot(rootElement).render(
   <React.StrictMode>
     <BrowserRouter>

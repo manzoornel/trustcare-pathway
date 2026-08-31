@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { MoreHorizontal, FileText, Download } from "lucide-react";
+import { MoreHorizontal, FileText, Download, ChevronRight } from "lucide-react";
 import { LabReport } from "./mockData";
 
 interface LabReportsTableProps {
@@ -46,12 +46,12 @@ const LabReportsTable: React.FC<LabReportsTableProps> = ({
   const someVisibleSelected =
     !allVisibleSelected && reports.some((r) => selectedVisitIds.has(r.visitId));
   return (
-    <div className="bg-white rounded-lg border overflow-hidden">
+    <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden shadow-sm">
       {/* Horizontal scroll container for mobile */}
       <div className="overflow-x-auto">
         <Table className="min-w-full">
           <TableHeader>
-            <TableRow>
+            <TableRow className="bg-neutral-50 hover:bg-neutral-50">
               {isComparing && (
                 <TableHead className="w-12">
                   <Checkbox
@@ -69,9 +69,9 @@ const LabReportsTable: React.FC<LabReportsTableProps> = ({
                   />
                 </TableHead>
               )}
-              <TableHead>Date</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead>Ordered By</TableHead>
+              <TableHead className="text-neutral-500 font-semibold">Date</TableHead>
+              <TableHead className="text-neutral-500 font-semibold">Type</TableHead>
+              <TableHead className="text-neutral-500 font-semibold">Ordered By</TableHead>
               <TableHead className="w-16"></TableHead>
             </TableRow>
           </TableHeader>
@@ -108,7 +108,7 @@ const LabReportsTable: React.FC<LabReportsTableProps> = ({
                 return (
                   <TableRow
                     key={report.id}
-                    className={!isComparing ? "cursor-pointer" : undefined}
+                    className={!isComparing ? "cursor-pointer hover:bg-teal-50/60" : undefined}
                     onClick={
                       !isComparing ? () => onViewReport(report) : undefined
                     }
@@ -122,32 +122,41 @@ const LabReportsTable: React.FC<LabReportsTableProps> = ({
                       </TableCell>
                     )}
                     <TableCell className="whitespace-nowrap font-medium">
-                      {report.date}
+                      <div className="flex items-center gap-2">
+                        <span className="flex items-center justify-center h-7 w-7 rounded-lg bg-teal-50 shrink-0">
+                          <FileText className="h-3.5 w-3.5 text-teal-600" />
+                        </span>
+                        {report.date}
+                      </div>
                     </TableCell>
-                    <TableCell className="whitespace-nowrap">
+                    <TableCell className="whitespace-nowrap text-neutral-600">
                       {report.type}
                     </TableCell>
-                    <TableCell className="whitespace-nowrap">
+                    <TableCell className="whitespace-nowrap text-neutral-600">
                       {report.doctor}
                     </TableCell>
                     <TableCell onClick={(e) => e.stopPropagation()}>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            onClick={() => onViewReport(report)}
-                          >
-                            <FileText className="h-4 w-4 mr-2" />
-                            View Report
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                      {isComparing ? (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              onClick={() => onViewReport(report)}
+                            >
+                              <FileText className="h-4 w-4 mr-2" />
+                              View Report
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      ) : (
+                        <ChevronRight className="h-4 w-4 text-neutral-300" />
+                      )}
                     </TableCell>
                   </TableRow>
                 );

@@ -5,7 +5,7 @@ import SearchAndFilter from "./lab-reports/SearchAndFilter";
 import LabReportsTable from "./lab-reports/LabReportsTable";
 import ReportViewDialog from "./lab-reports/ReportViewDialog";
 import ReportComparisonDialog from "./lab-reports/ReportComparisonDialog";
-import { AlertCircle, Edit, HeartPulse, Droplet, TestTube2, ArrowRight } from "lucide-react";
+import { AlertCircle, Edit, HeartPulse, Droplet, TestTube2, ArrowRight, Waves, Filter, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { LAB_CATEGORIES, testMatchesCategory, LabCategory } from "./lab-reports/labCategories";
@@ -13,6 +13,9 @@ import { LAB_CATEGORIES, testMatchesCategory, LabCategory } from "./lab-reports/
 const CATEGORY_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   lipid: HeartPulse,
   sugar: Droplet,
+  thyroid: Waves,
+  renal: Filter,
+  liver: Shield,
   cbc: TestTube2,
 };
 

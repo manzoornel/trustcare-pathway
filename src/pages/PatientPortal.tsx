@@ -9,6 +9,7 @@ import { PortalSidebar } from "@/components/patient-portal/PortalSidebar";
 import { DashboardCard } from "@/components/patient-portal/DashboardCard";
 import PortalTabsSection from "@/components/patient-portal/PortalTabsSection";
 import { PatientSwitcher } from "@/components/patient-portal/PatientSwitcher";
+import { DownloadAppBanner } from "@/components/patient-portal/DownloadAppBanner";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
@@ -190,6 +191,8 @@ const PatientPortal: React.FC = () => {
 
           {activeTab === "dashboard" ? (
             <>
+              <DownloadAppBanner />
+
               {/* Patient Info Card */}
               <div className="mb-6 p-5 md:p-6 rounded-2xl bg-white border border-neutral-200 shadow-sm">
                 <h2 className="text-base font-bold text-neutral-900 mb-4 flex items-center gap-2">

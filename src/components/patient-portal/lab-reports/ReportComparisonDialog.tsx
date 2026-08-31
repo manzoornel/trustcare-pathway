@@ -87,6 +87,72 @@ type RowCell = {
   isValid: boolean;
 };
 
+// A small inline trend line for a row — a compact "graphical view" that
+// doesn't cost any extra vertical space in the table.
+const Sparkline: React.FC<{ cells: RowCell[]; min: number; max: number }> = ({
+  cells,
+  min,
+  max,
+}) => {
+  const points = cells.filter((c) => c.isValid && c.value !== null);
+  if (points.length < 2) return <div className="w-14 h-7 shrink-0" />;
+
+  const values = points.map((p) => p.value as number);
+  const lo = Math.min(...values, Number.isFinite(min) ? min : Infinity);
+  const hi = Math.max(...values, Number.isFinite(max) ? max : -Infinity);
+  const span = hi - lo || 1;
+
+  const w = 56;
+  const h = 26;
+  const pad = 3;
+  const stepX = points.length > 1 ? (w - pad * 2) / (points.length - 1) : 0;
+  const coords = points.map((p, i) => {
+    const x = pad + i * stepX;
+    const y = h - pad - ((((p.value as number) - lo) / span) * (h - pad * 2));
+    return { x, y };
+  });
+  const path = coords.map((c) => `${c.x},${c.y}`).join(" ");
+
+  return (
+    <svg
+      width={w}
+      height={h}
+      viewBox={`0 0 ${w} ${h}`}
+      className="shrink-0"
+      aria-hidden="true"
+    >
+      <polyline
+        points={path}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.5}
+        className="text-teal-400"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      {coords.map((c, i) => {
+        const isLast = i === coords.length - 1;
+        const isAbnormal =
+          Number.isFinite(min) &&
+          Number.isFinite(max) &&
+          !(
+            (points[i].value as number) >= min &&
+            (points[i].value as number) <= max
+          );
+        return (
+          <circle
+            key={i}
+            cx={c.x}
+            cy={c.y}
+            r={isLast ? 2.2 : 1.4}
+            className={isAbnormal ? "fill-red-500" : "fill-teal-500"}
+          />
+        );
+      })}
+    </svg>
+  );
+};
+
 type ComparisonRow = {
   name: string;
   unit: string;
@@ -446,6 +512,8 @@ export const ReportComparisonDialog: React.FC<ReportComparisonDialogProps> = ({
                       style={{ animationDelay: `${Math.min(i * 40, 480)}ms`, animationFillMode: "backwards" }}
                     >
                       <td className="sticky left-0 z-10 bg-background group-hover:bg-neutral-50 py-2.5 pr-3 align-top border-b transition-colors">
+                       <div className="flex items-start gap-2">
+                        <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-1.5">
                           <span className="font-medium">{row.name}</span>
                           {row.trend === "up" && (
@@ -482,6 +550,9 @@ export const ReportComparisonDialog: React.FC<ReportComparisonDialogProps> = ({
                             {row.trendPct.toFixed(1)}% since last
                           </div>
                         )}
+                        </div>
+                        <Sparkline cells={row.cells} min={row.min} max={row.max} />
+                        </div>
                       </td>
                       {row.cells.map((cell, ci) => {
                         const isAbnormal =
@@ -504,8 +575,11 @@ export const ReportComparisonDialog: React.FC<ReportComparisonDialogProps> = ({
                                 {cell.raw}
                               </span>
                             ) : (
-                              <span className="text-muted-foreground/50">
-                                not tested
+                              <span
+                                className="text-neutral-300 select-none"
+                                title="Not tested at this visit"
+                              >
+                                &ndash;
                               </span>
                             )}
                           </td>
