@@ -296,8 +296,11 @@ export const ReportComparisonDialog: React.FC<ReportComparisonDialogProps> = ({
     return (window as any).jspdf;
   };
 
-  const HEADER_IMAGE_PATH =
-    "/lovable-uploads/d18bbc61-0f35-4480-9b29-cf9dd88e75d3.png";
+  // The clinic's real lab-report letterhead: a dark navy-teal band with the
+  // logo + two-tone wordmark, and a teal/navy footer with address and site.
+  const HEADER_IMAGE_PATH = "/icons/app-icon.jpg";
+  const BRAND_DARK: [number, number, number] = [27, 54, 58];
+  const BRAND_TEAL: [number, number, number] = [52, 201, 199];
   const resolveImageUrl = (pathOrUrl: string): string => {
     if (/^https?:\/\//i.test(pathOrUrl)) return pathOrUrl;
     try {
@@ -347,88 +350,139 @@ export const ReportComparisonDialog: React.FC<ReportComparisonDialogProps> = ({
       format: "a4",
     });
 
-    const doctorName = getDoctorName();
-    const initials = getDoctorInitials(doctorName);
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
     const leftMargin = 40;
-    const topMargin = 36;
-    const circleX = leftMargin + 30;
-    const circleY = topMargin + 30;
-    const circleR = 26;
+    const headerHeight = 74;
+    const footerHeight = 46;
 
-    let imageDataUrl: string | null = await fetchImageAsDataUrl(
-      resolveImageUrl(HEADER_IMAGE_PATH)
-    );
-    if (imageDataUrl) {
+    // Header band — the clinic's real letterhead colours: dark navy-teal
+    // with the bright teal wordmark accent.
+    doc.setFillColor(...BRAND_DARK);
+    doc.rect(0, 0, pageWidth, headerHeight, "F");
+
+    const logoDataUrl = await fetchImageAsDataUrl(resolveImageUrl(HEADER_IMAGE_PATH));
+    const logoH = 44;
+    const logoW = 44 * (1600 / 1200);
+    const logoX = leftMargin;
+    const logoY = (headerHeight - logoH) / 2;
+    if (logoDataUrl) {
       try {
-        doc.addImage(imageDataUrl, "PNG", leftMargin, topMargin, 60, 60);
+        doc.addImage(logoDataUrl, "JPEG", logoX, logoY, logoW, logoH);
       } catch {
-        imageDataUrl = null;
+        // fall through — text wordmark still renders without the logo
       }
     }
-    if (!imageDataUrl) {
-      doc.setFillColor(37, 190, 203);
-      doc.circle(circleX, circleY, circleR, "F");
-      doc.setTextColor(255, 255, 255);
-      doc.setFontSize(16);
-      doc.text(initials, circleX, circleY + 6, {
-        align: "center",
-        baseline: "middle",
-      } as any);
-    }
 
-    doc.setTextColor(0, 0, 0);
-    doc.setFontSize(14);
-    doc.text(`Doctor Uncle Family Clinic`, leftMargin + 70, topMargin + 12);
+    const wordmarkX = logoX + logoW + 14;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(18);
+    doc.setTextColor(255, 255, 255);
+    doc.text("DOCTOR", wordmarkX, headerHeight / 2 - 2);
+    const doctorWidth = doc.getTextWidth("DOCTOR ");
+    doc.setTextColor(...BRAND_TEAL);
+    doc.text("UNCLE", wordmarkX + doctorWidth, headerHeight / 2 - 2);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(230, 240, 240);
+    doc.text("THE COMPLETE FAMILY CLINIC", wordmarkX, headerHeight / 2 + 12);
+
+    doc.setFont("helvetica", "bold");
     doc.setFontSize(12);
+    doc.setTextColor(255, 255, 255);
+    const title = categoryLabel ? `${categoryLabel} — Trend Comparison` : "Lab Report Comparison";
+    doc.text(title, pageWidth - leftMargin, headerHeight / 2 - 4, { align: "right" } as any);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(210, 225, 225);
     doc.text(
-      `Lab Report Comparison — ${dates.length} visits`,
-      leftMargin + 70,
-      topMargin + 32
-    );
-    doc.setTextColor(100);
-
-    doc.setDrawColor(230);
-    doc.line(
-      leftMargin,
-      topMargin + 64,
-      doc.internal.pageSize.getWidth() - leftMargin,
-      topMargin + 64
+      `${dates.length} visits · ${formatShortDate(dates[0])} to ${formatShortDate(dates[dates.length - 1])}`,
+      pageWidth - leftMargin,
+      headerHeight / 2 + 12,
+      { align: "right" } as any
     );
 
-    const startY = topMargin + 80;
+    // Table
+    const startY = headerHeight + 26;
     const anyDoc = doc as any;
     const head = ["Test", ...dates.map(formatShortDate)];
     const body = rows.map((row) => [
       row.unit ? `${row.name} (${row.unit})` : row.name,
-      ...row.cells.map((c) => (c.isValid ? c.raw : "—")),
+      ...row.cells.map((c) => (c.isValid ? c.raw : "–")),
     ]);
 
+    const tableBottomLimit = pageHeight - footerHeight - 16;
     if (anyDoc.autoTable) {
       anyDoc.autoTable({
         head: [head],
         body,
         startY,
         styles: { fontSize: 9 },
-        headStyles: { fillColor: [243, 244, 246], textColor: [0, 0, 0] },
-        alternateRowStyles: { fillColor: [250, 250, 250] },
-        margin: { left: leftMargin, right: leftMargin },
+        headStyles: { fillColor: BRAND_DARK, textColor: [255, 255, 255] },
+        alternateRowStyles: { fillColor: [240, 249, 249] },
+        margin: { left: leftMargin, right: leftMargin, bottom: footerHeight + 16 },
       });
     } else {
       let y = startY;
       doc.setFontSize(10);
+      doc.setTextColor(0, 0, 0);
       doc.text(head.join("  |  "), leftMargin, y);
       y += 16;
       body.forEach((r) => {
-        if (y > doc.internal.pageSize.getHeight() - 40) {
+        if (y > tableBottomLimit) {
+          addLetterheadFooter(doc, pageWidth, pageHeight, footerHeight);
           doc.addPage();
-          y = topMargin;
+          doc.setFillColor(...BRAND_DARK);
+          doc.rect(0, 0, pageWidth, headerHeight, "F");
+          y = headerHeight + 26;
         }
         doc.text(r.join("  |  "), leftMargin, y);
         y += 14;
       });
     }
 
+    // Footer band on every page — address/phone on teal, site on dark navy.
+    const pageCount = doc.internal.getNumberOfPages();
+    for (let p = 1; p <= pageCount; p += 1) {
+      doc.setPage(p);
+      addLetterheadFooter(doc, pageWidth, pageHeight, footerHeight);
+    }
+
     doc.save(`lab-report-comparison.pdf`);
+  };
+
+  const addLetterheadFooter = (
+    doc: any,
+    pageWidth: number,
+    pageHeight: number,
+    footerHeight: number
+  ) => {
+    const tealY = pageHeight - footerHeight;
+    const darkY = pageHeight - footerHeight / 2;
+    doc.setFillColor(...BRAND_TEAL);
+    doc.rect(0, tealY, pageWidth, footerHeight / 2, "F");
+    doc.setFillColor(...BRAND_DARK);
+    doc.rect(0, darkY, pageWidth, footerHeight / 2, "F");
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8.5);
+    doc.setTextColor(255, 255, 255);
+    doc.text(
+      "Vakkad, Tirur, Malappuram   Phone: 04942087888, 9961588880",
+      pageWidth / 2,
+      tealY + footerHeight / 4 + 3,
+      { align: "center" } as any
+    );
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(230, 240, 240);
+    doc.text(
+      "www.doctoruncle.in",
+      pageWidth / 2,
+      darkY + footerHeight / 4 + 3,
+      { align: "center" } as any
+    );
   };
 
   return (

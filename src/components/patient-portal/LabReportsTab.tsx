@@ -5,7 +5,7 @@ import SearchAndFilter from "./lab-reports/SearchAndFilter";
 import LabReportsTable from "./lab-reports/LabReportsTable";
 import ReportViewDialog from "./lab-reports/ReportViewDialog";
 import ReportComparisonDialog from "./lab-reports/ReportComparisonDialog";
-import { AlertCircle, Edit, HeartPulse, Droplet, TestTube2, ArrowRight, Waves, Filter, Shield } from "lucide-react";
+import { AlertCircle, Edit, HeartPulse, Droplet, TestTube2, Waves, Filter, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { LAB_CATEGORIES, testMatchesCategory, LabCategory } from "./lab-reports/labCategories";
@@ -219,22 +219,25 @@ const LabReportsTab: React.FC<LabReportsTabProps> = ({
         )}
 
         {availableCategories.length > 0 && (
-          <div className="mb-4">
-            <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-2">
+          <div className="mb-5 p-4 md:p-5 rounded-2xl border border-neutral-200 bg-white">
+            <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-3">
               Quick Compare / പെട്ടെന്ന് താരതമ്യം ചെയ്യുക
             </p>
-            <div className="flex flex-wrap gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
               {availableCategories.map((category) => {
                 const Icon = CATEGORY_ICONS[category.id] ?? TestTube2;
                 return (
                   <button
                     key={category.id}
                     onClick={() => handleQuickCompare(category)}
-                    className="group flex items-center gap-2 pl-3 pr-2 py-2 rounded-full border border-teal-200 bg-teal-50 hover:bg-teal-100 hover:border-teal-300 transition-colors text-left"
+                    className="group flex flex-col items-center text-center gap-2 p-4 rounded-xl border border-neutral-200 bg-white hover:border-teal-300 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 transition-all"
                   >
-                    <Icon className="h-4 w-4 text-teal-600 shrink-0" />
-                    <span className="text-sm font-medium text-neutral-900">{category.label}</span>
-                    <ArrowRight className="h-3.5 w-3.5 text-teal-500 shrink-0 transition-transform group-hover:translate-x-0.5" />
+                    <div className="flex items-center justify-center h-11 w-11 rounded-xl bg-teal-50 group-hover:bg-teal-100">
+                      <Icon className="h-5 w-5 text-teal-600" />
+                    </div>
+                    <span className="text-xs md:text-sm font-semibold text-neutral-900 leading-tight">
+                      {category.label}
+                    </span>
                   </button>
                 );
               })}
@@ -242,49 +245,54 @@ const LabReportsTab: React.FC<LabReportsTabProps> = ({
           </div>
         )}
 
-        <SearchAndFilter
-          searchTerm={searchTerm}
-          onSearchChange={(e) => setSearchTerm(e.target.value)}
-          isComparing={isComparing}
-          onToggleCompare={handleToggleCompare}
-          onCompare={handleCompare}
-          selectedCount={selectedReports.length}
-        />
+        <div className="p-4 md:p-5 rounded-2xl border border-neutral-200 bg-white">
+          <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-3">
+            All Reports / എല്ലാ റിപ്പോർട്ടുകളും
+          </p>
+          <SearchAndFilter
+            searchTerm={searchTerm}
+            onSearchChange={(e) => setSearchTerm(e.target.value)}
+            isComparing={isComparing}
+            onToggleCompare={handleToggleCompare}
+            onCompare={handleCompare}
+            selectedCount={selectedReports.length}
+          />
 
-        <LabReportsTable
-          reports={filteredReports}
-          isComparing={isComparing}
-          selectedReports={selectedReports}
-          onReportSelect={handleReportSelect}
-          onViewReport={handleViewReport}
-          isLoading={isLoading}
-          onToggleSelectAll={(selectAll) => {
-            if (selectAll) {
-              // Select all currently visible filtered reports
-              const newIds = filteredReports.map((r) => r.visitId);
-              setSelectedReportsids((prev) =>
-                Array.from(new Set([...prev, ...newIds]))
-              );
-              // Add full report objects, avoid duplicates by visitId
-              setSelectedReports((prev) => {
-                const existingById = new Map(
-                  prev.map((r: any) => [r.visitId, r])
+          <LabReportsTable
+            reports={filteredReports}
+            isComparing={isComparing}
+            selectedReports={selectedReports}
+            onReportSelect={handleReportSelect}
+            onViewReport={handleViewReport}
+            isLoading={isLoading}
+            onToggleSelectAll={(selectAll) => {
+              if (selectAll) {
+                // Select all currently visible filtered reports
+                const newIds = filteredReports.map((r) => r.visitId);
+                setSelectedReportsids((prev) =>
+                  Array.from(new Set([...prev, ...newIds]))
                 );
-                filteredReports.forEach((r) => existingById.set(r.visitId, r));
-                return Array.from(existingById.values());
-              });
-            } else {
-              // Deselect all currently visible filtered reports
-              const visibleIds = new Set(filteredReports.map((r) => r.visitId));
-              setSelectedReportsids((prev) =>
-                prev.filter((id) => !visibleIds.has(id))
-              );
-              setSelectedReports((prev) =>
-                prev.filter((r) => !visibleIds.has(r.visitId))
-              );
-            }
-          }}
-        />
+                // Add full report objects, avoid duplicates by visitId
+                setSelectedReports((prev) => {
+                  const existingById = new Map(
+                    prev.map((r: any) => [r.visitId, r])
+                  );
+                  filteredReports.forEach((r) => existingById.set(r.visitId, r));
+                  return Array.from(existingById.values());
+                });
+              } else {
+                // Deselect all currently visible filtered reports
+                const visibleIds = new Set(filteredReports.map((r) => r.visitId));
+                setSelectedReportsids((prev) =>
+                  prev.filter((id) => !visibleIds.has(id))
+                );
+                setSelectedReports((prev) =>
+                  prev.filter((r) => !visibleIds.has(r.visitId))
+                );
+              }
+            }}
+          />
+        </div>
 
         <ReportViewDialog
           report={viewingReport}

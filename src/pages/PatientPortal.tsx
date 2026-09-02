@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useAuth } from "@/contexts/auth";
 import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
-import { AlertCircle, Mail, User, Phone, Hash, CheckCircle, Menu, ArrowLeft } from "lucide-react";
+import { AlertCircle, Mail, User, Phone, Hash, CheckCircle, Menu, ArrowLeft, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmailVerificationModal } from "@/components/patient-portal/EmailVerificationModal";
 import { PortalSidebar } from "@/components/patient-portal/PortalSidebar";
@@ -30,6 +30,7 @@ const PatientPortal: React.FC = () => {
     (() => void) | null
   >(null);
   const [showVerificationModal, setShowVerificationModal] = useState(false);
+  const [patientInfoOpen, setPatientInfoOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const isMobile = useIsMobile();
@@ -193,12 +194,32 @@ const PatientPortal: React.FC = () => {
             <>
               <DownloadAppBanner />
 
-              {/* Patient Info Card */}
-              <div className="mb-6 p-5 md:p-6 rounded-2xl bg-white border border-neutral-200 shadow-sm">
-                <h2 className="text-base font-bold text-neutral-900 mb-4 flex items-center gap-2">
-                  <User className="h-5 w-5 text-teal-600" />
-                  Patient Information
-                </h2>
+              {/* Patient Info Card — collapsed by default so the page opens
+                  on Quick Access, not a wall of fields nobody needs yet */}
+              <div className="mb-6 rounded-2xl bg-white border border-neutral-200 shadow-sm overflow-hidden">
+                <button
+                  onClick={() => setPatientInfoOpen((v) => !v)}
+                  className="w-full flex items-center justify-between gap-3 p-4 md:p-5 text-left"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="h-9 w-9 rounded-full bg-teal-50 flex items-center justify-center shrink-0">
+                      <User className="h-4.5 w-4.5 text-teal-600" />
+                    </div>
+                    <div className="min-w-0">
+                      <h2 className="text-sm font-bold text-neutral-900">Patient Information</h2>
+                      <p className="text-xs text-neutral-500 truncate">
+                        {patientData.name} &middot; ID: {patientData.hospitalId}
+                      </p>
+                    </div>
+                  </div>
+                  <ChevronDown
+                    className={`h-5 w-5 text-neutral-400 shrink-0 transition-transform ${
+                      patientInfoOpen ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+                {patientInfoOpen && (
+                <div className="px-5 pb-5 md:px-6 md:pb-6 animate-fade-in">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                   <div className="flex items-center gap-3 p-3 rounded-xl bg-neutral-50">
                     <User className="h-5 w-5 text-teal-600 shrink-0" />
@@ -236,6 +257,8 @@ const PatientPortal: React.FC = () => {
                     </div>
                   </div>
                 </div>
+                </div>
+                )}
               </div>
 
               {/* Dashboard Cards Grid */}
