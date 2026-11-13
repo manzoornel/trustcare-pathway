@@ -16,7 +16,9 @@ const swap = (html, marker, content) => {
 };
 
 for (const page of pages) {
-  const url = SITE + (page.path === "/" ? "/" : page.path);
+  // Netlify serves /services from /services/index.html and redirects to the trailing-slash URL,
+  // so that is the canonical address.
+  const url = SITE + (page.path === "/" ? "/" : `${page.path}/`);
   const head = `
     <title data-static-seo>${esc(page.title)}</title>
     <meta data-static-seo name="description" content="${esc(page.description)}" />

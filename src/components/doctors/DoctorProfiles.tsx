@@ -9,6 +9,39 @@ interface DoctorProfilesProps {
   featuredOnly?: boolean;
 }
 
+
+// The doctor list comes straight from the Grandis EMR, where names and specialities
+// are stored in capitals and some entries are billing/booking accounts rather than
+// doctors. Tidy it up for the public website without changing the EMR.
+const NON_DOCTOR_ENTRY = /external|home\s*care/i;
+
+const SPECIALITY_FIXES: Record<string, string> = {
+  dermetology: "Dermatology",
+  ent: "ENT",
+};
+
+const titleCase = (text: string) =>
+  text
+    .toLowerCase()
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((word) =>
+      word.length <= 2 && word !== "dr" ? word.toUpperCase() : word[0].toUpperCase() + word.slice(1)
+    )
+    .join(" ");
+
+const formatDoctorName = (raw: string = "") =>
+  /^dr\b/i.test(raw.trim())
+    ? `Dr. ${titleCase(raw.trim().replace(/^dr\.?\s*/i, ""))}`
+    : titleCase(raw);
+
+const formatSpeciality = (raw: string = "") => {
+  const key = raw.trim().toLowerCase();
+  return SPECIALITY_FIXES[key] ?? titleCase(raw).replace(/\bAnd\b/g, "and");
+};
+
+const nameKey = (raw: string = "") => raw.replace(/^dr\.?\s*/i, "").replace(/\s+/g, " ").trim().toLowerCase();
+
 const DoctorProfiles = ({ featuredOnly = true }: DoctorProfilesProps) => {
   const [doctors, setDoctors] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -41,9 +74,18 @@ const DoctorProfiles = ({ featuredOnly = true }: DoctorProfilesProps) => {
   }, []);
 
   // Convert API data to DoctorProfile format
-  const doctorProfiles: DoctorProfile[] = doctors.map((doctor) => ({
-    name: doctor.doctor_name,
-    specialty: doctor.speciality,
+  const seenNames = new Set<string>();
+  const publicDoctors = doctors.filter((doctor) => {
+    if (NON_DOCTOR_ENTRY.test(`${doctor.doctor_name} ${doctor.speciality}`)) return false;
+    const key = nameKey(doctor.doctor_name);
+    if (!key || seenNames.has(key)) return false;
+    seenNames.add(key);
+    return true;
+  });
+
+  const doctorProfiles: DoctorProfile[] = publicDoctors.map((doctor) => ({
+    name: formatDoctorName(doctor.doctor_name),
+    specialty: formatSpeciality(doctor.speciality),
     experience: doctor.experience,
     education: doctor.qualification,
     description: doctor.bio,
@@ -58,8 +100,8 @@ const DoctorProfiles = ({ featuredOnly = true }: DoctorProfilesProps) => {
 
   // Prioritize Dr. Manzoor
   const sortedDoctors = [...doctorProfiles].sort((a, b) => {
-    if (a.name.includes("Manzoor Nellancheri")) return -1;
-    if (b.name.includes("Manzoor Nellancheri")) return 1;
+    if (/manzoor/i.test(a.name)) return -1;
+    if (/manzoor/i.test(b.name)) return 1;
     return 0;
   });
 
