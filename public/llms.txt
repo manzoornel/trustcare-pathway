@@ -1,0 +1,25 @@
+# Doctor Uncle Family Clinic
+
+> Family clinic with two branches near Tirur, Malappuram district, Kerala, India. The Vakkad branch (near Malayalam University) is open 24 hours with a casualty department; the Unniyal branch (Unniyal Junction, Tanur Road) is open 7 AM to 10 PM. Primary care, diabetes care, minor surgery, home care, laboratory and ECG, pharmacy and telemedicine.
+
+## Branches
+- Vakkad branch: Near Malayalam University, Vakkad, Tirur, Kerala 676502. Open 24 hours, every day, including casualty (emergency) care. Phone: +91 99615 88880
+- Unniyal branch: Unniyal Junction, Tanur Road, Unniyal, Kerala. Open 7 AM to 10 PM, every day. Phone: +91 80897 71640, +91 80897 71641
+- Email: contact@doctoruncle.in
+
+## Services
+- General medicine and primary care for all ages: fever, infections, chronic conditions, check-ups
+- Diabetes care: personalised treatment plans, continuous glucose monitoring, diet counselling
+- Minor surgical procedures
+- Women's health, including prenatal care
+- Home care in Vakkad, Unniyal, Tanur and nearby areas: doctor home visits, nursing care, injections and IV infusions, physiotherapy, ECG, home sample collection for lab tests. Home care bookings: +91 99615 88880
+- Laboratory tests and ECG
+- On-site pharmacy
+- Telemedicine consultations
+
+## Key pages
+- [Services](https://doctoruncle.in/services)
+- [Our doctors](https://doctoruncle.in/doctors)
+- [About](https://doctoruncle.in/about)
+- [Contact and directions](https://doctoruncle.in/contact)
+- [Health articles](https://doctoruncle.in/blog)

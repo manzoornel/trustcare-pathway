@@ -1,0 +1,36 @@
+# robots.txt for doctoruncle.in
+# Public pages are open to search engines and AI assistant crawlers.
+# Patient login, portal and account pages are kept out of search.
+
+User-agent: *
+Allow: /
+Disallow: /login
+Disallow: /signup
+Disallow: /verify
+Disallow: /verify-otp
+Disallow: /patient-portal
+Disallow: /appointments
+Disallow: /admin
+
+User-agent: GPTBot
+Allow: /
+Disallow: /login
+Disallow: /patient-portal
+Disallow: /admin
+
+User-agent: ClaudeBot
+Allow: /
+Disallow: /login
+Disallow: /patient-portal
+Disallow: /admin
+
+User-agent: PerplexityBot
+Allow: /
+Disallow: /login
+Disallow: /patient-portal
+Disallow: /admin
+
+User-agent: Google-Extended
+Allow: /
+
+Sitemap: https://doctoruncle.in/sitemap.xml

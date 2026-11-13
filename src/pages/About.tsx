@@ -63,7 +63,7 @@ const About = () => {
               <div className="bg-white p-6 rounded-xl shadow-md">
                 <h3 className="text-xl font-semibold mb-2">Vakkad Branch</h3>
                 <p className="text-gray-600 mb-3">
-                  Located near Aneesha Theatre, our Vakkad branch offers a full
+                  Located near Malayalam University, our Vakkad branch offers a full
                   range of family healthcare services in a modern facility.
                 </p>
                 <a

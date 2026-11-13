@@ -17,7 +17,7 @@ const CasualtyServiceBanner = () => {
           <div className="text-center md:text-left">
             <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">Emergency Care When You Need It</h2>
             <p className="text-lg text-gray-700 mb-6 max-w-2xl">
-              Our casualty department is open 24 hours a day, 7 days a week, providing immediate care for medical emergencies. Our experienced medical team is always ready to assist you with prompt and professional attention.
+              Our casualty department at the Vakkad branch is open 24 hours a day, 7 days a week, providing immediate care for medical emergencies. Our experienced medical team is always ready to assist you with prompt and professional attention.
             </p>
             <div className="flex flex-wrap gap-4 justify-center md:justify-start">
               <a 

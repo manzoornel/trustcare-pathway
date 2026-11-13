@@ -14,6 +14,10 @@ if (!rootElement) {
   throw new Error("Failed to find the root element");
 }
 
+// The static SEO title/description/canonical (written at build time for crawlers)
+// are removed once the app runs, so react-helmet's per-page tags don't duplicate them.
+document.querySelectorAll("meta[data-static-seo], link[data-static-seo]").forEach((el) => el.remove());
+
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
     navigator.serviceWorker.register("/sw.js").catch(() => {

@@ -74,6 +74,7 @@ const Footer = () => {
                   Vakkad Branch (Near Malayalam University):
                 </p>
                 <p className="text-gray-500">Phone: 9961 588 880</p>
+                <p className="text-gray-500">Open 24 hours, every day</p>
                 <a
                   href="https://maps.app.goo.gl/APyMEnBeAxSfB5bX8"
                   target="_blank"
@@ -91,6 +92,7 @@ const Footer = () => {
                 <p className="text-gray-500">
                   Phone: 8089 771 640 | 8089 771 641
                 </p>
+                <p className="text-gray-500">Open 7 AM – 10 PM, every day</p>
                 <a
                   href="https://maps.app.goo.gl/GqAqenygrwV5vo3cA"
                   target="_blank"

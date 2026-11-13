@@ -1,2 +1,15 @@
-
-/* /index.html 200
+# Real files (robots.txt, sitemap.xml, llms.txt, pre-rendered pages) are served first.
+# App-only routes load the single-page app:
+/appointments   /index.html  200
+/signup         /index.html  200
+/login          /index.html  200
+/verify         /index.html  200
+/verify-otp     /index.html  200
+/patient-portal /index.html  200
+/patient-portal/*  /index.html  200
+/ai-chat        /index.html  200
+/admin          /index.html  200
+/admin/*        /index.html  200
+/blog/*         /index.html  200
+# Anything else is a real "not found" (the app still shows its 404 page):
+/*              /index.html  404

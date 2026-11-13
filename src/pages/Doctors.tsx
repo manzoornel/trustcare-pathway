@@ -13,10 +13,10 @@ const Doctors = () => {
   return (
     <>
       <Helmet>
-        <title>Our Doctors - Doctor Uncle Family Clinic</title>
+        <title>Our Doctors | Doctor Uncle Family Clinic, Vakkad &amp; Unniyal</title>
         <meta
           name="description"
-          content="Meet our experienced medical team at Doctor Uncle Family Clinic. Our physicians are committed to providing compassionate, high-quality healthcare for your entire family."
+          content="Meet the doctors at Doctor Uncle Family Clinic near Tirur: general practitioners, general medicine and specialist consultations at our Vakkad and Unniyal branches."
         />
       </Helmet>
 

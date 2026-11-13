@@ -28,7 +28,7 @@ const Services = () => {
     {
       title: "Diagnostic Services",
       description:
-        "State-of-the-art laboratory testing, ECG, ultrasound, and other diagnostic procedures to ensure accurate diagnosis.",
+        "State-of-the-art laboratory testing, ECG and other diagnostic procedures to ensure accurate diagnosis.",
     },
     {
       title: "Pharmacy Services",
@@ -45,13 +45,10 @@ const Services = () => {
   return (
     <>
       <Helmet>
-        <title>
-          Healthcare Services at Doctor Uncle Family Clinic – Expert Care for
-          Your Family
-        </title>
+        <title>Services | Primary Care, Diabetes &amp; Home Care | Doctor Uncle, Tirur</title>
         <meta
           name="description"
-          content="Explore our wide range of medical services, including primary care, diabetes management, women's health, diagnostic services, and telemedicine."
+          content="General medicine, diabetes care with glucose monitoring, minor surgery, women's health, lab and ECG, pharmacy, telemedicine and home care at our Vakkad and Unniyal branches."
         />
       </Helmet>
       <div className="min-h-screen bg-white">
@@ -96,7 +93,7 @@ const Services = () => {
 
             <div className="mt-12 text-center">
               <p className="text-lg text-gray-600 mb-6">
-                Visit either our Vakkad branch (near Aneesha Theatre) or our
+                Visit either our Vakkad branch (near Malayalam University) or our
                 Unniyal branch (Unniyal Junction, Tanur Road) to access our
                 complete range of healthcare services.
               </p>

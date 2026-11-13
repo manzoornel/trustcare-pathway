@@ -8,13 +8,83 @@
     <link rel="manifest" href="/manifest.webmanifest" />
     <meta name="theme-color" content="#0d9488" />
     <link rel="apple-touch-icon" href="/icons/app-icon.jpg" />
-    <title>Doctor Uncle Family Clinic</title>
+    <!--seo:head-->
+    <title data-static-seo>Doctor Uncle Family Clinic | 24-Hour Clinic in Vakkad, Tirur &amp; Unniyal</title>
+    <meta data-static-seo name="description" content="Family clinic near Tirur: Vakkad branch open 24 hours, Unniyal branch 7 AM–10 PM. General medicine, diabetes care, minor surgery, home visits, lab and pharmacy. Call 99615 88880." />
+    <!--/seo:head-->
+    <meta property="og:site_name" content="Doctor Uncle Family Clinic" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://doctoruncle.in/og-image.png" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "MedicalOrganization",
+          "@id": "https://doctoruncle.in/#org",
+          "name": "Doctor Uncle Family Clinic",
+          "alternateName": "Doctor Uncle - The Complete Family Clinic",
+          "url": "https://doctoruncle.in/",
+          "logo": "https://doctoruncle.in/icons/app-icon.jpg",
+          "email": "contact@doctoruncle.in",
+          "telephone": "+91-9961588880",
+          "areaServed": ["Vakkad", "Unniyal", "Tanur", "Tirur"],
+          "subOrganization": [{ "@id": "https://doctoruncle.in/#vakkad" }, { "@id": "https://doctoruncle.in/#unniyal" }]
+        },
+        {
+          "@type": "MedicalClinic",
+          "@id": "https://doctoruncle.in/#vakkad",
+          "name": "Doctor Uncle Family Clinic - Vakkad",
+          "parentOrganization": { "@id": "https://doctoruncle.in/#org" },
+          "url": "https://doctoruncle.in/contact",
+          "telephone": "+91-9961588880",
+          "hasMap": "https://maps.app.goo.gl/APyMEnBeAxSfB5bX8",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "Near Malayalam University, Vakkad",
+            "addressLocality": "Tirur",
+            "addressRegion": "Kerala",
+            "postalCode": "676502",
+            "addressCountry": "IN"
+          },
+          "openingHoursSpecification": {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+            "opens": "00:00",
+            "closes": "23:59"
+          }
+        },
+        {
+          "@type": "MedicalClinic",
+          "@id": "https://doctoruncle.in/#unniyal",
+          "name": "Doctor Uncle Family Clinic - Unniyal",
+          "parentOrganization": { "@id": "https://doctoruncle.in/#org" },
+          "url": "https://doctoruncle.in/contact",
+          "telephone": ["+91-8089771640", "+91-8089771641"],
+          "hasMap": "https://maps.app.goo.gl/GqAqenygrwV5vo3cA",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "Unniyal Junction, Tanur Road",
+            "addressLocality": "Unniyal",
+            "addressRegion": "Kerala",
+            "addressCountry": "IN"
+          },
+          "openingHoursSpecification": {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+            "opens": "07:00",
+            "closes": "22:00"
+          }
+        }
+      ]
+    }
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root"><!--seo:body--><!--/seo:body--></div>
     <!-- Add the Lovable script tag -->
     <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
     <script type="module" src="/src/main.tsx"></script>

@@ -3,7 +3,6 @@ import { useEffect } from "react";
 import { Helmet } from "react-helmet";
 import HeroSection from "@/components/HeroSection";
 import ServicePreview from "@/components/ServicePreview";
-import Testimonials from "@/components/Testimonials";
 import BlogPreview from "@/components/BlogPreview";
 import CallToAction from "@/components/CallToAction";
 import FestivalDecorations from "@/components/FestivalDecorations";
@@ -28,10 +27,10 @@ const Index = () => {
   return (
     <>
       <Helmet>
-        <title>Doctor Uncle - The Complete Family Clinic</title>
+        <title>Doctor Uncle Family Clinic | 24-Hour Clinic in Vakkad, Tirur &amp; Unniyal</title>
         <meta
           name="description"
-          content="Experience compassionate care and medical excellence at Doctor Uncle Family Clinic. We're committed to your health and well-being."
+          content="Family clinic near Tirur: Vakkad branch open 24 hours, Unniyal branch 7 AM–10 PM. General medicine, diabetes care, minor surgery, home visits, lab and pharmacy. Call 99615 88880."
         />
       </Helmet>
 
@@ -44,7 +43,6 @@ const Index = () => {
         <HomeCareServices />
         <DoctorProfiles />
         <PatientReviews />
-        <Testimonials />
         <BlogPreview />
         <CallToAction />
       </main>

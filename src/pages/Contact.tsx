@@ -14,10 +14,10 @@ const Contact = () => {
   return (
     <>
       <Helmet>
-        <title>Contact Us | Doctor Uncle Family Clinic</title>
+        <title>Contact &amp; Directions | Doctor Uncle Clinic, Vakkad &amp; Unniyal</title>
         <meta
           name="description"
-          content="Contact Doctor Uncle Family Clinic for appointments, inquiries, or emergencies. Our friendly staff is ready to assist you."
+          content="Vakkad branch near Malayalam University, open 24 hours: 99615 88880. Unniyal branch, Unniyal Junction, Tanur Road, 7 AM–10 PM: 80897 71640."
         />
       </Helmet>
       <div className="min-h-screen flex flex-col">
@@ -126,7 +126,8 @@ const Contact = () => {
                     <Clock className="w-6 h-6 text-primary mr-4 mt-1" />
                     <div>
                       <h3 className="font-medium">Hours</h3>
-                      <p className="text-gray-600">24/7</p>
+                      <p className="text-gray-600">Vakkad: open 24 hours, every day</p>
+                      <p className="text-gray-600">Unniyal: 7 AM – 10 PM, every day</p>
                     </div>
                   </div>
                   <div>
